@@ -1,4 +1,17 @@
-# Elemental Knight · La Cripta de Brasas — v0.4.0
+# Elemental Knight · La Cripta de Brasas — v0.4.1
+
+## Cambios de v0.4.1 — Curación en combate
+
+Se elimina la regeneración automática por esperar. Los valores iniciales y su progresión son:
+
+- **Vida:** `100 + 8 × (vitalidad − 1)`.
+- **Daño a puños:** `12 + 1,5 × (fuerza − 1)`, más los bonos del equipo. Una espada básica aporta 12 de daño adicional frente a los puños.
+- **Movimiento:** `88 + 0,5 × (agilidad − 1)`, más botas.
+- **Intervalo de ataque:** `0,48 / (1 + 0,01 × (agilidad − 1))` segundos antes de aplicar pulsera. Mínimo absoluto de 0,18 segundos.
+- **Nivel:** empieza en 1 y aumenta en 1 cada cinco esqueletos derrotados. El punto libre por cada baja se mantiene.
+- **Curación por ataque acertado:** `0,6 + 0,03 × (vitalidad − 1) + 0,015 × (fuerza − 1) + 0,01 × (agilidad − 1) + 0,1 × (nivel − 1)`. Nunca supera el **8% del daño real** causado ni la vida máxima. El daño real excluye el daño sobrante al matar a un enemigo con poca vida.
+
+Un ataque cura una sola vez aunque alcance a varios enemigos; fallar o esperar no cura. Funciona con puños, espada y contra el dragón. Las curaciones de pociones, collar, sala completada y tienda siguen siendo recompensas independientes. El panel muestra los valores actuales y la fórmula. Estos son valores iniciales de balance para probar con jugadores, no una garantía de supervivencia.
 
 ## Cambios de v0.4.0 — A los golpes
 
@@ -34,9 +47,9 @@ Las cuatro primeras salas tienen 3, 4, 5 y 6 esqueletos, respectivamente. Al lle
 
 **Terragrán** tiene 650 de vida, lanza rocas y marca el suelo antes de sus impactos. Al derrotarlo aparece un cofre lujoso que se abre con E: garantiza una pieza +3, 200 de oro y una poción de +8 por atributo. El premio se entrega una sola vez.
 
-**Supervivencia:** vida inicial 140, daño de esqueletos reducido, 1,1 segundos de protección después de un golpe, regeneración de 4 de vida/segundo luego de 3 segundos sin daño y +35 de vida al limpiar una sala. Shift permite esquivar por 20 de energía. El collar no es necesario para regenerar vida.
+**Supervivencia actual:** vida inicial 100, 1,1 segundos de protección después de un golpe, curación por ataque acertado calculada con atributos y nivel, y +35 de vida al limpiar una sala. Shift permite esquivar por 20 de energía. El collar aporta su curación adicional por baja.
 
-**Efectos de atributos:** cada punto de fuerza sobre 1 suma 2 de daño; vitalidad suma 6 de vida máxima; energía aumenta la reserva para esquivar; agilidad mejora movimiento y velocidad de ataque. Los golpes normales no consumen energía.
+**Efectos de atributos:** cada punto de fuerza sobre 1 suma 1,5 de daño; vitalidad suma 8 de vida máxima; energía aumenta la reserva para esquivar; agilidad mejora movimiento y velocidad de ataque. Los golpes normales no consumen energía.
 
 ## Desarrollo de la versión actual
 

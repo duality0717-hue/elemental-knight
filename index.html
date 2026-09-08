@@ -1036,7 +1036,7 @@ html&gt;body{padding:0}&lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
 &lt;div id=&quot;ember-dungeon&quot;&gt;
-  &lt;header class=&quot;ek-header&quot;&gt;&lt;div&gt;&lt;span class=&quot;ek-eyebrow&quot;&gt;ELEMENTAL KNIGHT&lt;/span&gt;&lt;h2&gt;La Cripta de Brasas&lt;/h2&gt;&lt;/div&gt;&lt;span class=&quot;ek-version&quot;&gt;v0.4 · A los golpes&lt;/span&gt;&lt;/header&gt;
+  &lt;header class=&quot;ek-header&quot;&gt;&lt;div&gt;&lt;span class=&quot;ek-eyebrow&quot;&gt;ELEMENTAL KNIGHT&lt;/span&gt;&lt;h2&gt;La Cripta de Brasas&lt;/h2&gt;&lt;/div&gt;&lt;span class=&quot;ek-version&quot;&gt;v0.4.1 · Curación en combate&lt;/span&gt;&lt;/header&gt;
   &lt;div class=&quot;ek-hud&quot;&gt;&lt;span id=&quot;ek-life&quot;&gt;&lt;/span&gt;&lt;span id=&quot;ek-energy&quot;&gt;&lt;/span&gt;&lt;span id=&quot;ek-gold&quot;&gt;&lt;/span&gt;&lt;span id=&quot;ek-points&quot;&gt;&lt;/span&gt;&lt;span id=&quot;ek-room&quot;&gt;&lt;/span&gt;&lt;/div&gt;
   &lt;div id=&quot;ek-world&quot;&gt;&lt;canvas id=&quot;ek-canvas&quot; width=&quot;1440&quot; height=&quot;816&quot; aria-label=&quot;Mazmorra de dibujos animados. Aventurero, esqueletos de fuego y dragón de tierra.&quot;&gt;&lt;/canvas&gt;&lt;/div&gt;
   &lt;section id=&quot;ek-character&quot; hidden aria-label=&quot;Atributos, equipo y mochila&quot;&gt;
@@ -1093,6 +1093,7 @@ html&gt;body{padding:0}&lt;/style&gt;
 #ember-dungeon .ek-stat-track{height:4px;background:#353042;margin-top:8px;grid-column:1/-1}
 #ember-dungeon .ek-stat-track span{height:100%;display:block}
 #ember-dungeon .ek-derived{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:18px 0;color:#d8cbe6;font-size:12px}
+#ember-dungeon .ek-heal-formula{grid-column:1/-1;color:var(--ek-muted)}
 #ember-dungeon #ek-slots{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 #ember-dungeon .ek-slot{padding:8px;border:1px solid var(--ek-line);min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:5px}
 #ember-dungeon .ek-slot .ek-item-name{font-size:11px;overflow-wrap:anywhere}
@@ -1114,9 +1115,9 @@ html&gt;body{padding:0}&lt;/style&gt;
 (function (scope) {
   &#x27;use strict&#x27;;
   const ATTRS = {
-    strength: { name: &#x27;Fuerza&#x27;, color: &#x27;#f46b71&#x27;, detail: &#x27;+2 de daño por punto&#x27; },
+    strength: { name: &#x27;Fuerza&#x27;, color: &#x27;#f46b71&#x27;, detail: &#x27;+1,5 de daño por punto&#x27; },
     energy: { name: &#x27;Energía&#x27;, color: &#x27;#75b8ff&#x27;, detail: &#x27;+2 de energía máxima por punto&#x27; },
-    vitality: { name: &#x27;Vitalidad&#x27;, color: &#x27;#8bdc83&#x27;, detail: &#x27;+6 de vida máxima por punto&#x27; },
+    vitality: { name: &#x27;Vitalidad&#x27;, color: &#x27;#8bdc83&#x27;, detail: &#x27;100 de vida inicial; +8 por punto&#x27; },
     agility: { name: &#x27;Agilidad&#x27;, color: &#x27;#bc91f5&#x27;, detail: &#x27;Más movimiento y ataques más rápidos&#x27; }
   };
   const ITEMS = [
@@ -1136,7 +1137,7 @@ html&gt;body{padding:0}&lt;/style&gt;
     reset() {
       this.nextId = 1; this.room = 1; this.kills = 0; this.mode = &#x27;play&#x27;; this.paused = false;
       this.time = 0; this.attack = 0; this.cooldown = 0; this.dashTime = 0; this.dashCooldown = 0;
-      this.hero = { x: 54, y: 136, face: 0, hp: 140, stamina: 52, gold: 0, points: 0, inv: 1.5, safe: 0,
+      this.hero = { x: 54, y: 136, face: 0, hp: 100, stamina: 52, gold: 0, points: 0, inv: 1.5,
         attributes: { strength: 1, energy: 1, vitality: 1, agility: 1 } };
       this.bag = []; this.equipped = Array(8).fill(null); this.stock = []; this.boss = null;
       this.effects = []; this.notices = []; this.revision = 0; this.rewardClaimed = false;
@@ -1145,13 +1146,14 @@ html&gt;body{padding:0}&lt;/style&gt;
     say(text) { this.message = text; this.revision++; }
     rank(slot) { return this.equipped[slot]?.rank || 0; }
     stats() {
-      const a = this.hero.attributes, r = i =&gt; this.rank(i);
-      return { damage: (r(4) ? 24 + 6 * (r(4) - 1) : 18) + (a.strength - 1) * 2 + r(3) * 4 + r(5) * 6,
-        maxHp: 140 + (a.vitality - 1) * 6, maxEnergy: 50 + a.energy * 2,
+      const a = this.hero.attributes, r = i =&gt; this.rank(i), level = 1 + Math.floor(this.kills / 5);
+      return { level, damage: (r(4) ? 24 + 6 * (r(4) - 1) : 12) + (a.strength - 1) * 1.5 + r(3) * 4 + r(5) * 6,
+        maxHp: 100 + (a.vitality - 1) * 8, maxEnergy: 50 + a.energy * 2,
         armor: r(0) * 3 + r(2) * 2 + (this.equipped.slice(0, 4).every(Boolean) ? 2 : 0),
-        speed: 92 + (a.agility - 1) * .5 + r(1) * 10,
-        delay: Math.max(.17, .40 - (a.agility - 1) * .002 - r(6) * .045),
-        range: r(4) ? 47 : 33, frost: this.equipped.slice(4).every(Boolean) };
+        speed: 88 + (a.agility - 1) * .5 + r(1) * 10,
+        delay: Math.max(.18, .48 / (1 + (a.agility - 1) * .01) * Math.pow(.88, r(6))),
+        range: r(4) ? 47 : 33, frost: this.equipped.slice(4).every(Boolean),
+        lifeOnHit: .6 + .03 * (a.vitality - 1) + .015 * (a.strength - 1) + .01 * (a.agility - 1) + .1 * (level - 1) };
     }
     chances() { return { gear: this.room * 5 / 100, potion: (15 + (this.room - 1) * 10) / 100 }; }
     spawnRoom() {
@@ -1235,11 +1237,12 @@ html&gt;body{padding:0}&lt;/style&gt;
     }
     strike() {
       if (!this.active() || this.cooldown &gt; 0) return;
-      const s = this.stats(); this.cooldown = s.delay; this.attack = .18;
+      const s = this.stats(); this.cooldown = s.delay; this.attack = .18; let damageDealt = 0;
       for (const e of this.enemies) {
         const dx = e.x - this.hero.x, dy = e.y - this.hero.y, distance = Math.hypot(dx, dy);
         const dot = (dx * Math.cos(this.hero.face) + dy * Math.sin(this.hero.face)) / (distance || 1);
         if (e.hp &gt; 0 &amp;&amp; distance &lt; s.range &amp;&amp; (dot &gt; -.15 || distance &lt; 17)) {
+          damageDealt += Math.min(e.hp, s.damage + (s.frost ? 10 : 0));
           e.hp -= s.damage + (s.frost ? 10 : 0); e.slow = this.rank(4) ? 1.6 : 0;
           e.x = clamp(e.x + Math.cos(this.hero.face) * 11, 22, 458); e.y = clamp(e.y + Math.sin(this.hero.face) * 11, 32, 243);
           if (e.hp &lt;= 0) this.kill(e);
@@ -1250,16 +1253,19 @@ html&gt;body{padding:0}&lt;/style&gt;
       if (this.mode === &#x27;boss&#x27; &amp;&amp; this.boss.hp &gt; 0) {
         const dx = this.boss.x - this.hero.x, dy = this.boss.y - this.hero.y, dist = Math.hypot(dx, dy);
         if (dist &lt; s.range + 27 &amp;&amp; (dx * Math.cos(this.hero.face) + dy * Math.sin(this.hero.face)) / (dist || 1) &gt; -.1) {
+          damageDealt += Math.min(this.boss.hp, s.damage);
           this.boss.hp = Math.max(0, this.boss.hp - s.damage);
           this.boss.hit = .15;
           if (!this.boss.hp) { this.mode = &#x27;reward&#x27;; this.shots = []; this.hazards = []; this.chests = [{ x: 330, y: 136, open: false, luxury: true }]; this.say(&#x27;¡Cayó Terragrán! Acercate al cofre lujoso y abrilo con E.&#x27;); }
         }
       }
+      // One recovery per successful swing, even when it hits multiple targets.
+      if (damageDealt &gt; 0) this.hero.hp = Math.min(s.maxHp, this.hero.hp + Math.min(s.lifeOnHit, damageDealt * .08));
     }
     hurt(amount = 10 + this.room) {
       if (!this.active() || this.hero.inv &gt; 0) return false;
       this.hero.hp = Math.max(0, this.hero.hp - Math.max(2, amount - this.stats().armor));
-      this.hero.inv = 1.1; this.hero.safe = 0;
+      this.hero.inv = 1.1;
       if (!this.hero.hp) { this.mode = &#x27;dead&#x27;; this.say(&#x27;Caíste. Reiniciá para volver a intentarlo.&#x27;); }
       return true;
     }
@@ -1311,8 +1317,7 @@ html&gt;body{padding:0}&lt;/style&gt;
       if (this.paused || ![&#x27;play&#x27;, &#x27;boss&#x27;, &#x27;reward&#x27;].includes(this.mode)) return;
       this.time += dt; this.hero.inv = Math.max(0, this.hero.inv - dt); this.attack = Math.max(0, this.attack - dt);
       this.cooldown = Math.max(0, this.cooldown - dt); this.dashCooldown = Math.max(0, this.dashCooldown - dt);
-      const s = this.stats(); this.hero.safe += dt;
-      if (this.hero.safe &gt; 3) this.hero.hp = Math.min(s.maxHp, this.hero.hp + dt * 4);
+      const s = this.stats();
       this.hero.stamina = Math.min(s.maxEnergy, this.hero.stamina + dt * 15);
       let dx = (keys.right ? 1 : 0) - (keys.left ? 1 : 0), dy = (keys.down ? 1 : 0) - (keys.up ? 1 : 0), len = Math.hypot(dx, dy);
       if (len) this.hero.face = Math.atan2(dy, dx);
@@ -1479,7 +1484,7 @@ html&gt;body{padding:0}&lt;/style&gt;
     $(&#x27;#ek-life&#x27;).textContent = &#x27;Vida &#x27; + Math.ceil(h.hp) + &#x27;/&#x27; + s.maxHp;
     $(&#x27;#ek-energy&#x27;).textContent = &#x27;Energía &#x27; + Math.floor(h.stamina) + &#x27;/&#x27; + s.maxEnergy;
     $(&#x27;#ek-gold&#x27;).textContent = h.gold + &#x27; oro&#x27;; $(&#x27;#ek-points&#x27;).textContent = h.points + &#x27; puntos libres&#x27;;
-    $(&#x27;#ek-room&#x27;).textContent = &#x27;Sala &#x27; + game.room + &#x27;/5&#x27; + (game.boss ? &#x27; · Dragón&#x27; : &#x27;&#x27;);
+    $(&#x27;#ek-room&#x27;).textContent = &#x27;Nivel &#x27; + s.level + &#x27; · Sala &#x27; + game.room + &#x27;/5&#x27; + (game.boss ? &#x27; · Dragón&#x27; : &#x27;&#x27;);
     const odds = game.chances();
     $(&#x27;#ek-chances&#x27;).textContent = &#x27;Cofres: equipo &#x27; + Math.round(odds.gear * 100) + &#x27;% · poción &#x27; + Math.round(odds.potion * 100) + &#x27;% · resto oro&#x27;;
     $(&#x27;#ek-kills&#x27;).textContent = &#x27;Esqueletos &#x27; + game.kills + &#x27;/18&#x27;;
@@ -1495,7 +1500,10 @@ html&gt;body{padding:0}&lt;/style&gt;
     }
     const s = game.stats(), derived = $(&#x27;#ek-derived&#x27;); derived.replaceChildren();
     for (const text of [&#x27;Daño: &#x27; + s.damage, &#x27;Protección: &#x27; + s.armor, &#x27;Vida máxima: &#x27; + s.maxHp, &#x27;Energía máxima: &#x27; + s.maxEnergy,
-      &#x27;Ataques/seg: &#x27; + (1 / s.delay).toFixed(1), &#x27;Regeneración: 4 vida/seg&#x27;]) derived.append(node(&#x27;span&#x27;, &#x27;&#x27;, text));
+      &#x27;Ataques/seg: &#x27; + (1 / s.delay).toFixed(2), &#x27;Movimiento: &#x27; + s.speed.toFixed(1),
+      &#x27;Cura por acierto: hasta &#x27; + s.lifeOnHit.toFixed(2), &#x27;Límite: 8% del daño real&#x27;,
+      &#x27;Nivel &#x27; + s.level + &#x27; · +1 cada 5 esqueletos&#x27;, &#x27;Un ataque acertado = una curación&#x27;]) derived.append(node(&#x27;span&#x27;, &#x27;&#x27;, text));
+    derived.append(node(&#x27;span&#x27;, &#x27;ek-heal-formula&#x27;, &#x27;Curación = 0,6 + 0,03(V−1) + 0,015(F−1) + 0,01(A−1) + 0,1(nivel−1). V: vitalidad · F: fuerza · A: agilidad.&#x27;));
     const slotBox = $(&#x27;#ek-slots&#x27;); slotBox.replaceChildren();
     ITEMS.forEach((def, slot) =&gt; {
       const item = game.equipped[slot], card = node(&#x27;div&#x27;, &#x27;ek-slot&#x27;);

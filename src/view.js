@@ -16,7 +16,7 @@
     $('#ek-life').textContent = 'Vida ' + Math.ceil(h.hp) + '/' + s.maxHp;
     $('#ek-energy').textContent = 'Energía ' + Math.floor(h.stamina) + '/' + s.maxEnergy;
     $('#ek-gold').textContent = h.gold + ' oro'; $('#ek-points').textContent = h.points + ' puntos libres';
-    $('#ek-room').textContent = 'Sala ' + game.room + '/5' + (game.boss ? ' · Dragón' : '');
+    $('#ek-room').textContent = 'Nivel ' + s.level + ' · Sala ' + game.room + '/5' + (game.boss ? ' · Dragón' : '');
     const odds = game.chances();
     $('#ek-chances').textContent = 'Cofres: equipo ' + Math.round(odds.gear * 100) + '% · poción ' + Math.round(odds.potion * 100) + '% · resto oro';
     $('#ek-kills').textContent = 'Esqueletos ' + game.kills + '/18';
@@ -32,7 +32,10 @@
     }
     const s = game.stats(), derived = $('#ek-derived'); derived.replaceChildren();
     for (const text of ['Daño: ' + s.damage, 'Protección: ' + s.armor, 'Vida máxima: ' + s.maxHp, 'Energía máxima: ' + s.maxEnergy,
-      'Ataques/seg: ' + (1 / s.delay).toFixed(1), 'Regeneración: 4 vida/seg']) derived.append(node('span', '', text));
+      'Ataques/seg: ' + (1 / s.delay).toFixed(2), 'Movimiento: ' + s.speed.toFixed(1),
+      'Cura por acierto: hasta ' + s.lifeOnHit.toFixed(2), 'Límite: 8% del daño real',
+      'Nivel ' + s.level + ' · +1 cada 5 esqueletos', 'Un ataque acertado = una curación']) derived.append(node('span', '', text));
+    derived.append(node('span', 'ek-heal-formula', 'Curación = 0,6 + 0,03(V−1) + 0,015(F−1) + 0,01(A−1) + 0,1(nivel−1). V: vitalidad · F: fuerza · A: agilidad.'));
     const slotBox = $('#ek-slots'); slotBox.replaceChildren();
     ITEMS.forEach((def, slot) => {
       const item = game.equipped[slot], card = node('div', 'ek-slot');

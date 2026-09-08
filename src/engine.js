@@ -1,9 +1,9 @@
 (function (scope) {
   'use strict';
   const ATTRS = {
-    strength: { name: 'Fuerza', color: '#f46b71', detail: '+2 de daño por punto' },
+    strength: { name: 'Fuerza', color: '#f46b71', detail: '+1,5 de daño por punto' },
     energy: { name: 'Energía', color: '#75b8ff', detail: '+2 de energía máxima por punto' },
-    vitality: { name: 'Vitalidad', color: '#8bdc83', detail: '+6 de vida máxima por punto' },
+    vitality: { name: 'Vitalidad', color: '#8bdc83', detail: '100 de vida inicial; +8 por punto' },
     agility: { name: 'Agilidad', color: '#bc91f5', detail: 'Más movimiento y ataques más rápidos' }
   };
   const ITEMS = [
@@ -23,7 +23,7 @@
     reset() {
       this.nextId = 1; this.room = 1; this.kills = 0; this.mode = 'play'; this.paused = false;
       this.time = 0; this.attack = 0; this.cooldown = 0; this.dashTime = 0; this.dashCooldown = 0;
-      this.hero = { x: 54, y: 136, face: 0, hp: 140, stamina: 52, gold: 0, points: 0, inv: 1.5, safe: 0,
+      this.hero = { x: 54, y: 136, face: 0, hp: 100, stamina: 52, gold: 0, points: 0, inv: 1.5,
         attributes: { strength: 1, energy: 1, vitality: 1, agility: 1 } };
       this.bag = []; this.equipped = Array(8).fill(null); this.stock = []; this.boss = null;
       this.effects = []; this.notices = []; this.revision = 0; this.rewardClaimed = false;
@@ -32,13 +32,14 @@
     say(text) { this.message = text; this.revision++; }
     rank(slot) { return this.equipped[slot]?.rank || 0; }
     stats() {
-      const a = this.hero.attributes, r = i => this.rank(i);
-      return { damage: (r(4) ? 24 + 6 * (r(4) - 1) : 18) + (a.strength - 1) * 2 + r(3) * 4 + r(5) * 6,
-        maxHp: 140 + (a.vitality - 1) * 6, maxEnergy: 50 + a.energy * 2,
+      const a = this.hero.attributes, r = i => this.rank(i), level = 1 + Math.floor(this.kills / 5);
+      return { level, damage: (r(4) ? 24 + 6 * (r(4) - 1) : 12) + (a.strength - 1) * 1.5 + r(3) * 4 + r(5) * 6,
+        maxHp: 100 + (a.vitality - 1) * 8, maxEnergy: 50 + a.energy * 2,
         armor: r(0) * 3 + r(2) * 2 + (this.equipped.slice(0, 4).every(Boolean) ? 2 : 0),
-        speed: 92 + (a.agility - 1) * .5 + r(1) * 10,
-        delay: Math.max(.17, .40 - (a.agility - 1) * .002 - r(6) * .045),
-        range: r(4) ? 47 : 33, frost: this.equipped.slice(4).every(Boolean) };
+        speed: 88 + (a.agility - 1) * .5 + r(1) * 10,
+        delay: Math.max(.18, .48 / (1 + (a.agility - 1) * .01) * Math.pow(.88, r(6))),
+        range: r(4) ? 47 : 33, frost: this.equipped.slice(4).every(Boolean),
+        lifeOnHit: .6 + .03 * (a.vitality - 1) + .015 * (a.strength - 1) + .01 * (a.agility - 1) + .1 * (level - 1) };
     }
     chances() { return { gear: this.room * 5 / 100, potion: (15 + (this.room - 1) * 10) / 100 }; }
     spawnRoom() {
@@ -122,11 +123,12 @@
     }
     strike() {
       if (!this.active() || this.cooldown > 0) return;
-      const s = this.stats(); this.cooldown = s.delay; this.attack = .18;
+      const s = this.stats(); this.cooldown = s.delay; this.attack = .18; let damageDealt = 0;
       for (const e of this.enemies) {
         const dx = e.x - this.hero.x, dy = e.y - this.hero.y, distance = Math.hypot(dx, dy);
         const dot = (dx * Math.cos(this.hero.face) + dy * Math.sin(this.hero.face)) / (distance || 1);
         if (e.hp > 0 && distance < s.range && (dot > -.15 || distance < 17)) {
+          damageDealt += Math.min(e.hp, s.damage + (s.frost ? 10 : 0));
           e.hp -= s.damage + (s.frost ? 10 : 0); e.slow = this.rank(4) ? 1.6 : 0;
           e.x = clamp(e.x + Math.cos(this.hero.face) * 11, 22, 458); e.y = clamp(e.y + Math.sin(this.hero.face) * 11, 32, 243);
           if (e.hp <= 0) this.kill(e);
@@ -137,16 +139,19 @@
       if (this.mode === 'boss' && this.boss.hp > 0) {
         const dx = this.boss.x - this.hero.x, dy = this.boss.y - this.hero.y, dist = Math.hypot(dx, dy);
         if (dist < s.range + 27 && (dx * Math.cos(this.hero.face) + dy * Math.sin(this.hero.face)) / (dist || 1) > -.1) {
+          damageDealt += Math.min(this.boss.hp, s.damage);
           this.boss.hp = Math.max(0, this.boss.hp - s.damage);
           this.boss.hit = .15;
           if (!this.boss.hp) { this.mode = 'reward'; this.shots = []; this.hazards = []; this.chests = [{ x: 330, y: 136, open: false, luxury: true }]; this.say('¡Cayó Terragrán! Acercate al cofre lujoso y abrilo con E.'); }
         }
       }
+      // One recovery per successful swing, even when it hits multiple targets.
+      if (damageDealt > 0) this.hero.hp = Math.min(s.maxHp, this.hero.hp + Math.min(s.lifeOnHit, damageDealt * .08));
     }
     hurt(amount = 10 + this.room) {
       if (!this.active() || this.hero.inv > 0) return false;
       this.hero.hp = Math.max(0, this.hero.hp - Math.max(2, amount - this.stats().armor));
-      this.hero.inv = 1.1; this.hero.safe = 0;
+      this.hero.inv = 1.1;
       if (!this.hero.hp) { this.mode = 'dead'; this.say('Caíste. Reiniciá para volver a intentarlo.'); }
       return true;
     }
@@ -198,8 +203,7 @@
       if (this.paused || !['play', 'boss', 'reward'].includes(this.mode)) return;
       this.time += dt; this.hero.inv = Math.max(0, this.hero.inv - dt); this.attack = Math.max(0, this.attack - dt);
       this.cooldown = Math.max(0, this.cooldown - dt); this.dashCooldown = Math.max(0, this.dashCooldown - dt);
-      const s = this.stats(); this.hero.safe += dt;
-      if (this.hero.safe > 3) this.hero.hp = Math.min(s.maxHp, this.hero.hp + dt * 4);
+      const s = this.stats();
       this.hero.stamina = Math.min(s.maxEnergy, this.hero.stamina + dt * 15);
       let dx = (keys.right ? 1 : 0) - (keys.left ? 1 : 0), dy = (keys.down ? 1 : 0) - (keys.up ? 1 : 0), len = Math.hypot(dx, dy);
       if (len) this.hero.face = Math.atan2(dy, dx);

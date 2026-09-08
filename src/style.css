@@ -31,6 +31,7 @@
 #ember-dungeon .ek-stat-track{height:4px;background:#353042;margin-top:8px;grid-column:1/-1}
 #ember-dungeon .ek-stat-track span{height:100%;display:block}
 #ember-dungeon .ek-derived{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:18px 0;color:#d8cbe6;font-size:12px}
+#ember-dungeon .ek-heal-formula{grid-column:1/-1;color:var(--ek-muted)}
 #ember-dungeon #ek-slots{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 #ember-dungeon .ek-slot{padding:8px;border:1px solid var(--ek-line);min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:5px}
 #ember-dungeon .ek-slot .ek-item-name{font-size:11px;overflow-wrap:anywhere}
