@@ -1,4 +1,16 @@
-# Elemental Knight · La Cripta de Brasas — v0.3.0
+# Elemental Knight · La Cripta de Brasas — v0.4.0
+
+## Cambios de v0.4.0 — A los golpes
+
+Rediseño visual original de dibujos animados, inspirado en la energía y las proporciones caricaturescas de El Bruto: cabezas grandes, trazos suaves, expresiones y movimiento de extremidades. No se incorporan gráficos del juego de referencia.
+
+Se reemplazó el renderizador de pixel art por dibujo vectorial en Canvas a 1440 × 816, conservando el espacio lógico de combate de 480 × 272. Incluye caminar, respiración, puñetazos, espada, reacción al daño, efectos de impactos, llamas y un dragón animado. Cofres, iconos de equipo, pociones y escenario también fueron redibujados. El fondo se reutiliza entre cuadros para reducir trabajo de dibujo.
+
+Las reglas, atributos, RNG, inventario, tienda y progresión de v0.3.0 se mantienen. La versión previa está conservada en `versions/v0.3.0/`.
+
+---
+
+## Mecánicas vigentes desde v0.3.0
 
 La versión actual agrega el panel de personaje con **Enter**, atributos, pociones, equipo manual y el dragón de tierra. Abrí `index.html` para jugar, sin instalación.
 

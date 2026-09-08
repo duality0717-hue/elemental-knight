@@ -12,7 +12,7 @@
 #ember-dungeon .ek-version,#ember-dungeon .ek-muted,#ember-dungeon .ek-controls,#ember-dungeon .ek-footer{color:var(--ek-muted);font-size:12px}
 #ember-dungeon .ek-hud{display:flex;justify-content:space-between;gap:8px 15px;flex-wrap:wrap;font-variant-numeric:tabular-nums;padding:10px 0 14px}
 #ember-dungeon #ek-gold{color:var(--ek-gold)}#ember-dungeon #ek-points{color:#b2e4a8}
-#ember-dungeon #ek-canvas{display:block;width:100%;height:auto;image-rendering:pixelated;background:#15131f;touch-action:none}
+#ember-dungeon #ek-canvas{display:block;width:100%;height:auto;image-rendering:auto;background:#716774;touch-action:none;border:2px solid #695465;border-radius:12px}
 #ember-dungeon .ek-actions,#ember-dungeon .ek-controls,#ember-dungeon .ek-pad{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-top:10px}
 #ember-dungeon .ek-pad{margin:0}#ember-dungeon .ek-pad button{min-width:40px;touch-action:none}
 #ember-dungeon #ek-attack,#ember-dungeon #ek-dash{touch-action:none}
@@ -35,7 +35,7 @@
 #ember-dungeon .ek-slot{padding:8px;border:1px solid var(--ek-line);min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:5px}
 #ember-dungeon .ek-slot .ek-item-name{font-size:11px;overflow-wrap:anywhere}
 #ember-dungeon .ek-slot button{font-size:11px;min-height:32px;padding:5px 7px;width:100%;margin-top:auto}
-#ember-dungeon .ek-icon{width:32px;height:32px;image-rendering:pixelated;flex:none}
+#ember-dungeon .ek-icon{width:32px;height:32px;image-rendering:auto;flex:none}
 #ember-dungeon .ek-slot-label{font-size:11px;color:var(--ek-gold)}#ember-dungeon .ek-empty{color:var(--ek-muted)}
 #ember-dungeon #ek-inventory{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:10px;align-items:start}#ember-dungeon .ek-bag-item{padding:7px 3px;display:flex;flex-direction:column;gap:4px;align-items:center;min-width:0;min-height:80px;font-size:11px;overflow-wrap:anywhere}
 #ember-dungeon #ek-bonuses{margin-top:12px}
