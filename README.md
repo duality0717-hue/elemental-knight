@@ -1,8 +1,18 @@
-# Elemental Knight — v0.6.0
+# Elemental Knight — v0.6.1
+
+## v0.6.1 — Guardado y pantalla completa
+
+La cabecera incluye **Guardar partida**, **Continuar partida** (cuando hay un guardado y estás en el inicio o tras morir) y **Pantalla completa**. Esc o el mismo botón permiten salir. El escenario conserva su proporción y los menús siguen disponibles.
+
+El progreso se guarda manualmente, cada cinco segundos y al salir de la página. Incluye personaje, atributos, equipo, mochila, oro, cofres, enemigos, anexos, jefe y aliado. Al cargar un combate, queda pausado hasta pulsar **Seguir**. Una muerte no sobrescribe el último guardado vivo. Comenzar una partida nueva reemplaza el guardado cuando se guarda esa nueva partida.
+
+El guardado es local al navegador y a la dirección desde la que abrís el juego; no es sincronización en la nube. Está disponible a partir de esta versión. Si un entorno incrustado bloquea almacenamiento o fullscreen, abrí `index.html` en tu navegador. La exportación ahora es un documento independiente sin iframe. Las pruebas de `.qa/` usan guardados separados de la partida normal.
+
+Se verificaron guardado y carga tras recargar, entrada/salida de pantalla completa y cinco pruebas adicionales de persistencia con `node tests/save.test.cjs`.
 
 ## v0.6.0 — Capítulo II: La catedral de la peste
 
-Después de derrotar a tu sombra, elegir nombre y especialización y abrir su cofre, **Descender al capítulo II** continúa la partida con todos tus atributos, oro, puntos, mochila y equipo. El descenso restaura vida y energía. Reiniciar comienza una partida nueva desde el capítulo I; la progresión todavía no se guarda al cerrar o recargar.
+Después de derrotar a tu sombra, elegir nombre y especialización y abrir su cofre, **Descender al capítulo II** continúa la partida con todos tus atributos, oro, puntos, mochila y equipo. El descenso restaura vida y energía. Reiniciar comienza una partida nueva desde el capítulo I.
 
 Las primeras cuatro salas del capítulo II son laberintos de **siete anexos cada una**: atrio con cuatro puertas, corredores con dos, un circuito y caminos sin salida. El mapa descubre los sectores al explorarlos. Cruzar una puerta común conserva el número de sala; solo el umbral dorado permite avanzar. La orientación varía entre salas y partidas. Hay que despejar los enemigos para abrir puertas. Los cofres abiertos y enemigos derrotados no reaparecen al regresar.
 

@@ -1,5 +1,5 @@
 <div id="ember-dungeon">
-  <header class="ek-header"><div><span class="ek-eyebrow">ELEMENTAL KNIGHT</span><h2 id="ek-title">La Cripta de Brasas</h2></div><span class="ek-version">v0.6.0 · La catedral de la peste</span></header>
+  <header class="ek-header"><div><span class="ek-eyebrow">ELEMENTAL KNIGHT</span><h2 id="ek-title">La Cripta de Brasas</h2></div><div class="ek-window-actions"><button type="button" id="ek-save">Guardar partida</button><button type="button" id="ek-load" hidden>Continuar partida</button><button type="button" id="ek-fullscreen" aria-pressed="false">⛶ Pantalla completa</button><span id="ek-save-status" role="status"></span></div></header>
   <div class="ek-hud"><span id="ek-life"></span><span id="ek-energy"></span><span id="ek-gold"></span><span id="ek-points"></span><span id="ek-room"></span></div>
   <div id="ek-world"><canvas id="ek-canvas" width="1440" height="816" aria-label="Catedral gótica en penumbras. Explorá las puertas, esquivá los ataques y derrotá a los enemigos."></canvas></div>
   <section id="ek-exploration" hidden aria-label="Exploración de la sala"><div><span class="ek-eyebrow">CARTOGRAFÍA DEL DESCENSO</span><h3 id="ek-location"></h3><p id="ek-route"></p><p class="ek-muted">Caminá hasta una puerta para cruzarla. Los anexos pertenecen a la misma sala. El umbral dorado lleva a la siguiente.</p><p id="ek-class-help"></p></div><div><div id="ek-map" role="img" aria-label="Mapa de los anexos descubiertos"></div><p class="ek-map-legend">◆ Vos · ○ Explorado · ? Sin explorar · ✦ Umbral</p></div></section>
@@ -116,6 +116,23 @@
 #ember-dungeon .ek-map-cell.ek-visited{border-style:solid;color:#c1bfa5;background:#35453e}#ember-dungeon .ek-map-cell.ek-current{border:1px solid #d4c18a;color:#e6d7ac;background:#675c3b}
 #ember-dungeon .ek-map-legend{font-size:11px!important;text-align:center}
 @media(max-width:520px){#ember-dungeon #ek-exploration{grid-template-columns:1fr}#ember-dungeon #ek-map{justify-content:start}#ember-dungeon .ek-map-legend{text-align:left}}
+
+#ember-dungeon .ek-window-actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+#ember-dungeon #ek-save-status{flex-basis:100%;font-size:11px;color:var(--ek-muted);text-align:right;min-height:16px}
+#ember-dungeon.ek-expanded{max-width:none;width:100%;height:100dvh;margin:0;padding:10px 16px;display:flex;flex-direction:column;overflow:auto;border:0}
+#ember-dungeon.ek-full-window{position:fixed;inset:0;z-index:2147483647;width:100vw}
+#ember-dungeon.ek-expanded .ek-header{margin:0;padding:0 0 5px;flex-shrink:0}
+#ember-dungeon.ek-expanded h2{font-size:20px}#ember-dungeon.ek-expanded .ek-hud{padding:5px 0;flex-shrink:0}
+#ember-dungeon.ek-expanded #ek-world{flex:1 1 240px;min-height:120px;display:grid;place-items:center;overflow:hidden}
+#ember-dungeon.ek-expanded #ek-canvas{max-width:100%;flex:none}
+#ember-dungeon.ek-expanded #ek-character,#ember-dungeon.ek-expanded #ek-shop,#ember-dungeon.ek-expanded #ek-awakening{flex:1;overflow:auto;min-height:150px}
+#ember-dungeon.ek-expanded #ek-exploration{display:block;padding:4px 8px;flex-shrink:0}
+#ember-dungeon.ek-expanded #ek-exploration .ek-eyebrow,#ember-dungeon.ek-expanded #ek-exploration .ek-muted,#ember-dungeon.ek-expanded #ek-class-help,#ember-dungeon.ek-expanded #ek-exploration>div:last-child{display:none}
+#ember-dungeon.ek-expanded #ek-exploration h3,#ember-dungeon.ek-expanded #ek-route{display:inline;font-size:12px;margin:0 10px 0 0}
+#ember-dungeon.ek-expanded .ek-actions,#ember-dungeon.ek-expanded .ek-controls{margin-top:5px;flex-shrink:0}
+#ember-dungeon.ek-expanded #ek-message{margin:5px 0;min-height:18px;font-size:12px;flex-shrink:0}
+#ember-dungeon.ek-expanded .ek-footer{padding-top:4px;flex-shrink:0}
+@media(max-height:600px) and (min-width:600px){#ember-dungeon.ek-expanded .ek-eyebrow,#ember-dungeon.ek-expanded .ek-footer,#ember-dungeon.ek-expanded #ek-save-status,#ember-dungeon.ek-expanded .ek-controls>span{display:none}#ember-dungeon.ek-expanded .ek-controls{position:absolute;right:16px;bottom:8px}#ember-dungeon.ek-expanded .ek-actions{padding-right:190px}#ember-dungeon.ek-expanded #ek-message{max-width:70%}}
 
 </style>
 <script>
@@ -524,6 +541,52 @@
 
 (function(scope){
   'use strict';
+  const {Game,ATTRS,CLASSES}=scope.ElementalEngine;
+  const finite=(o,keys)=>o&&keys.every(k=>Number.isFinite(o[k]));
+  const list=(items,check)=>Array.isArray(items)&&items.length<=2048&&items.every(check);
+  const gear=i=>i&&Number.isInteger(i.id)&&i.kind==='gear'&&Number.isInteger(i.slot)&&i.slot>=0&&i.slot<8&&Number.isInteger(i.rank)&&i.rank>=1&&i.rank<=100;
+  const item=i=>gear(i)||(i&&Number.isInteger(i.id)&&i.kind==='potion'&&Object.hasOwn(ATTRS,i.attribute)&&Number.isFinite(i.power)&&i.power>0);
+  const equipment=a=>Array.isArray(a)&&a.length===8&&a.every(i=>i===null||gear(i));
+  const enemy=e=>finite(e,['x','y','hp','max','slow','fire','timer','face','swing'])&&['elite','caster'].includes(e.kind)&&['chase','windup','recover'].includes(e.phase);
+  const chest=b=>finite(b,['x','y'])&&typeof b.open==='boolean';
+  const zone=z=>finite(z,['x','y'])&&typeof z.name==='string'&&z.doors&&list(z.enemies,enemy)&&list(z.chests,chest);
+  function valid(d){
+    if(!d||![1,2].includes(d.chapter)||!Number.isInteger(d.room)||d.room<1||d.room>5||!['play','boss','shop','awakening','reward','chapter-complete','won'].includes(d.mode))return false;
+    if(!finite(d,['nextId','kills','chapterKills','time','attack','cooldown','dashTime','dashCooldown','doorCooldown','revision']))return false;
+    if(!finite(d.hero,['x','y','hp','stamina','gold','points','inv','face','slow','poison','poisonTick'])||d.hero.hp<=0||typeof d.hero.name!=='string'||d.hero.name.length>40)return false;
+    if(d.hero.specialization!==null&&!Object.hasOwn(CLASSES,d.hero.specialization))return false;
+    if(d.chapter===2&&!d.hero.specialization)return false;
+    if(!Object.keys(ATTRS).every(k=>Number.isInteger(d.hero.attributes?.[k])&&d.hero.attributes[k]>=1&&d.hero.attributes[k]<=100))return false;
+    if(!equipment(d.equipped)||!list(d.bag,item)||!list(d.stock,i=>gear(i)&&Number.isFinite(i.price)))return false;
+    if(!list(d.enemies,enemy)||!list(d.chests,chest)||!list(d.shots,p=>finite(p,['x','y','vx','vy','life']))||!list(d.friendlyShots,p=>finite(p,['x','y','vx','vy','life','damage'])))return false;
+    if(!list(d.hazards,h=>finite(h,['x','y','radius','timer','life']))||!list(d.notices,n=>finite(n,['x','y','life'])&&typeof n.text==='string')||!Array.isArray(d.effects))return false;
+    if(d.boss!==null&&(!finite(d.boss,['x','y','hp','max','timer','cycle','hit','face','swing'])||!['rest','warning'].includes(d.boss.phase)||(d.chapter===1&&!equipment(d.boss.equipment))))return false;
+    if(d.mode==='boss'&&!d.boss)return false;
+    if(d.ally!==null&&(!finite(d.ally,['x','y','hp','face','fire','swing'])||!equipment(d.ally.equipment)))return false;
+    if(d.zones!==null){if(typeof d.zones!=='object'||Object.keys(d.zones).length!==7||!Object.hasOwn(d.zones,d.zoneId)||!Object.values(d.zones).every(zone))return false;
+      for(const z of Object.values(d.zones))for(const [dir,target] of Object.entries(z.doors))if(!['up','right','down','left'].includes(dir)||(target!=='next'&&!Object.hasOwn(d.zones,target)))return false;
+    }else if(d.chapter===2&&d.mode==='play')return false;
+    return true;
+  }
+  function encode(game){
+    if(['ready','dead'].includes(game.mode)||game.hero.hp<=0)return null;
+    const data=JSON.parse(JSON.stringify(game));
+    if(data.zones&&data.zoneId){data.zones[data.zoneId].enemies=data.enemies;data.zones[data.zoneId].chests=data.chests;}
+    return JSON.stringify({version:1,savedAt:new Date().toISOString(),data});
+  }
+  function decode(text){
+    try{if(typeof text!=='string'||text.length>1000000)return null;const save=JSON.parse(text);if(save.version!==1||!valid(save.data))return null;
+      const g=new Game();for(const key of Object.keys(g))if(key!=='random'&&Object.hasOwn(save.data,key))g[key]=save.data[key];
+      if(g.zones){g.zones[g.zoneId].enemies=g.enemies;g.zones[g.zoneId].chests=g.chests;}
+      g.paused=['play','boss','reward'].includes(g.mode);g.dashTime=0;g.revision++;return g;
+    }catch{return null;}
+  }
+  scope.ElementalSave={encode,decode};
+  if(typeof module!=='undefined'&&module.exports)module.exports=scope.ElementalSave;
+})(globalThis);
+
+(function(scope){
+  'use strict';
   const INK='#141319';
   class Painter{
     constructor(canvas){this.canvas=canvas;canvas.width=1440;canvas.height=816;this.c=canvas.getContext('2d');this.c.setTransform(3,0,0,3,0,0);this.memory=new Map();this.sparks=[];this.clock=0;this.background=null;this.bgKey='';}
@@ -733,9 +796,43 @@
 (() => {
   'use strict';
   const root = document.getElementById('ember-dungeon'), $ = selector => root.querySelector(selector);
-  const { Game, ITEMS, ATTRS, CLASSES } = globalThis.ElementalEngine, game = new Game();
+  const { Game, ITEMS, ATTRS, CLASSES } = globalThis.ElementalEngine;
+  let game = new Game();
   const canvas = $('#ek-canvas'), painter = new globalThis.ElementalPainter(canvas);
   let panel = false, pausedBeforePanel = false, keys = {}, last = 0, lastRevision = -1, hudTimer = 0;
+  const saveKey='elemental-knight-save-v1'+(location.pathname.includes('/.qa/')?':qa:'+location.pathname:'');
+  let storedSave=null,saveTimer=0,expandedFallback=false;
+  try{storedSave=globalThis.ElementalSave.decode(localStorage.getItem(saveKey));}catch{}
+  function saveGame(manual=false){
+    const data=globalThis.ElementalSave.encode(game);if(!data)return false;
+    try{localStorage.setItem(saveKey,data);storedSave=true;$('#ek-save-status').textContent=(manual?'Partida guardada':'Guardado automático')+' · '+new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'});return true;}
+    catch{if(manual)$('#ek-save-status').textContent='El navegador no permite guardar acá. Abrí index.html en tu navegador.';return false;}
+  }
+  function fitCanvas(){
+    if(!root.classList.contains('ek-expanded')){canvas.style.width='';canvas.style.height='';return;}
+    if($('#ek-world').hidden)return;
+    const box=$('#ek-world'),width=Math.max(1,Math.min(box.clientWidth,box.clientHeight*480/272));
+    canvas.style.width=width+'px';canvas.style.height=(width*272/480)+'px';
+  }
+  function fullscreenState(){
+    const expanded=document.fullscreenElement===root||expandedFallback;
+    root.classList.toggle('ek-expanded',expanded);root.classList.toggle('ek-full-window',expandedFallback);
+    $('#ek-fullscreen').textContent=expanded?'⛶ Salir de pantalla completa':'⛶ Pantalla completa';$('#ek-fullscreen').setAttribute('aria-pressed',String(expanded));
+    keys={};requestAnimationFrame(fitCanvas);
+  }
+  $('#ek-fullscreen').onclick=async()=>{
+    try{if(document.fullscreenElement===root)await document.exitFullscreen();else if(expandedFallback)expandedFallback=false;else if(root.requestFullscreen&&document.fullscreenEnabled)await root.requestFullscreen();else expandedFallback=true;}
+    catch{expandedFallback=true;$('#ek-save-status').textContent='Vista ampliada. Para ocupar toda la pantalla, abrí el juego en tu navegador.';}
+    fullscreenState();
+  };
+  document.addEventListener('fullscreenchange',fullscreenState);
+  new ResizeObserver(fitCanvas).observe($('#ek-world'));
+  $('#ek-save').onclick=()=>saveGame(true);
+  $('#ek-load').onclick=()=>{
+    let recovered;try{recovered=globalThis.ElementalSave.decode(localStorage.getItem(saveKey));}catch{}
+    if(!recovered){$('#ek-save-status').textContent='No se pudo recuperar la partida.';return;}
+    game=recovered;panel=false;keys={};lastRevision=-1;refresh();$('#ek-save-status').textContent='Partida recuperada'+(game.paused?' · Tocá Seguir para jugar.':'.');
+  };
   const node = (tag, className, text) => { const e = document.createElement(tag); if (className) e.className = className; if (text !== undefined) e.textContent = text; return e; };
   function button(text, callback, disabled = false, label) {
     const b = node('button', '', text); b.type = 'button'; b.disabled = disabled;
@@ -804,6 +901,8 @@
     game.chests.forEach((chest, i) => chests.append(button(chest.open ? 'Cofre ' + (i + 1) + ' abierto' : 'Abrir cofre ' + (i + 1), () => game.openChest(i), chest.open)));
   }
   function refresh() {
+    $('#ek-save').disabled=['ready','dead'].includes(game.mode);
+    $('#ek-load').hidden=!storedSave||!['ready','dead'].includes(game.mode);
     const focused = document.activeElement?.getAttribute?.('aria-label');
     $('#ek-world').hidden = panel || ['shop','awakening'].includes(game.mode); $('#ek-character').hidden = !panel; $('#ek-shop').hidden = panel || game.mode !== 'shop';
     $('#ek-awakening').hidden=panel || game.mode!=='awakening';
@@ -822,6 +921,7 @@
     updateHud(); if (panel) inventory(); if (game.mode === 'shop' && !panel) shop();
     if (panel && focused) { for (const b of root.querySelectorAll('[aria-label]')) if (b.getAttribute('aria-label') === focused && !b.disabled) { b.focus({ preventScroll: true }); break; } }
     lastRevision = game.revision;
+    requestAnimationFrame(fitCanvas);
   }
   function exploration(){
     const z=game.zones[game.zoneId],dirs={up:'arriba',right:'derecha',down:'abajo',left:'izquierda'};
@@ -862,7 +962,8 @@
   const map = { ArrowLeft: 'left', a: 'left', ArrowRight: 'right', d: 'right', ArrowUp: 'up', w: 'up', ArrowDown: 'down', s: 'down' };
   document.addEventListener('keydown', e => {
     if (/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)||game.mode==='awakening') return;
-    if(e.key==='Enter'&&['ek-next-chapter','ek-start'].includes(e.target.id))return;
+    if(e.key==='Escape'&&expandedFallback){expandedFallback=false;fullscreenState();return;}
+    if(e.key==='Enter'&&['ek-next-chapter','ek-start','ek-fullscreen','ek-save','ek-load'].includes(e.target.id))return;
     if (e.key === 'Enter') { e.preventDefault(); if (!e.repeat) togglePanel(); return; }
     if (e.key === 'Escape' && panel) { e.preventDefault(); togglePanel(); return; }
     if (panel) return;
@@ -872,11 +973,13 @@
     if (e.key === 'Shift' && !e.repeat) { e.preventDefault(); game.dash(); }
   });
   document.addEventListener('keyup', e => { const k = map[e.key] || map[e.key.toLowerCase()]; if (k) keys[k] = false; if (e.code === 'Space') keys.hit = false; });
-  function blur() { keys = {}; if (game.active() || game.mode === 'reward') { game.paused = true; refresh(); } }
+  function blur() { saveGame(); keys = {}; if (game.active() || game.mode === 'reward') { game.paused = true; refresh(); } }
+  window.addEventListener('pagehide',()=>saveGame());
   window.addEventListener('blur', blur); document.addEventListener('visibilitychange', () => { if (document.hidden) blur(); });
   canvas.onpointerdown = e => { if (!game.active()) return; const r = canvas.getBoundingClientRect(); game.hero.face = Math.atan2((e.clientY - r.top) * 272 / r.height - game.hero.y, (e.clientX - r.left) * 480 / r.width - game.hero.x); game.strike(); };
   refresh();
   function frame(now) { const dt = Math.min(.035, (now - last) / 1000 || 0); last = now; game.tick(dt, keys); painter.draw(game);
+    saveTimer+=dt;if(saveTimer>=5){saveTimer=0;saveGame();}
     hudTimer += dt; if (hudTimer > .12) { updateHud(); hudTimer = 0; } if (lastRevision !== game.revision) refresh(); requestAnimationFrame(frame); }
   requestAnimationFrame(frame);
 })();

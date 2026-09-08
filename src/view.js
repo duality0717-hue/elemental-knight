@@ -1,9 +1,43 @@
 (() => {
   'use strict';
   const root = document.getElementById('ember-dungeon'), $ = selector => root.querySelector(selector);
-  const { Game, ITEMS, ATTRS, CLASSES } = globalThis.ElementalEngine, game = new Game();
+  const { Game, ITEMS, ATTRS, CLASSES } = globalThis.ElementalEngine;
+  let game = new Game();
   const canvas = $('#ek-canvas'), painter = new globalThis.ElementalPainter(canvas);
   let panel = false, pausedBeforePanel = false, keys = {}, last = 0, lastRevision = -1, hudTimer = 0;
+  const saveKey='elemental-knight-save-v1'+(location.pathname.includes('/.qa/')?':qa:'+location.pathname:'');
+  let storedSave=null,saveTimer=0,expandedFallback=false;
+  try{storedSave=globalThis.ElementalSave.decode(localStorage.getItem(saveKey));}catch{}
+  function saveGame(manual=false){
+    const data=globalThis.ElementalSave.encode(game);if(!data)return false;
+    try{localStorage.setItem(saveKey,data);storedSave=true;$('#ek-save-status').textContent=(manual?'Partida guardada':'Guardado automático')+' · '+new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'});return true;}
+    catch{if(manual)$('#ek-save-status').textContent='El navegador no permite guardar acá. Abrí index.html en tu navegador.';return false;}
+  }
+  function fitCanvas(){
+    if(!root.classList.contains('ek-expanded')){canvas.style.width='';canvas.style.height='';return;}
+    if($('#ek-world').hidden)return;
+    const box=$('#ek-world'),width=Math.max(1,Math.min(box.clientWidth,box.clientHeight*480/272));
+    canvas.style.width=width+'px';canvas.style.height=(width*272/480)+'px';
+  }
+  function fullscreenState(){
+    const expanded=document.fullscreenElement===root||expandedFallback;
+    root.classList.toggle('ek-expanded',expanded);root.classList.toggle('ek-full-window',expandedFallback);
+    $('#ek-fullscreen').textContent=expanded?'⛶ Salir de pantalla completa':'⛶ Pantalla completa';$('#ek-fullscreen').setAttribute('aria-pressed',String(expanded));
+    keys={};requestAnimationFrame(fitCanvas);
+  }
+  $('#ek-fullscreen').onclick=async()=>{
+    try{if(document.fullscreenElement===root)await document.exitFullscreen();else if(expandedFallback)expandedFallback=false;else if(root.requestFullscreen&&document.fullscreenEnabled)await root.requestFullscreen();else expandedFallback=true;}
+    catch{expandedFallback=true;$('#ek-save-status').textContent='Vista ampliada. Para ocupar toda la pantalla, abrí el juego en tu navegador.';}
+    fullscreenState();
+  };
+  document.addEventListener('fullscreenchange',fullscreenState);
+  new ResizeObserver(fitCanvas).observe($('#ek-world'));
+  $('#ek-save').onclick=()=>saveGame(true);
+  $('#ek-load').onclick=()=>{
+    let recovered;try{recovered=globalThis.ElementalSave.decode(localStorage.getItem(saveKey));}catch{}
+    if(!recovered){$('#ek-save-status').textContent='No se pudo recuperar la partida.';return;}
+    game=recovered;panel=false;keys={};lastRevision=-1;refresh();$('#ek-save-status').textContent='Partida recuperada'+(game.paused?' · Tocá Seguir para jugar.':'.');
+  };
   const node = (tag, className, text) => { const e = document.createElement(tag); if (className) e.className = className; if (text !== undefined) e.textContent = text; return e; };
   function button(text, callback, disabled = false, label) {
     const b = node('button', '', text); b.type = 'button'; b.disabled = disabled;
@@ -72,6 +106,8 @@
     game.chests.forEach((chest, i) => chests.append(button(chest.open ? 'Cofre ' + (i + 1) + ' abierto' : 'Abrir cofre ' + (i + 1), () => game.openChest(i), chest.open)));
   }
   function refresh() {
+    $('#ek-save').disabled=['ready','dead'].includes(game.mode);
+    $('#ek-load').hidden=!storedSave||!['ready','dead'].includes(game.mode);
     const focused = document.activeElement?.getAttribute?.('aria-label');
     $('#ek-world').hidden = panel || ['shop','awakening'].includes(game.mode); $('#ek-character').hidden = !panel; $('#ek-shop').hidden = panel || game.mode !== 'shop';
     $('#ek-awakening').hidden=panel || game.mode!=='awakening';
@@ -90,6 +126,7 @@
     updateHud(); if (panel) inventory(); if (game.mode === 'shop' && !panel) shop();
     if (panel && focused) { for (const b of root.querySelectorAll('[aria-label]')) if (b.getAttribute('aria-label') === focused && !b.disabled) { b.focus({ preventScroll: true }); break; } }
     lastRevision = game.revision;
+    requestAnimationFrame(fitCanvas);
   }
   function exploration(){
     const z=game.zones[game.zoneId],dirs={up:'arriba',right:'derecha',down:'abajo',left:'izquierda'};
@@ -130,7 +167,8 @@
   const map = { ArrowLeft: 'left', a: 'left', ArrowRight: 'right', d: 'right', ArrowUp: 'up', w: 'up', ArrowDown: 'down', s: 'down' };
   document.addEventListener('keydown', e => {
     if (/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)||game.mode==='awakening') return;
-    if(e.key==='Enter'&&['ek-next-chapter','ek-start'].includes(e.target.id))return;
+    if(e.key==='Escape'&&expandedFallback){expandedFallback=false;fullscreenState();return;}
+    if(e.key==='Enter'&&['ek-next-chapter','ek-start','ek-fullscreen','ek-save','ek-load'].includes(e.target.id))return;
     if (e.key === 'Enter') { e.preventDefault(); if (!e.repeat) togglePanel(); return; }
     if (e.key === 'Escape' && panel) { e.preventDefault(); togglePanel(); return; }
     if (panel) return;
@@ -140,11 +178,13 @@
     if (e.key === 'Shift' && !e.repeat) { e.preventDefault(); game.dash(); }
   });
   document.addEventListener('keyup', e => { const k = map[e.key] || map[e.key.toLowerCase()]; if (k) keys[k] = false; if (e.code === 'Space') keys.hit = false; });
-  function blur() { keys = {}; if (game.active() || game.mode === 'reward') { game.paused = true; refresh(); } }
+  function blur() { saveGame(); keys = {}; if (game.active() || game.mode === 'reward') { game.paused = true; refresh(); } }
+  window.addEventListener('pagehide',()=>saveGame());
   window.addEventListener('blur', blur); document.addEventListener('visibilitychange', () => { if (document.hidden) blur(); });
   canvas.onpointerdown = e => { if (!game.active()) return; const r = canvas.getBoundingClientRect(); game.hero.face = Math.atan2((e.clientY - r.top) * 272 / r.height - game.hero.y, (e.clientX - r.left) * 480 / r.width - game.hero.x); game.strike(); };
   refresh();
   function frame(now) { const dt = Math.min(.035, (now - last) / 1000 || 0); last = now; game.tick(dt, keys); painter.draw(game);
+    saveTimer+=dt;if(saveTimer>=5){saveTimer=0;saveGame();}
     hudTimer += dt; if (hudTimer > .12) { updateHud(); hudTimer = 0; } if (lastRevision !== game.revision) refresh(); requestAnimationFrame(frame); }
   requestAnimationFrame(frame);
 })();
