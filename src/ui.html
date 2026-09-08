@@ -1,0 +1,23 @@
+<div id="ember-dungeon">
+  <header class="ek-header"><div><span class="ek-eyebrow">ELEMENTAL KNIGHT</span><h2>La Cripta de Brasas</h2></div><span class="ek-version">v0.3 · El despertar</span></header>
+  <div class="ek-hud"><span id="ek-life"></span><span id="ek-energy"></span><span id="ek-gold"></span><span id="ek-points"></span><span id="ek-room"></span></div>
+  <div id="ek-world"><canvas id="ek-canvas" width="480" height="272" aria-label="Mazmorra pixel art. Esqueletos de fuego, cofres y dragón de tierra."></canvas></div>
+  <section id="ek-character" hidden aria-label="Atributos, equipo y mochila">
+    <div class="ek-panel-top"><strong>PERSONAJE</strong><button type="button" id="ek-close">Cerrar · Enter</button></div>
+    <div class="ek-character-grid">
+      <section class="ek-attributes"><h3>Atributos</h3><p id="ek-available"></p><div id="ek-stat-list"></div><div class="ek-derived" id="ek-derived"></div><p class="ek-muted">Cada esqueleto: +1 punto libre. Las pociones suman a su atributo. Máximo: 100.</p></section>
+      <div class="ek-loadout">
+        <section class="ek-build"><h3>Set equipado <span id="ek-count"></span></h3><div id="ek-slots"></div><p class="ek-muted" id="ek-bonuses"></p></section>
+        <section class="ek-backpack"><h3>Mochila <span id="ek-bag-count"></span></h3><p class="ek-muted">Clic: equipar pieza o beber poción.</p><div id="ek-inventory"></div></section>
+      </div>
+    </div>
+  </section>
+  <section id="ek-shop" hidden aria-label="Tienda de la quinta sala">
+    <div class="ek-shop-heading"><span class="ek-eyebrow">SALA 05 · ZONA SEGURA</span><h2>El último mercader</h2><p>Vida y energía restauradas. Las compras van a la mochila: equipalas antes del jefe.</p></div>
+    <div id="ek-shop-stock"></div><div class="ek-shop-chests" id="ek-shop-chests"></div>
+    <div class="ek-shop-actions"><button type="button" id="ek-shop-build">Preparar mi build · Enter</button><button type="button" class="ek-primary" id="ek-enter-boss">Entrar al refugio del dragón →</button></div>
+  </section>
+  <div class="ek-actions"><button type="button" class="ek-primary" id="ek-start">Entrar a la cripta</button><button type="button" id="ek-attack">Atacar · Espacio</button><button type="button" id="ek-open">Cofre · E</button><button type="button" id="ek-dash">Esquivar · Shift</button><button type="button" id="ek-panel" aria-expanded="false">Personaje · Enter</button><button type="button" id="ek-pause">Pausa</button></div>
+  <div class="ek-controls"><div class="ek-pad"><button type="button" data-dir="left" aria-label="Izquierda">←</button><button type="button" data-dir="up" aria-label="Arriba">↑</button><button type="button" data-dir="down" aria-label="Abajo">↓</button><button type="button" data-dir="right" aria-label="Derecha">→</button></div><span>WASD / flechas · Espacio: atacar · Shift: esquivar</span></div>
+  <p id="ek-message" aria-live="polite"></p><div class="ek-footer"><span id="ek-chances"></span><span id="ek-kills"></span></div>
+</div>

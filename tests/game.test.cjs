@@ -1,37 +1,52 @@
-const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
-const html=fs.readFileSync(require('node:path').join(__dirname,'../game.html'),'utf8');
-const nodes=new Map();const context=new Proxy({},{get:(o,k)=>o[k]||(()=>{}),set:(o,k,v)=>(o[k]=v,true)});
-function element(){return {textContent:'',hidden:true,dataset:{},children:[],append(...e){this.children.push(...e);},replaceChildren(){this.children=[];},setAttribute(){},addEventListener(){},focus(){},getContext(){return context;}};}
-const root=element();root.querySelector=s=>{if(!nodes.has(s))nodes.set(s,element());return nodes.get(s);};root.querySelectorAll=()=>[];
-let script=html.match(/<script>([\s\S]*?)<\/script>/)[1];
-script=script.replace('equipment();hero=',`globalThis.test={restart,tick,strike,stats,slots,render,togglePause,openChest,lootChance,hurt,get:()=>({state,room,kills,hero,enemies,shots,chests}),place:()=>{for(const e of enemies){e.x=hero.x+20;e.y=hero.y;e.fire=100;}hero.face=0;},door:()=>{hero.x=459;hero.y=136;}};equipment();hero=`);
-const math=Object.create(Math);math.random=()=>.9;
-const box={document:{getElementById:()=>root,createElement:element,addEventListener(){}},window:{addEventListener(){}},requestAnimationFrame(){},Math:math};
-vm.createContext(box);vm.runInContext(script,box);const a=box.test;
-function reset(){math.random=()=>.9;a.restart();}
-function chest(n,roll){const s=a.get();s.hero.x=s.chests[n].x;s.hero.y=s.chests[n].y;math.random=()=>roll;a.openChest();}
-reset();assert.equal(a.get().hero.gold,0);assert.equal(a.stats().damage,16);assert.equal(a.stats().armor,0);assert(a.slots.every(s=>!s.owned&&!s.on));
-assert.equal(nodes.get('#ed-armor').children[0].children[0].disabled,true);
-a.openChest();assert(a.get().chests.every(c=>!c.open),'Out of range cannot open chests');
-chest(0,.05);assert(a.get().chests[0].open);assert(a.slots.every(s=>!s.owned),'5% boundary fails');
-chest(0,0);assert(a.slots.every(s=>!s.owned),'Opened chest cannot reroll');
-chest(1,.049999);assert.equal(a.slots.filter(s=>s.owned).length,1,'Below 5% gets one item');assert(a.slots[0].on,'Loot auto equips');
-chest(2,0);assert.equal(a.slots.filter(s=>s.owned).length,2,'No duplicate equipment');
-const owned=a.slots.filter(s=>s.owned).length;a.togglePause();const x=a.get().hero.x;a.tick(1);a.strike();a.openChest();assert.equal(a.get().hero.x,x);a.togglePause();
-reset();let gold=0;
-for(let r=1;r<=5;r++){
- assert.equal(a.get().room,r);assert.equal(a.get().enemies.length,r+2);assert.equal(Math.round(a.lootChance()*100),r*5);
- assert.equal(a.get().chests.length,3);assert(a.get().chests.every(c=>!c.open));
- // Kill with bare hands; isolate collision to exercise combat and progression deterministically.
- let hits=0;while(a.get().enemies.length&&hits++<25){a.get().hero.inv=100;a.place();a.strike();a.tick(.44);a.render();}
- assert.equal(a.get().enemies.length,0);assert(a.get().hero.gold>gold);gold=a.get().hero.gold;
- const after=a.get().hero.gold;a.tick(.5);a.strike();assert.equal(a.get().hero.gold,after,'No repeat kill rewards');
- if(r===1){chest(0,0);assert(a.slots[0].owned);}
- if(r>1)assert(a.slots[0].owned,'Equipment persists across rooms');
- math.random=()=>.9;a.door();a.tick(.01);
-}
-assert.equal(a.get().state,'won');assert.equal(a.get().kills,25);assert.equal(a.get().hero.gold,370,'Expected per-room gold payouts');
-reset();assert.equal(a.get().hero.gold,0);assert.equal(a.get().kills,0);assert(a.slots.every(s=>!s.owned));
-a.get().hero.inv=0;a.get().hero.hp=1;a.hurt();assert.equal(a.get().state,'dead');const n=a.get().enemies.length;a.strike();a.openChest();assert.equal(a.get().enemies.length,n);
-reset();a.slots.forEach(s=>s.owned=s.on=true);assert.equal(a.stats().damage,34);assert.equal(a.stats().armor,7);assert(a.stats().frost);a.render();
-console.log('PASS: empty starting loadout; locked slots; chest range, 5% boundary, one roll, no duplicates; auto equip; 5 rooms/25 kills; gold; persistence; restart; death; set bonuses.');
+const assert = require('node:assert/strict');
+const { Game, ATTRS } = require('../src/engine.js');
+let checks = 0;
+function test(name, fn) { fn(); checks++; console.log('PASS ' + name); }
+function game(roll=.99) { const g = new Game(() => roll); g.reset(); return g; }
+function open(g, index=0) { g.hero.x=g.chests[index].x;g.hero.y=g.chests[index].y;return g.openChest(); }
+test('start empty; attributes 1/100; no gold, no free points',()=>{
+ const g=game();assert.equal(g.hero.hp,140);assert.equal(g.hero.gold,0);assert.equal(g.hero.points,0);assert.equal(g.bag.length,0);assert(g.equipped.every(i=>i===null));assert(Object.values(g.hero.attributes).every(x=>x===1));assert.equal(g.stats().damage,18);
+});
+test('one free point and gold per skeleton, never double rewards',()=>{
+ const g=game(),e=g.enemies[0];g.kill(e);assert.equal(g.hero.points,1);assert.equal(g.hero.gold,10);g.kill(e);assert.equal(g.hero.points,1);
+});
+test('distribution costs points, affects combat, respects cap',()=>{
+ const g=game();assert(!g.invest('strength'));g.hero.points=2;assert(g.invest('strength'));assert.equal(g.stats().damage,20);assert.equal(g.hero.points,1);assert(!g.invest('unknown'));g.hero.attributes.strength=100;assert(!g.invest('strength'));assert.equal(g.hero.points,1);assert(g.invest('vitality'));assert.equal(g.stats().maxHp,146);assert.equal(g.hero.hp,146);
+});
+test('gear odds unchanged; potion odds rise by 10%; chests never empty or repeat',()=>{
+ for(let room=1;room<=5;room++){
+  const g=game();g.room=room;g.spawnRoom();const p=g.chances();assert.equal(p.gear,room*5/100);assert.equal(p.potion,(15+(room-1)*10)/100);
+  for(const [roll,kind] of [[0,'gear'],[p.gear,'potion'],[p.gear+p.potion,'gold'],[.999,'gold']]){
+   g.bag=[];g.chests[0].open=false;g.random=()=>roll;const before=g.hero.gold;assert(open(g));
+   if(kind==='gold')assert(g.hero.gold>before);else {assert.equal(g.bag[0].kind,kind);if(kind==='potion')assert.equal(g.bag[0].power,room);}
+   assert(g.equipped.every(i=>!i));const count=g.bag.length,gold=g.hero.gold;assert(!open(g));assert.equal(g.bag.length,count);assert.equal(g.hero.gold,gold);
+  }
+ }
+});
+test('range, pause and death prevent chest rewards',()=>{const g=game();assert(!g.openChest());g.paused=true;assert(!open(g));g.paused=false;g.mode='dead';assert(!open(g));});
+test('manual equip, unequip and same-slot replacement preserve items',()=>{
+ const g=game(0);open(g);const item=g.bag[0];assert(!g.equipped[item.slot]);assert(g.equip(item.id));assert.equal(g.bag.length,0);const upgrade=g.gear(item.slot,2);g.bag.push(upgrade);assert(g.equip(upgrade.id));assert.equal(g.equipped[item.slot].id,upgrade.id);assert.equal(g.bag[0].id,item.id);assert(g.unequip(item.slot));assert.equal(g.bag.length,2);assert(!g.equip(-1));
+});
+test('four potion types require use, add scaled attributes and consume once',()=>{
+ for(const key of Object.keys(ATTRS)){const g=game(),p=g.potion(key,4);g.bag.push(p);g.hero.hp=50;g.hero.stamina=0;assert.equal(g.hero.attributes[key],1);assert(g.drink(p.id));assert.equal(g.hero.attributes[key],5);assert(!g.drink(p.id));assert.equal(g.bag.length,0);if(key==='vitality')assert(g.hero.hp>74);if(key==='energy')assert.equal(g.hero.stamina,g.stats().maxEnergy);}
+});
+test('potion cap retains excess points',()=>{const g=game(),p=g.potion('strength',5);g.hero.attributes.strength=99;g.bag.push(p);g.drink(p.id);assert.equal(g.hero.attributes.strength,100);assert.equal(g.bag[0].power,4);assert(!g.drink(p.id));});
+test('survival without collar: reduced damage, crowd immunity, regeneration',()=>{
+ const g=game();g.hero.inv=0;g.hurt();const hp=g.hero.hp;assert.equal(hp,129);g.hurt();assert.equal(g.hero.hp,hp);g.enemies=[];g.shots=[];g.hero.x=54;for(let i=0;i<200;i++)g.tick(.02);assert(g.hero.hp>hp);assert(g.hero.hp<=g.stats().maxHp);
+});
+test('dash consumes energy and gives brief invulnerability',()=>{const g=game();assert(g.dash());assert.equal(g.hero.stamina,32);assert(!g.dash());g.hero.stamina=0;g.dashCooldown=0;assert(!g.dash());});
+test('full run: four combat rooms, fifth shop, eighteen points, persistent inventory',()=>{
+ const g=game(.99);g.bag.push(g.potion('energy',3));const saved=g.bag[0].id;
+ for(let room=1;room<=4;room++){assert.equal(g.room,room);assert.equal(g.enemies.length,room+2);let n=0;while(g.enemies.length&&n++<30){g.hero.inv=100;for(const e of g.enemies){e.x=g.hero.x+20;e.y=g.hero.y;e.fire=100;}g.hero.face=0;g.strike();g.tick(.41);}assert.equal(g.enemies.length,0);assert(g.advance());assert(g.bag.some(i=>i.id===saved));}
+ assert.equal(g.mode,'shop');assert.equal(g.room,5);assert.equal(g.kills,18);assert.equal(g.hero.points,18);assert.equal(g.hero.hp,g.stats().maxHp);
+});
+test('shop random unique stock, no rerolls, checked funds, manual equip',()=>{
+ const g=game(.2);g.enterShop();assert.equal(g.stock.length,6);assert.equal(new Set(g.stock.map(i=>i.slot)).size,6);const ids=g.stock.map(i=>i.id);g.enterShop();assert.deepEqual(g.stock.map(i=>i.id),ids);const item=g.stock[0];assert(!g.buy(item.id));g.hero.gold=item.price;assert(g.buy(item.id));assert.equal(g.hero.gold,0);assert(g.bag.some(i=>i.id===item.id));assert(g.equipped.every(i=>!i));assert(!g.buy(item.id));for(let i=0;i<3;i++){assert(g.openChest(i));assert(!g.openChest(i));}
+});
+test('dragon telegraphs ground attack; death yields luxury chest and one reward',()=>{
+ const g=game();g.enterShop();g.enterBoss();assert.equal(g.boss.hp,650);g.boss.timer=.01;g.tick(.02);assert.equal(g.hazards.length,1);assert(g.hazards[0].timer>0);g.hero.x=40;g.hero.y=40;g.hero.inv=0;g.tick(1.01);assert.equal(g.hazards[0].fired,true);assert.equal(g.hero.hp,140);g.hero.x=g.boss.x-50;g.hero.y=g.boss.y;g.hero.face=0;g.boss.hp=1;g.cooldown=0;g.strike();assert.equal(g.mode,'reward');assert(g.chests[0].luxury);const before=g.hero.gold;assert(open(g));assert.equal(g.mode,'won');assert.equal(g.hero.gold,before+200);assert.equal(g.bag.filter(i=>i.kind==='potion').length,4);assert(g.bag.some(i=>i.rank===3));assert(!open(g));
+});
+test('pause freezes movement; restart clears progression and shop',()=>{
+ const g=game();g.paused=true;const x=g.hero.x;g.tick(1,{right:true,hit:true});assert.equal(g.hero.x,x);g.hero.points=12;g.hero.gold=100;g.reset();assert.equal(g.hero.points,0);assert.equal(g.hero.gold,0);assert.equal(g.boss,null);assert.equal(g.stock.length,0);
+});
+console.log(checks+' rule and progression tests passed.');
