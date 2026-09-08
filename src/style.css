@@ -47,3 +47,32 @@
 #ember-dungeon .ek-shop-actions{justify-content:space-between}#ember-dungeon .ek-shop-heading p{color:var(--ek-muted);margin-top:8px}
 @media(max-width:760px){#ember-dungeon{padding:12px}#ember-dungeon .ek-character-grid{grid-template-columns:1fr}#ember-dungeon .ek-attributes{padding:0 0 20px;border:0}#ember-dungeon .ek-loadout{padding:18px 0 0;border-top:1px solid var(--ek-line)}#ember-dungeon #ek-shop-stock{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:420px){#ember-dungeon #ek-slots{grid-template-columns:1fr}#ember-dungeon #ek-character,#ember-dungeon #ek-shop{padding:10px}#ember-dungeon #ek-shop-stock{grid-template-columns:1fr}#ember-dungeon h2{font-size:19px}}
+
+/* Engraved grimoire, tarnished brass and charcoal velvet. */
+#ember-dungeon{--ek-bg:#111317;--ek-surface:#1a1b20;--ek-line:#514737;--ek-text:#e8dcc5;--ek-muted:#b9ae9b;--ek-gold:#d6b981;background:radial-gradient(ellipse at top,#302a28,#111317 70%);border:1px solid #65533c;box-shadow:inset 0 0 0 5px #131418}
+#ember-dungeon h2,#ember-dungeon h3{font-family:Georgia,serif;letter-spacing:.4px}
+#ember-dungeon h2{font-size:27px}#ember-dungeon .ek-header{padding:8px 8px 16px;border-bottom:1px solid #67553c}
+#ember-dungeon button{background:linear-gradient(#35312e,#242326);border-color:#6b5840;border-radius:2px;box-shadow:inset 0 1px #c4aa6920}
+#ember-dungeon .ek-primary{background:linear-gradient(#e0c394,#af8c58);color:#211c19}
+#ember-dungeon #ek-canvas{border-radius:3px;border:3px solid #736044}
+#ember-dungeon #ek-character{background:repeating-linear-gradient(7deg,#ffffff02 0 1px,transparent 1px 5px),radial-gradient(ellipse at top left,#36302b,#181a20 70%);border:1px solid #77603d;box-shadow:inset 0 0 0 4px #14171b,inset 0 0 70px #0008;padding:22px}
+#ember-dungeon .ek-panel-top{border-bottom:3px double #76603f}
+#ember-dungeon #ek-portrait{width:100%;height:auto;display:block;border:1px solid #8a7047;box-shadow:0 5px 20px #0007;margin-bottom:8px}
+#ember-dungeon #ek-identity{text-align:center;color:var(--ek-gold);font:12px Georgia,serif;margin:8px 0 18px}
+#ember-dungeon .ek-slot{position:relative;background:radial-gradient(ellipse at 50% 20%,#46403a,#1b1e25 80%);border:1px solid #686052;box-shadow:inset 0 0 0 3px #17191e;align-items:center;text-align:center;padding:10px 7px}
+#ember-dungeon .ek-slot[data-rank="2"]{border-color:#ad8b52}#ember-dungeon .ek-slot[data-rank="3"]{border-color:#c0a1dc;background:radial-gradient(ellipse at top,#58465c,#191c23)}
+#ember-dungeon .ek-slot .ek-icon{width:48px;height:48px;filter:drop-shadow(0 4px 4px #0009)}
+#ember-dungeon .ek-item-detail{font-size:11px;color:#c8bba5}
+#ember-dungeon .ek-stat{background:linear-gradient(90deg,#ffffff04,transparent);padding:13px 8px}
+#ember-dungeon .ek-derived{padding:12px;border-top:3px double #69573e;border-bottom:3px double #69573e;color:#d6c6ac}
+#ember-dungeon .ek-bag-item{background:radial-gradient(ellipse at top,#393338,#181b22);border-color:#575047;box-shadow:inset 0 0 0 2px #11151b}
+#ember-dungeon #ek-awakening{text-align:center;padding:35px 20px;background:radial-gradient(ellipse at top,#413645,#151820 75%);border:1px solid #796447}
+#ember-dungeon #ek-awakening h2{font-size:34px;margin:12px 0}#ember-dungeon #ek-destiny{margin:24px auto 0;max-width:800px}
+#ember-dungeon #ek-destiny label{display:block;color:#dcc69b;margin-bottom:9px}
+#ember-dungeon #ek-name{display:block;width:min(100%,360px);margin:0 auto 24px;padding:12px;background:#10141b;border:1px solid #9a7f57;color:#f0e3cd;font:18px Georgia,serif;text-align:center}
+#ember-dungeon #ek-classes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:25px}
+#ember-dungeon #ek-classes button{display:flex;flex-direction:column;align-items:center;gap:12px;padding:20px 10px;border-color:#605447}
+#ember-dungeon #ek-classes button[aria-pressed="true"]{border-color:var(--class-color);box-shadow:inset 0 0 35px #a799c322,0 0 15px #a799c318}
+#ember-dungeon #ek-classes strong{font:23px Georgia,serif;color:var(--class-color)}#ember-dungeon .ek-class-sigil{font:52px Georgia,serif;color:var(--class-color);text-shadow:0 0 25px var(--class-color)}
+#ember-dungeon #ek-classes small{color:#c1b29c}#ember-dungeon #ek-name-error{color:#f3a39c;margin:12px}
+@media(max-width:520px){#ember-dungeon #ek-classes{grid-template-columns:1fr}#ember-dungeon #ek-classes button{padding:15px}#ember-dungeon #ek-character{padding:12px}#ember-dungeon h2{font-size:23px}}

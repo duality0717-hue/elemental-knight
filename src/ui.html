@@ -1,13 +1,13 @@
 <div id="ember-dungeon">
-  <header class="ek-header"><div><span class="ek-eyebrow">ELEMENTAL KNIGHT</span><h2>La Cripta de Brasas</h2></div><span class="ek-version">v0.4.1 · Curación en combate</span></header>
+  <header class="ek-header"><div><span class="ek-eyebrow">ELEMENTAL KNIGHT</span><h2>La Cripta de Brasas</h2></div><span class="ek-version">v0.5.0 · El espejo de ceniza</span></header>
   <div class="ek-hud"><span id="ek-life"></span><span id="ek-energy"></span><span id="ek-gold"></span><span id="ek-points"></span><span id="ek-room"></span></div>
-  <div id="ek-world"><canvas id="ek-canvas" width="1440" height="816" aria-label="Mazmorra de dibujos animados. Aventurero, esqueletos de fuego y dragón de tierra."></canvas></div>
+  <div id="ek-world"><canvas id="ek-canvas" width="1440" height="816" aria-label="Mazmorra de dibujos animados. Aventurero, esqueletos de fuego y tu propia sombra."></canvas></div>
   <section id="ek-character" hidden aria-label="Atributos, equipo y mochila">
-    <div class="ek-panel-top"><strong>PERSONAJE</strong><button type="button" id="ek-close">Cerrar · Enter</button></div>
+    <div class="ek-panel-top"><div><span class="ek-eyebrow">EL GRIMORIO DEL VIAJERO</span><h2>Tu alma, tu arsenal</h2></div><button type="button" id="ek-close">Cerrar · Enter</button></div>
     <div class="ek-character-grid">
       <section class="ek-attributes"><h3>Atributos</h3><p id="ek-available"></p><div id="ek-stat-list"></div><div class="ek-derived" id="ek-derived"></div><p class="ek-muted">Cada esqueleto: +1 punto libre. Las pociones suman a su atributo. Máximo: 100.</p></section>
       <div class="ek-loadout">
-        <section class="ek-build"><h3>Set equipado <span id="ek-count"></span></h3><div id="ek-slots"></div><p class="ek-muted" id="ek-bonuses"></p></section>
+        <section class="ek-build"><canvas id="ek-portrait" aria-label="Retrato del personaje con su equipo"></canvas><p id="ek-identity"></p><h3>Set equipado <span id="ek-count"></span></h3><div id="ek-slots"></div><p class="ek-muted" id="ek-bonuses"></p></section>
         <section class="ek-backpack"><h3>Mochila <span id="ek-bag-count"></span></h3><p class="ek-muted">Clic: equipar pieza o beber poción.</p><div id="ek-inventory"></div></section>
       </div>
     </div>
@@ -15,7 +15,11 @@
   <section id="ek-shop" hidden aria-label="Tienda de la quinta sala">
     <div class="ek-shop-heading"><span class="ek-eyebrow">SALA 05 · ZONA SEGURA</span><h2>El último mercader</h2><p>Vida y energía restauradas. Las compras van a la mochila: equipalas antes del jefe.</p></div>
     <div id="ek-shop-stock"></div><div class="ek-shop-chests" id="ek-shop-chests"></div>
-    <div class="ek-shop-actions"><button type="button" id="ek-shop-build">Preparar mi build · Enter</button><button type="button" class="ek-primary" id="ek-enter-boss">Entrar al refugio del dragón →</button></div>
+    <div class="ek-shop-actions"><button type="button" id="ek-shop-build">Preparar mi build · Enter</button><button type="button" class="ek-primary" id="ek-enter-boss">Enfrentar a mi sombra →</button></div>
+  </section>
+  <section id="ek-awakening" hidden aria-label="Elegir nombre y especialización">
+    <span class="ek-eyebrow">LA SOMBRA HA CAÍDO</span><h2>Ahora, elegí quién sos.</h2><p>De las cenizas de tu reflejo nacen tres caminos.</p>
+    <form id="ek-destiny"><label for="ek-name">El nombre de tu personaje</label><input id="ek-name" maxlength="20" required placeholder="Escribí tu nombre" autocomplete="off"><div id="ek-classes"></div><p id="ek-name-error" role="alert"></p><button class="ek-primary" type="submit">Sellar mi destino →</button></form>
   </section>
   <div class="ek-actions"><button type="button" class="ek-primary" id="ek-start">Entrar a la cripta</button><button type="button" id="ek-attack">Atacar · Espacio</button><button type="button" id="ek-open">Cofre · E</button><button type="button" id="ek-dash">Esquivar · Shift</button><button type="button" id="ek-panel" aria-expanded="false">Personaje · Enter</button><button type="button" id="ek-pause">Pausa</button></div>
   <div class="ek-controls"><div class="ek-pad"><button type="button" data-dir="left" aria-label="Izquierda">←</button><button type="button" data-dir="up" aria-label="Arriba">↑</button><button type="button" data-dir="down" aria-label="Abajo">↓</button><button type="button" data-dir="right" aria-label="Derecha">→</button></div><span>WASD / flechas · Espacio: atacar · Shift: esquivar</span></div>

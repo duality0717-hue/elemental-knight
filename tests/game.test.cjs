@@ -43,8 +43,8 @@ test('full run: four combat rooms, fifth shop, eighteen points, persistent inven
 test('shop random unique stock, no rerolls, checked funds, manual equip',()=>{
  const g=game(.2);g.enterShop();assert.equal(g.stock.length,6);assert.equal(new Set(g.stock.map(i=>i.slot)).size,6);const ids=g.stock.map(i=>i.id);g.enterShop();assert.deepEqual(g.stock.map(i=>i.id),ids);const item=g.stock[0];assert(!g.buy(item.id));g.hero.gold=item.price;assert(g.buy(item.id));assert.equal(g.hero.gold,0);assert(g.bag.some(i=>i.id===item.id));assert(g.equipped.every(i=>!i));assert(!g.buy(item.id));for(let i=0;i<3;i++){assert(g.openChest(i));assert(!g.openChest(i));}
 });
-test('dragon telegraphs ground attack; death yields luxury chest and one reward',()=>{
- const g=game();g.enterShop();g.enterBoss();assert.equal(g.boss.hp,650);g.boss.timer=.01;g.tick(.02);assert.equal(g.hazards.length,1);assert(g.hazards[0].timer>0);g.hero.x=40;g.hero.y=40;g.hero.inv=0;g.tick(1.01);assert.equal(g.hazards[0].fired,true);assert.equal(g.hero.hp,100);g.hero.x=g.boss.x-50;g.hero.y=g.boss.y;g.hero.face=0;g.boss.hp=1;g.cooldown=0;g.strike();assert.equal(g.mode,'reward');assert(g.chests[0].luxury);const before=g.hero.gold;assert(open(g));assert.equal(g.mode,'won');assert.equal(g.hero.gold,before+200);assert.equal(g.bag.filter(i=>i.kind==='potion').length,4);assert(g.bag.some(i=>i.rank===3));assert(!open(g));
+test('shadow telegraphs ground attack; death yields luxury chest and one reward',()=>{
+ const g=game();g.enterShop();g.enterBoss();assert.equal(g.boss.hp,650);g.boss.cycle=1;g.boss.timer=.01;g.tick(.02);assert.equal(g.hazards.length,1);assert(g.hazards[0].timer>0);g.hero.x=40;g.hero.y=40;g.hero.inv=0;g.tick(1.01);assert.equal(g.hazards[0].fired,true);assert.equal(g.hero.hp,100);g.hero.x=g.boss.x-35;g.hero.y=g.boss.y;g.hero.face=0;g.boss.hp=1;g.cooldown=0;g.strike();assert.equal(g.mode,'awakening');assert(!g.specialize('', 'mage'));assert(g.specialize('Crist', 'mage'));assert.equal(g.hero.attributes.energy,6);assert(!g.specialize('Again','warrior'));assert.equal(g.mode,'reward');assert(g.chests[0].luxury);const before=g.hero.gold;assert(open(g));assert.equal(g.mode,'won');assert.equal(g.hero.gold,before+200);assert.equal(g.bag.filter(i=>i.kind==='potion').length,4);assert(g.bag.some(i=>i.rank===3));assert(!open(g));
 });
 test('pause freezes movement; restart clears progression and shop',()=>{
  const g=game();g.paused=true;const x=g.hero.x;g.tick(1,{right:true,hit:true});assert.equal(g.hero.x,x);g.hero.points=12;g.hero.gold=100;g.reset();assert.equal(g.hero.points,0);assert.equal(g.hero.gold,0);assert.equal(g.boss,null);assert.equal(g.stock.length,0);
@@ -65,7 +65,19 @@ test('healing grows with attributes and level, but is capped by actual damage',(
  g.hero.attributes.vitality=10;g.hero.attributes.strength=10;g.hero.attributes.agility=10;assert(g.stats().lifeOnHit>.7);
  g.hero.hp=50;g.enemies[0].hp=1;g.enemies[0].x=g.hero.x+20;g.enemies[0].y=g.hero.y;g.hero.face=0;g.strike();assert(Math.abs(g.hero.hp-50.08)<1e-9);
 });
-test('successful attacks also restore health against the dragon',()=>{
- const g=game();g.enterShop();g.enterBoss();g.hero.hp=50;g.hero.x=g.boss.x-50;g.hero.y=g.boss.y;g.hero.face=0;g.strike();assert(Math.abs(g.hero.hp-50.6)<1e-9);
+test('successful attacks also restore health against the shadow',()=>{
+ const g=game();g.enterShop();g.enterBoss();g.hero.hp=50;g.hero.x=g.boss.x-35;g.hero.y=g.boss.y;g.hero.face=0;g.strike();assert(Math.abs(g.hero.hp-50.6)<1e-9);
+});
+test('room three replaces one caster with a stronger sword elite',()=>{
+ const g=game();g.room=3;g.spawnRoom();assert.equal(g.enemies.length,5);const elites=g.enemies.filter(e=>e.kind==='elite');assert.equal(elites.length,1);const e=elites[0];assert.equal(e.hp,130);g.hero.x=e.x-30;g.hero.y=e.y;g.hero.inv=0;g.eliteTick(e,.01);assert.equal(e.phase,'windup');assert.equal(g.hero.hp,100);g.eliteTick(e,.76);assert.equal(g.hero.hp,78);assert.equal(g.shots.length,0);
+});
+test('shadow casts ice, arrows and a directional heavy sword',()=>{
+ const g=game();g.enterShop();g.enterBoss();g.boss.timer=0;g.bossTick(.01);assert.equal(g.boss.style,'mage');g.bossTick(1.01);assert.equal(g.shots.length,5);assert(g.shots.every(p=>p.type==='ice'));
+ g.boss.timer=0;g.bossTick(.01);assert.equal(g.boss.style,'rogue');assert.equal(g.hazards[0].type,'arrows');g.bossTick(1.01);
+ g.boss.timer=0;g.bossTick(.01);assert.equal(g.boss.style,'warrior');const h=g.hazards.find(h=>h.type==='sword');assert(h);g.hero.x=h.x+Math.cos(h.angle)*30;g.hero.y=h.y+Math.sin(h.angle)*30;g.hero.inv=0;const before=g.hero.hp;g.bossTick(1.01);assert.equal(g.hero.hp,before-28);
+});
+test('ice slows only on damage; identity requires victory and survives reward',()=>{
+ const g=game();assert(!g.specialize('Crist','mage'));g.hero.inv=0;g.shots=[{x:g.hero.x,y:g.hero.y,vx:0,vy:0,type:'ice',life:1}];g.tick(.01);assert.equal(g.hero.hp,88);assert.equal(g.hero.slow,1.2);
+ g.mode='awakening';assert(!g.specialize('x'.repeat(21),'warrior'));assert(!g.specialize('Crist','invalid'));assert(g.specialize('  Crist  ','rogue'));assert.equal(g.hero.name,'Crist');assert.equal(g.hero.attributes.agility,6);
 });
 console.log(checks+' rule and progression tests passed.');

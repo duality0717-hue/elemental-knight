@@ -5,7 +5,9 @@ const source=fs.readFileSync(path.join(base,'game.html'),'utf8');
 const states={
  character:"game.reset(); game.hero.points=12; game.hero.gold=180; for(let i=0;i<8;i++)game.bag.push(game.gear(i)); for(const key of Object.keys(ATTRS))game.bag.push(game.potion(key,3)); game.equip(game.bag[0].id); game.equip(game.bag.find(i=>i.kind==='gear'&&i.slot===4).id);",
  shop:"game.reset(); game.hero.gold=310; game.enterShop();",
- boss:"game.reset(); game.enterShop(); game.enterBoss(); game.paused=true;"
+ boss:"game.reset(); game.enterShop(); game.enterBoss(); game.paused=true;",
+ awakening:"game.reset(); game.enterShop(); game.enterBoss(); game.boss.hp=0; game.mode='awakening';",
+ elite:"game.reset(); game.room=3; game.spawnRoom(); game.paused=true;"
 };
 for(const [name,setup] of Object.entries(states)){
  let html=source.replace('const canvas =',setup+'\n  const canvas =');

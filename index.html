@@ -1036,15 +1036,15 @@ html&gt;body{padding:0}&lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
 &lt;div id=&quot;ember-dungeon&quot;&gt;
-  &lt;header class=&quot;ek-header&quot;&gt;&lt;div&gt;&lt;span class=&quot;ek-eyebrow&quot;&gt;ELEMENTAL KNIGHT&lt;/span&gt;&lt;h2&gt;La Cripta de Brasas&lt;/h2&gt;&lt;/div&gt;&lt;span class=&quot;ek-version&quot;&gt;v0.4.1 · Curación en combate&lt;/span&gt;&lt;/header&gt;
+  &lt;header class=&quot;ek-header&quot;&gt;&lt;div&gt;&lt;span class=&quot;ek-eyebrow&quot;&gt;ELEMENTAL KNIGHT&lt;/span&gt;&lt;h2&gt;La Cripta de Brasas&lt;/h2&gt;&lt;/div&gt;&lt;span class=&quot;ek-version&quot;&gt;v0.5.0 · El espejo de ceniza&lt;/span&gt;&lt;/header&gt;
   &lt;div class=&quot;ek-hud&quot;&gt;&lt;span id=&quot;ek-life&quot;&gt;&lt;/span&gt;&lt;span id=&quot;ek-energy&quot;&gt;&lt;/span&gt;&lt;span id=&quot;ek-gold&quot;&gt;&lt;/span&gt;&lt;span id=&quot;ek-points&quot;&gt;&lt;/span&gt;&lt;span id=&quot;ek-room&quot;&gt;&lt;/span&gt;&lt;/div&gt;
-  &lt;div id=&quot;ek-world&quot;&gt;&lt;canvas id=&quot;ek-canvas&quot; width=&quot;1440&quot; height=&quot;816&quot; aria-label=&quot;Mazmorra de dibujos animados. Aventurero, esqueletos de fuego y dragón de tierra.&quot;&gt;&lt;/canvas&gt;&lt;/div&gt;
+  &lt;div id=&quot;ek-world&quot;&gt;&lt;canvas id=&quot;ek-canvas&quot; width=&quot;1440&quot; height=&quot;816&quot; aria-label=&quot;Mazmorra de dibujos animados. Aventurero, esqueletos de fuego y tu propia sombra.&quot;&gt;&lt;/canvas&gt;&lt;/div&gt;
   &lt;section id=&quot;ek-character&quot; hidden aria-label=&quot;Atributos, equipo y mochila&quot;&gt;
-    &lt;div class=&quot;ek-panel-top&quot;&gt;&lt;strong&gt;PERSONAJE&lt;/strong&gt;&lt;button type=&quot;button&quot; id=&quot;ek-close&quot;&gt;Cerrar · Enter&lt;/button&gt;&lt;/div&gt;
+    &lt;div class=&quot;ek-panel-top&quot;&gt;&lt;div&gt;&lt;span class=&quot;ek-eyebrow&quot;&gt;EL GRIMORIO DEL VIAJERO&lt;/span&gt;&lt;h2&gt;Tu alma, tu arsenal&lt;/h2&gt;&lt;/div&gt;&lt;button type=&quot;button&quot; id=&quot;ek-close&quot;&gt;Cerrar · Enter&lt;/button&gt;&lt;/div&gt;
     &lt;div class=&quot;ek-character-grid&quot;&gt;
       &lt;section class=&quot;ek-attributes&quot;&gt;&lt;h3&gt;Atributos&lt;/h3&gt;&lt;p id=&quot;ek-available&quot;&gt;&lt;/p&gt;&lt;div id=&quot;ek-stat-list&quot;&gt;&lt;/div&gt;&lt;div class=&quot;ek-derived&quot; id=&quot;ek-derived&quot;&gt;&lt;/div&gt;&lt;p class=&quot;ek-muted&quot;&gt;Cada esqueleto: +1 punto libre. Las pociones suman a su atributo. Máximo: 100.&lt;/p&gt;&lt;/section&gt;
       &lt;div class=&quot;ek-loadout&quot;&gt;
-        &lt;section class=&quot;ek-build&quot;&gt;&lt;h3&gt;Set equipado &lt;span id=&quot;ek-count&quot;&gt;&lt;/span&gt;&lt;/h3&gt;&lt;div id=&quot;ek-slots&quot;&gt;&lt;/div&gt;&lt;p class=&quot;ek-muted&quot; id=&quot;ek-bonuses&quot;&gt;&lt;/p&gt;&lt;/section&gt;
+        &lt;section class=&quot;ek-build&quot;&gt;&lt;canvas id=&quot;ek-portrait&quot; aria-label=&quot;Retrato del personaje con su equipo&quot;&gt;&lt;/canvas&gt;&lt;p id=&quot;ek-identity&quot;&gt;&lt;/p&gt;&lt;h3&gt;Set equipado &lt;span id=&quot;ek-count&quot;&gt;&lt;/span&gt;&lt;/h3&gt;&lt;div id=&quot;ek-slots&quot;&gt;&lt;/div&gt;&lt;p class=&quot;ek-muted&quot; id=&quot;ek-bonuses&quot;&gt;&lt;/p&gt;&lt;/section&gt;
         &lt;section class=&quot;ek-backpack&quot;&gt;&lt;h3&gt;Mochila &lt;span id=&quot;ek-bag-count&quot;&gt;&lt;/span&gt;&lt;/h3&gt;&lt;p class=&quot;ek-muted&quot;&gt;Clic: equipar pieza o beber poción.&lt;/p&gt;&lt;div id=&quot;ek-inventory&quot;&gt;&lt;/div&gt;&lt;/section&gt;
       &lt;/div&gt;
     &lt;/div&gt;
@@ -1052,7 +1052,11 @@ html&gt;body{padding:0}&lt;/style&gt;
   &lt;section id=&quot;ek-shop&quot; hidden aria-label=&quot;Tienda de la quinta sala&quot;&gt;
     &lt;div class=&quot;ek-shop-heading&quot;&gt;&lt;span class=&quot;ek-eyebrow&quot;&gt;SALA 05 · ZONA SEGURA&lt;/span&gt;&lt;h2&gt;El último mercader&lt;/h2&gt;&lt;p&gt;Vida y energía restauradas. Las compras van a la mochila: equipalas antes del jefe.&lt;/p&gt;&lt;/div&gt;
     &lt;div id=&quot;ek-shop-stock&quot;&gt;&lt;/div&gt;&lt;div class=&quot;ek-shop-chests&quot; id=&quot;ek-shop-chests&quot;&gt;&lt;/div&gt;
-    &lt;div class=&quot;ek-shop-actions&quot;&gt;&lt;button type=&quot;button&quot; id=&quot;ek-shop-build&quot;&gt;Preparar mi build · Enter&lt;/button&gt;&lt;button type=&quot;button&quot; class=&quot;ek-primary&quot; id=&quot;ek-enter-boss&quot;&gt;Entrar al refugio del dragón →&lt;/button&gt;&lt;/div&gt;
+    &lt;div class=&quot;ek-shop-actions&quot;&gt;&lt;button type=&quot;button&quot; id=&quot;ek-shop-build&quot;&gt;Preparar mi build · Enter&lt;/button&gt;&lt;button type=&quot;button&quot; class=&quot;ek-primary&quot; id=&quot;ek-enter-boss&quot;&gt;Enfrentar a mi sombra →&lt;/button&gt;&lt;/div&gt;
+  &lt;/section&gt;
+  &lt;section id=&quot;ek-awakening&quot; hidden aria-label=&quot;Elegir nombre y especialización&quot;&gt;
+    &lt;span class=&quot;ek-eyebrow&quot;&gt;LA SOMBRA HA CAÍDO&lt;/span&gt;&lt;h2&gt;Ahora, elegí quién sos.&lt;/h2&gt;&lt;p&gt;De las cenizas de tu reflejo nacen tres caminos.&lt;/p&gt;
+    &lt;form id=&quot;ek-destiny&quot;&gt;&lt;label for=&quot;ek-name&quot;&gt;El nombre de tu personaje&lt;/label&gt;&lt;input id=&quot;ek-name&quot; maxlength=&quot;20&quot; required placeholder=&quot;Escribí tu nombre&quot; autocomplete=&quot;off&quot;&gt;&lt;div id=&quot;ek-classes&quot;&gt;&lt;/div&gt;&lt;p id=&quot;ek-name-error&quot; role=&quot;alert&quot;&gt;&lt;/p&gt;&lt;button class=&quot;ek-primary&quot; type=&quot;submit&quot;&gt;Sellar mi destino →&lt;/button&gt;&lt;/form&gt;
   &lt;/section&gt;
   &lt;div class=&quot;ek-actions&quot;&gt;&lt;button type=&quot;button&quot; class=&quot;ek-primary&quot; id=&quot;ek-start&quot;&gt;Entrar a la cripta&lt;/button&gt;&lt;button type=&quot;button&quot; id=&quot;ek-attack&quot;&gt;Atacar · Espacio&lt;/button&gt;&lt;button type=&quot;button&quot; id=&quot;ek-open&quot;&gt;Cofre · E&lt;/button&gt;&lt;button type=&quot;button&quot; id=&quot;ek-dash&quot;&gt;Esquivar · Shift&lt;/button&gt;&lt;button type=&quot;button&quot; id=&quot;ek-panel&quot; aria-expanded=&quot;false&quot;&gt;Personaje · Enter&lt;/button&gt;&lt;button type=&quot;button&quot; id=&quot;ek-pause&quot;&gt;Pausa&lt;/button&gt;&lt;/div&gt;
   &lt;div class=&quot;ek-controls&quot;&gt;&lt;div class=&quot;ek-pad&quot;&gt;&lt;button type=&quot;button&quot; data-dir=&quot;left&quot; aria-label=&quot;Izquierda&quot;&gt;←&lt;/button&gt;&lt;button type=&quot;button&quot; data-dir=&quot;up&quot; aria-label=&quot;Arriba&quot;&gt;↑&lt;/button&gt;&lt;button type=&quot;button&quot; data-dir=&quot;down&quot; aria-label=&quot;Abajo&quot;&gt;↓&lt;/button&gt;&lt;button type=&quot;button&quot; data-dir=&quot;right&quot; aria-label=&quot;Derecha&quot;&gt;→&lt;/button&gt;&lt;/div&gt;&lt;span&gt;WASD / flechas · Espacio: atacar · Shift: esquivar&lt;/span&gt;&lt;/div&gt;
@@ -1110,6 +1114,35 @@ html&gt;body{padding:0}&lt;/style&gt;
 @media(max-width:760px){#ember-dungeon{padding:12px}#ember-dungeon .ek-character-grid{grid-template-columns:1fr}#ember-dungeon .ek-attributes{padding:0 0 20px;border:0}#ember-dungeon .ek-loadout{padding:18px 0 0;border-top:1px solid var(--ek-line)}#ember-dungeon #ek-shop-stock{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:420px){#ember-dungeon #ek-slots{grid-template-columns:1fr}#ember-dungeon #ek-character,#ember-dungeon #ek-shop{padding:10px}#ember-dungeon #ek-shop-stock{grid-template-columns:1fr}#ember-dungeon h2{font-size:19px}}
 
+/* Engraved grimoire, tarnished brass and charcoal velvet. */
+#ember-dungeon{--ek-bg:#111317;--ek-surface:#1a1b20;--ek-line:#514737;--ek-text:#e8dcc5;--ek-muted:#b9ae9b;--ek-gold:#d6b981;background:radial-gradient(ellipse at top,#302a28,#111317 70%);border:1px solid #65533c;box-shadow:inset 0 0 0 5px #131418}
+#ember-dungeon h2,#ember-dungeon h3{font-family:Georgia,serif;letter-spacing:.4px}
+#ember-dungeon h2{font-size:27px}#ember-dungeon .ek-header{padding:8px 8px 16px;border-bottom:1px solid #67553c}
+#ember-dungeon button{background:linear-gradient(#35312e,#242326);border-color:#6b5840;border-radius:2px;box-shadow:inset 0 1px #c4aa6920}
+#ember-dungeon .ek-primary{background:linear-gradient(#e0c394,#af8c58);color:#211c19}
+#ember-dungeon #ek-canvas{border-radius:3px;border:3px solid #736044}
+#ember-dungeon #ek-character{background:repeating-linear-gradient(7deg,#ffffff02 0 1px,transparent 1px 5px),radial-gradient(ellipse at top left,#36302b,#181a20 70%);border:1px solid #77603d;box-shadow:inset 0 0 0 4px #14171b,inset 0 0 70px #0008;padding:22px}
+#ember-dungeon .ek-panel-top{border-bottom:3px double #76603f}
+#ember-dungeon #ek-portrait{width:100%;height:auto;display:block;border:1px solid #8a7047;box-shadow:0 5px 20px #0007;margin-bottom:8px}
+#ember-dungeon #ek-identity{text-align:center;color:var(--ek-gold);font:12px Georgia,serif;margin:8px 0 18px}
+#ember-dungeon .ek-slot{position:relative;background:radial-gradient(ellipse at 50% 20%,#46403a,#1b1e25 80%);border:1px solid #686052;box-shadow:inset 0 0 0 3px #17191e;align-items:center;text-align:center;padding:10px 7px}
+#ember-dungeon .ek-slot[data-rank=&quot;2&quot;]{border-color:#ad8b52}#ember-dungeon .ek-slot[data-rank=&quot;3&quot;]{border-color:#c0a1dc;background:radial-gradient(ellipse at top,#58465c,#191c23)}
+#ember-dungeon .ek-slot .ek-icon{width:48px;height:48px;filter:drop-shadow(0 4px 4px #0009)}
+#ember-dungeon .ek-item-detail{font-size:11px;color:#c8bba5}
+#ember-dungeon .ek-stat{background:linear-gradient(90deg,#ffffff04,transparent);padding:13px 8px}
+#ember-dungeon .ek-derived{padding:12px;border-top:3px double #69573e;border-bottom:3px double #69573e;color:#d6c6ac}
+#ember-dungeon .ek-bag-item{background:radial-gradient(ellipse at top,#393338,#181b22);border-color:#575047;box-shadow:inset 0 0 0 2px #11151b}
+#ember-dungeon #ek-awakening{text-align:center;padding:35px 20px;background:radial-gradient(ellipse at top,#413645,#151820 75%);border:1px solid #796447}
+#ember-dungeon #ek-awakening h2{font-size:34px;margin:12px 0}#ember-dungeon #ek-destiny{margin:24px auto 0;max-width:800px}
+#ember-dungeon #ek-destiny label{display:block;color:#dcc69b;margin-bottom:9px}
+#ember-dungeon #ek-name{display:block;width:min(100%,360px);margin:0 auto 24px;padding:12px;background:#10141b;border:1px solid #9a7f57;color:#f0e3cd;font:18px Georgia,serif;text-align:center}
+#ember-dungeon #ek-classes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:25px}
+#ember-dungeon #ek-classes button{display:flex;flex-direction:column;align-items:center;gap:12px;padding:20px 10px;border-color:#605447}
+#ember-dungeon #ek-classes button[aria-pressed=&quot;true&quot;]{border-color:var(--class-color);box-shadow:inset 0 0 35px #a799c322,0 0 15px #a799c318}
+#ember-dungeon #ek-classes strong{font:23px Georgia,serif;color:var(--class-color)}#ember-dungeon .ek-class-sigil{font:52px Georgia,serif;color:var(--class-color);text-shadow:0 0 25px var(--class-color)}
+#ember-dungeon #ek-classes small{color:#c1b29c}#ember-dungeon #ek-name-error{color:#f3a39c;margin:12px}
+@media(max-width:520px){#ember-dungeon #ek-classes{grid-template-columns:1fr}#ember-dungeon #ek-classes button{padding:15px}#ember-dungeon #ek-character{padding:12px}#ember-dungeon h2{font-size:23px}}
+
 &lt;/style&gt;
 &lt;script&gt;
 (function (scope) {
@@ -1131,13 +1164,18 @@ html&gt;body{padding:0}&lt;/style&gt;
     { slot: &#x27;Collar&#x27;, name: &#x27;Corazón de invierno&#x27;, group: &#x27;Artefactos&#x27;, detail: &#x27;Recupera vida por baja&#x27;, basePrice: 95 }
   ];
   const ROOMS = [&#x27;La entrada carbonizada&#x27;, &#x27;El osario&#x27;, &#x27;El santuario ardiente&#x27;, &#x27;Las forjas hundidas&#x27;, &#x27;El trono de ceniza&#x27;];
+  const CLASSES = {
+    mage: { name: &#x27;Mago&#x27;, attribute: &#x27;energy&#x27;, color: &#x27;#91d9ed&#x27;, title: &#x27;La voluntad del invierno&#x27;, detail: &#x27;+5 Energía · Dominio arcano&#x27; },
+    rogue: { name: &#x27;Rogue&#x27;, attribute: &#x27;agility&#x27;, color: &#x27;#c5a6ef&#x27;, title: &#x27;El filo del silencio&#x27;, detail: &#x27;+5 Agilidad · Precisión y velocidad&#x27; },
+    warrior: { name: &#x27;Guerrero&#x27;, attribute: &#x27;strength&#x27;, color: &#x27;#e6b17e&#x27;, title: &#x27;El juramento de hierro&#x27;, detail: &#x27;+5 Fuerza · Poder cuerpo a cuerpo&#x27; }
+  };
   const clamp = (n, lo, hi) =&gt; Math.max(lo, Math.min(hi, n));
   class Game {
     constructor(random = Math.random) { this.random = random; this.reset(); this.mode = &#x27;ready&#x27;; }
     reset() {
       this.nextId = 1; this.room = 1; this.kills = 0; this.mode = &#x27;play&#x27;; this.paused = false;
       this.time = 0; this.attack = 0; this.cooldown = 0; this.dashTime = 0; this.dashCooldown = 0;
-      this.hero = { x: 54, y: 136, face: 0, hp: 100, stamina: 52, gold: 0, points: 0, inv: 1.5,
+      this.hero = { x: 54, y: 136, face: 0, hp: 100, stamina: 52, gold: 0, points: 0, inv: 1.5, slow: 0, name: &#x27;&#x27;, specialization: null,
         attributes: { strength: 1, energy: 1, vitality: 1, agility: 1 } };
       this.bag = []; this.equipped = Array(8).fill(null); this.stock = []; this.boss = null;
       this.effects = []; this.notices = []; this.revision = 0; this.rewardClaimed = false;
@@ -1161,7 +1199,9 @@ html&gt;body{padding:0}&lt;/style&gt;
       this.shots = []; this.hazards = []; this.effects = []; this.notices = [];
       this.chests = [{ x: 70, y: 60 }, { x: 236, y: 218 }, { x: 412, y: 64 }].map(p =&gt; ({ ...p, open: false }));
       this.enemies = Array.from({ length: this.room + 2 }, (_, i) =&gt; ({ x: 240 + (i % 2) * 110, y: 55 + Math.floor(i / 2) * 52,
-        hp: 44 + this.room * 7, max: 44 + this.room * 7, slow: 0, fire: 2.5 + i * .75, warning: false }));
+        hp: this.room === 3 &amp;&amp; i === 0 ? 130 : 44 + this.room * 7, max: this.room === 3 &amp;&amp; i === 0 ? 130 : 44 + this.room * 7,
+        kind: this.room === 3 &amp;&amp; i === 0 ? &#x27;elite&#x27; : &#x27;caster&#x27;, slow: 0, fire: 2.5 + i * .75, warning: false,
+        phase: &#x27;chase&#x27;, timer: 1, face: Math.PI, swing: 0 }));
       this.revision++;
     }
     active() { return !this.paused &amp;&amp; [&#x27;play&#x27;, &#x27;boss&#x27;].includes(this.mode); }
@@ -1241,7 +1281,7 @@ html&gt;body{padding:0}&lt;/style&gt;
       for (const e of this.enemies) {
         const dx = e.x - this.hero.x, dy = e.y - this.hero.y, distance = Math.hypot(dx, dy);
         const dot = (dx * Math.cos(this.hero.face) + dy * Math.sin(this.hero.face)) / (distance || 1);
-        if (e.hp &gt; 0 &amp;&amp; distance &lt; s.range &amp;&amp; (dot &gt; -.15 || distance &lt; 17)) {
+        if (e.hp &gt; 0 &amp;&amp; distance &lt; s.range + (e.kind === &#x27;elite&#x27; ? 7 : 0) &amp;&amp; (dot &gt; -.15 || distance &lt; 17)) {
           damageDealt += Math.min(e.hp, s.damage + (s.frost ? 10 : 0));
           e.hp -= s.damage + (s.frost ? 10 : 0); e.slow = this.rank(4) ? 1.6 : 0;
           e.x = clamp(e.x + Math.cos(this.hero.face) * 11, 22, 458); e.y = clamp(e.y + Math.sin(this.hero.face) * 11, 32, 243);
@@ -1252,11 +1292,11 @@ html&gt;body{padding:0}&lt;/style&gt;
       if (previous &amp;&amp; !this.enemies.length) { this.shots = []; this.hero.hp = Math.min(s.maxHp, this.hero.hp + 35); this.say(&#x27;Sala despejada · +35 de vida. Revisá los cofres antes de avanzar.&#x27;); }
       if (this.mode === &#x27;boss&#x27; &amp;&amp; this.boss.hp &gt; 0) {
         const dx = this.boss.x - this.hero.x, dy = this.boss.y - this.hero.y, dist = Math.hypot(dx, dy);
-        if (dist &lt; s.range + 27 &amp;&amp; (dx * Math.cos(this.hero.face) + dy * Math.sin(this.hero.face)) / (dist || 1) &gt; -.1) {
+        if (dist &lt; s.range + 12 &amp;&amp; (dx * Math.cos(this.hero.face) + dy * Math.sin(this.hero.face)) / (dist || 1) &gt; -.1) {
           damageDealt += Math.min(this.boss.hp, s.damage);
           this.boss.hp = Math.max(0, this.boss.hp - s.damage);
           this.boss.hit = .15;
-          if (!this.boss.hp) { this.mode = &#x27;reward&#x27;; this.shots = []; this.hazards = []; this.chests = [{ x: 330, y: 136, open: false, luxury: true }]; this.say(&#x27;¡Cayó Terragrán! Acercate al cofre lujoso y abrilo con E.&#x27;); }
+          if (!this.boss.hp) { this.mode = &#x27;awakening&#x27;; this.shots = []; this.hazards = []; this.chests = [{ x: 330, y: 136, open: false, luxury: true }]; this.say(&#x27;Tu sombra cayó. Elegí tu nombre y tu especialización.&#x27;); }
         }
       }
       // One recovery per successful swing, even when it hits multiple targets.
@@ -1280,7 +1320,7 @@ html&gt;body{padding:0}&lt;/style&gt;
       const pool = ITEMS.map((_, i) =&gt; i); this.stock = [];
       for (let i = 0; i &lt; 6; i++) { const slot = pool.splice(Math.floor(this.random() * pool.length), 1)[0], rank = this.random() &lt; .3 ? 2 : 1;
         this.stock.push({ ...this.gear(slot, rank), price: ITEMS[slot].basePrice + (rank - 1) * 35, sold: false }); }
-      this.say(&#x27;Tienda de la quinta sala · Vida y energía restauradas. Comprá piezas y equipalas antes del dragón.&#x27;);
+      this.say(&#x27;Tienda de la quinta sala · Vida y energía restauradas. Prepará tu build: tu sombra te espera.&#x27;);
     }
     buy(id) {
       if (this.mode !== &#x27;shop&#x27;) return false;
@@ -1292,8 +1332,20 @@ html&gt;body{padding:0}&lt;/style&gt;
       if (this.mode !== &#x27;shop&#x27;) return false;
       this.mode = &#x27;boss&#x27;; this.paused = false; this.enemies = []; this.chests = []; this.shots = []; this.hazards = [];
       this.hero.x = 70; this.hero.y = 136; this.hero.face = 0; this.hero.inv = 2;
-      this.boss = { x: 335, y: 136, hp: 650, max: 650, timer: 1.4, phase: &#x27;rest&#x27;, cycle: 0, hit: 0, target: null };
-      this.say(&#x27;Terragrán, dragón de tierra · Salí de los círculos antes del impacto. Shift permite esquivar.&#x27;); return true;
+      this.boss = { x: 335, y: 136, hp: 650, max: 650, timer: 1.4, phase: &#x27;rest&#x27;, cycle: 0, hit: 0, target: null,
+        style: &#x27;mage&#x27;, face: Math.PI, swing: 0, equipment: this.equipped.map(i =&gt; i ? { ...i } : null) };
+      this.say(&#x27;EL ECO · Tu propia sombra. Hielo, lluvia de flechas y espada. Mirá las señales antes de atacar.&#x27;); return true;
+    }
+    specialize(name, specialization) {
+      if (this.mode !== &#x27;awakening&#x27; || this.hero.specialization || !CLASSES[specialization] || typeof name !== &#x27;string&#x27;) return false;
+      const clean = name.trim();
+      if (!clean || Array.from(clean).length &gt; 20 || /[\u0000-\u001f\u007f]/.test(clean)) { this.say(&#x27;Elegí un nombre de 1 a 20 caracteres.&#x27;); return false; }
+      const before = this.stats(), key = CLASSES[specialization].attribute;
+      this.hero.name = clean; this.hero.specialization = specialization;
+      this.hero.attributes[key] = Math.min(100, this.hero.attributes[key] + 5);
+      this.hero.stamina += this.stats().maxEnergy - before.maxEnergy;
+      this.mode = &#x27;reward&#x27;; this.paused = false;
+      this.say(clean + &#x27;, &#x27; + CLASSES[specialization].name + &#x27;: tu camino acaba de comenzar. Abrí el cofre lujoso con E.&#x27;); return true;
     }
     advance() {
       if (this.mode !== &#x27;play&#x27; || this.enemies.length) return false;
@@ -1302,52 +1354,84 @@ html&gt;body{padding:0}&lt;/style&gt;
       return true;
     }
     bossTick(dt) {
-      const b = this.boss; b.hit = Math.max(0, b.hit - dt); b.timer -= dt;
-      if (b.timer &lt;= 0) {
-        if (b.phase === &#x27;rest&#x27;) { b.phase = &#x27;warning&#x27;; b.timer = 1; b.target = { x: this.hero.x, y: this.hero.y }; this.hazards.push({ ...b.target, radius: 35, timer: 1, life: 1.25, fired: false }); }
-        else { b.phase = &#x27;rest&#x27;; b.timer = b.hp &lt; b.max / 2 ? 1.4 : 2; b.cycle++;
-          const base = Math.atan2(this.hero.y - b.y, this.hero.x - b.x);
-          for (const offset of [-.35, 0, .35]) this.shots.push({ x: b.x - 12, y: b.y, vx: Math.cos(base + offset) * 72, vy: Math.sin(base + offset) * 72, life: 6, earth: true }); }
+      const b = this.boss; b.hit = Math.max(0, b.hit - dt); b.swing = Math.max(0, b.swing - dt); b.timer -= dt;
+      const dx = this.hero.x - b.x, dy = this.hero.y - b.y, distance = Math.hypot(dx, dy) || 1;
+      if (b.phase === &#x27;rest&#x27;) {
+        b.face = Math.atan2(dy, dx);
+        const meleeNext = b.cycle % 3 === 2, desired = meleeNext ? 48 : 115;
+        const move = distance &gt; desired + 10 ? 1 : distance &lt; desired - 25 ? -1 : 0;
+        b.x = clamp(b.x + dx / distance * move * 38 * dt, 36, 444); b.y = clamp(b.y + dy / distance * move * 38 * dt, 50, 228);
       }
-      if (Math.hypot(this.hero.x - b.x, this.hero.y - b.y) &lt; 34) this.hurt(18);
-      for (const h of this.hazards) { h.timer -= dt; h.life -= dt; if (h.timer &lt;= 0 &amp;&amp; !h.fired) { h.fired = true; if (Math.hypot(h.x - this.hero.x, h.y - this.hero.y) &lt; h.radius) this.hurt(24); } }
+      if (b.timer &lt;= 0) {
+        if (b.phase === &#x27;rest&#x27;) {
+          b.style = [&#x27;mage&#x27;, &#x27;rogue&#x27;, &#x27;warrior&#x27;][b.cycle % 3]; b.phase = &#x27;warning&#x27;; b.timer = 1;
+          b.target = { x: this.hero.x, y: this.hero.y }; b.face = Math.atan2(dy, dx);
+          if (b.style === &#x27;rogue&#x27;) this.hazards.push({ ...b.target, type: &#x27;arrows&#x27;, radius: 42, timer: 1, life: 1.45, fired: false });
+          if (b.style === &#x27;warrior&#x27;) this.hazards.push({ x: b.x, y: b.y, type: &#x27;sword&#x27;, angle: b.face, radius: 72, timer: 1, life: 1.35, fired: false });
+          this.say(b.style === &#x27;mage&#x27; ? &#x27;SOMBRA · Mago: prepara bolas de hielo.&#x27; : b.style === &#x27;rogue&#x27; ? &#x27;SOMBRA · Rogue: salí de la zona de flechas.&#x27; : &#x27;SOMBRA · Guerrero: esquivá el arco de la espada.&#x27;);
+        } else {
+          if (b.style === &#x27;mage&#x27;) { const base = Math.atan2(b.target.y - b.y, b.target.x - b.x); for (const offset of [-.36, -.18, 0, .18, .36]) this.shots.push({ x: b.x, y: b.y - 6, vx: Math.cos(base + offset) * 90, vy: Math.sin(base + offset) * 90, life: 5, type: &#x27;ice&#x27; }); }
+          if (b.style === &#x27;warrior&#x27;) b.swing = .35;
+          b.phase = &#x27;rest&#x27;; b.timer = b.hp &lt; b.max / 2 ? 1.6 : 2; b.cycle++;
+        }
+      }
+      for (const h of this.hazards) { h.timer -= dt; h.life -= dt; if (h.timer &lt;= 0 &amp;&amp; !h.fired) {
+        h.fired = true; const ax = this.hero.x - h.x, ay = this.hero.y - h.y, dist = Math.hypot(ax, ay);
+        const inArc = h.type !== &#x27;sword&#x27; || (ax * Math.cos(h.angle) + ay * Math.sin(h.angle)) / (dist || 1) &gt; .35;
+        if (dist &lt; h.radius &amp;&amp; inArc) this.hurt(h.type === &#x27;sword&#x27; ? 28 : 18);
+      } }
       this.hazards = this.hazards.filter(h =&gt; h.life &gt; 0);
+    }
+    eliteTick(e, dt) {
+      const dx = this.hero.x - e.x, dy = this.hero.y - e.y, distance = Math.hypot(dx, dy) || 1;
+      e.swing = Math.max(0, e.swing - dt); e.timer -= dt;
+      if (e.phase === &#x27;windup&#x27;) {
+        if (e.timer &lt;= 0) { const dot = (dx * Math.cos(e.face) + dy * Math.sin(e.face)) / distance;
+          if (distance &lt; 48 &amp;&amp; dot &gt; .2) this.hurt(22);
+          e.phase = &#x27;recover&#x27;; e.timer = 1; e.swing = .3; e.warning = false;
+        }
+      } else if (e.phase === &#x27;recover&#x27;) { if (e.timer &lt;= 0) e.phase = &#x27;chase&#x27;; }
+      else { e.face = Math.atan2(dy, dx); if (distance &gt; 30) { e.x += dx / distance * (e.slow &gt; 0 ? 13 : 32) * dt; e.y += dy / distance * (e.slow &gt; 0 ? 13 : 32) * dt; }
+        if (distance &lt; 48) { e.phase = &#x27;windup&#x27;; e.timer = .75; e.warning = true; } }
     }
     tick(dt, keys = {}) {
       if (this.paused || ![&#x27;play&#x27;, &#x27;boss&#x27;, &#x27;reward&#x27;].includes(this.mode)) return;
       this.time += dt; this.hero.inv = Math.max(0, this.hero.inv - dt); this.attack = Math.max(0, this.attack - dt);
       this.cooldown = Math.max(0, this.cooldown - dt); this.dashCooldown = Math.max(0, this.dashCooldown - dt);
+      this.hero.slow = Math.max(0, this.hero.slow - dt);
       const s = this.stats();
       this.hero.stamina = Math.min(s.maxEnergy, this.hero.stamina + dt * 15);
       let dx = (keys.right ? 1 : 0) - (keys.left ? 1 : 0), dy = (keys.down ? 1 : 0) - (keys.up ? 1 : 0), len = Math.hypot(dx, dy);
       if (len) this.hero.face = Math.atan2(dy, dx);
       if (this.dashTime &gt; 0) { this.dashTime -= dt; dx = Math.cos(this.hero.face); dy = Math.sin(this.hero.face); len = 1; }
-      if (len) { const speed = this.dashTime &gt; 0 ? 270 : s.speed; this.hero.x = clamp(this.hero.x + dx / len * speed * dt, 20, 460); this.hero.y = clamp(this.hero.y + dy / len * speed * dt, 32, 243); }
+      if (len) { const speed = this.dashTime &gt; 0 ? 270 : s.speed * (this.hero.slow &gt; 0 ? .7 : 1); this.hero.x = clamp(this.hero.x + dx / len * speed * dt, 20, 460); this.hero.y = clamp(this.hero.y + dy / len * speed * dt, 32, 243); }
       if (keys.hit) this.strike();
       for (const e of this.enemies) {
         if (!this.active()) break;
         e.slow = Math.max(0, e.slow - dt); const ax = this.hero.x - e.x, ay = this.hero.y - e.y, distance = Math.hypot(ax, ay) || 1;
+        if (e.kind === &#x27;elite&#x27;) { this.eliteTick(e, dt); continue; }
         const speed = e.slow &gt; 0 ? 12 : 20 + this.room * 2;
-        if (distance &gt; 15) { e.x += ax / distance * speed * dt; e.y += ay / distance * speed * dt; }
+        const direction = distance &gt; 115 ? 1 : distance &lt; 65 ? -1 : 0;
+        e.x = clamp(e.x + ax / distance * speed * dt * direction, 22, 458); e.y = clamp(e.y + ay / distance * speed * dt * direction, 36, 243);
         if (distance &lt; 17) this.hurt();
         e.fire -= dt; e.warning = e.fire &lt; .5;
         if (e.fire &lt; 0 &amp;&amp; this.active()) { e.fire = 3.8 + this.random(); this.shots.push({ x: e.x, y: e.y, vx: ax / distance * 66, vy: ay / distance * 66, life: 5 }); }
       }
       if (this.mode === &#x27;boss&#x27;) this.bossTick(dt);
       for (const p of this.shots) { p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt;
-        if (Math.hypot(p.x - this.hero.x, p.y - this.hero.y) &lt; 10 &amp;&amp; this.active()) { this.hurt(p.earth ? 18 : 10 + this.room); p.life = 0; } }
+        if (Math.hypot(p.x - this.hero.x, p.y - this.hero.y) &lt; 10 &amp;&amp; this.active()) { const hit = this.hurt(p.type === &#x27;ice&#x27; ? 12 : 10 + this.room); if (hit &amp;&amp; p.type === &#x27;ice&#x27;) this.hero.slow = 1.2; p.life = 0; } }
       this.shots = this.shots.filter(p =&gt; p.life &gt; 0 &amp;&amp; p.x &gt; 16 &amp;&amp; p.x &lt; 464 &amp;&amp; p.y &gt; 24 &amp;&amp; p.y &lt; 252);
       for (const n of this.notices) { n.life -= dt; n.y -= dt * 10; } this.notices = this.notices.filter(n =&gt; n.life &gt; 0);
       if (this.mode === &#x27;play&#x27; &amp;&amp; !this.enemies.length &amp;&amp; this.hero.x &gt; 445 &amp;&amp; Math.abs(this.hero.y - 136) &lt; 25) this.advance();
     }
   }
-  scope.ElementalEngine = { Game, ITEMS, ATTRS, ROOMS };
+  scope.ElementalEngine = { Game, ITEMS, ATTRS, ROOMS, CLASSES };
   if (typeof module !== &#x27;undefined&#x27; &amp;&amp; module.exports) module.exports = scope.ElementalEngine;
 })(globalThis);
 
 (function(scope){
   &#x27;use strict&#x27;;
-  const INK=&#x27;#302536&#x27;;
+  const INK=&#x27;#141319&#x27;;
   class Painter{
     constructor(canvas){this.canvas=canvas;canvas.width=1440;canvas.height=816;this.c=canvas.getContext(&#x27;2d&#x27;);this.c.setTransform(3,0,0,3,0,0);this.memory=new Map();this.sparks=[];this.clock=0;this.background=null;this.bgKey=&#x27;&#x27;;}
     ellipse(x,y,rx,ry,fill,line=INK,width=1.25){const c=this.c;c.beginPath();c.ellipse(x,y,Math.max(.01,rx),Math.max(.01,ry),0,0,Math.PI*2);c.fillStyle=fill;c.fill();if(line){c.strokeStyle=line;c.lineWidth=width;c.stroke();}}
@@ -1378,17 +1462,19 @@ html&gt;body{padding:0}&lt;/style&gt;
     scene(g){
       const key=g.room+&#x27;-&#x27;+Boolean(g.boss);if(this.bgKey===key&amp;&amp;this.background)return;
       this.bgKey=key;const prior=this.c,layer=document.createElement(&#x27;canvas&#x27;);layer.width=1440;layer.height=816;this.c=layer.getContext(&#x27;2d&#x27;);const c=this.c;c.scale(3,3);const earth=Boolean(g.boss);
-      const floor=c.createLinearGradient(0,25,0,272);floor.addColorStop(0,earth?&#x27;#657263&#x27;:&#x27;#716774&#x27;);floor.addColorStop(1,earth?&#x27;#b1ac83&#x27;:&#x27;#b1a18d&#x27;);c.fillStyle=floor;c.fillRect(0,0,480,272);
+      const floor=c.createLinearGradient(0,25,0,272);floor.addColorStop(0,earth?&#x27;#33313d&#x27;:&#x27;#33343b&#x27;);floor.addColorStop(1,earth?&#x27;#63566a&#x27;:&#x27;#666052&#x27;);c.fillStyle=floor;c.fillRect(0,0,480,272);
       for(let row=0;row&lt;8;row++)for(let col=0;col&lt;11;col++){
         const x=col*49-(row%2)*24,y=37+row*30,n=(row*17+col*11)%7;
-        this.path([[&#x27;M&#x27;,x+3,y+3],[&#x27;L&#x27;,x+44,y+1],[&#x27;L&#x27;,x+48,y+25],[&#x27;L&#x27;,x+4,y+27],[&#x27;Z&#x27;]],earth?[&#x27;#a6a481&#x27;,&#x27;#939b7a&#x27;,&#x27;#9e9e7e&#x27;][n%3]:[&#x27;#a69a8d&#x27;,&#x27;#958e87&#x27;,&#x27;#aca093&#x27;][n%3],&#x27;#615c6260&#x27;,.7);
+        this.path([[&#x27;M&#x27;,x+3,y+3],[&#x27;L&#x27;,x+44,y+1],[&#x27;L&#x27;,x+48,y+25],[&#x27;L&#x27;,x+4,y+27],[&#x27;Z&#x27;]],earth?[&#x27;#514752&#x27;,&#x27;#45424e&#x27;,&#x27;#544c59&#x27;][n%3]:[&#x27;#57554f&#x27;,&#x27;#494a47&#x27;,&#x27;#605b51&#x27;][n%3],&#x27;#615c6260&#x27;,.7);
         if(n&lt;2)this.path([[&#x27;M&#x27;,x+16,y+5],[&#x27;L&#x27;,x+20,y+13],[&#x27;L&#x27;,x+15,y+16]],null,&#x27;#625d6460&#x27;,.7);
       }
-      c.fillStyle=earth?&#x27;#3e4945&#x27;:&#x27;#484152&#x27;;c.fillRect(0,0,480,35);
-      for(let i=0;i&lt;13;i++){const x=i*40;this.path([[&#x27;M&#x27;,x,2],[&#x27;L&#x27;,x+38,0],[&#x27;L&#x27;,x+37,19],[&#x27;L&#x27;,x+2,20],[&#x27;Z&#x27;]],earth?&#x27;#596356&#x27;:&#x27;#62586b&#x27;);this.path([[&#x27;M&#x27;,x-18,21],[&#x27;L&#x27;,x+17,21],[&#x27;L&#x27;,x+18,35],[&#x27;L&#x27;,x-18,34],[&#x27;Z&#x27;]],earth?&#x27;#6c7460&#x27;:&#x27;#7a6b7b&#x27;);}
+      c.fillStyle=earth?&#x27;#3e4945&#x27;:&#x27;#171b22&#x27;;c.fillRect(0,0,480,35);
+      for(let i=0;i&lt;13;i++){const x=i*40;this.path([[&#x27;M&#x27;,x,2],[&#x27;L&#x27;,x+38,0],[&#x27;L&#x27;,x+37,19],[&#x27;L&#x27;,x+2,20],[&#x27;Z&#x27;]],earth?&#x27;#596356&#x27;:&#x27;#303039&#x27;);this.path([[&#x27;M&#x27;,x-18,21],[&#x27;L&#x27;,x+17,21],[&#x27;L&#x27;,x+18,35],[&#x27;L&#x27;,x-18,34],[&#x27;Z&#x27;]],earth?&#x27;#6c7460&#x27;:&#x27;#3e3b40&#x27;);}
       for(const x of [8,472]){this.path([[&#x27;M&#x27;,x-10,29],[&#x27;L&#x27;,x+8,27],[&#x27;L&#x27;,x+10,261],[&#x27;L&#x27;,x-8,264],[&#x27;Z&#x27;]],&#x27;#514952&#x27;);for(let y=43;y&lt;250;y+=32)this.line(x-7,y,x+7,y-2,&#x27;#93838a&#x27;);}
-      this.path([[&#x27;M&#x27;,4,255],[&#x27;Q&#x27;,230,246,476,255],[&#x27;L&#x27;,480,272],[&#x27;L&#x27;,0,272],[&#x27;Z&#x27;]],earth?&#x27;#61694f&#x27;:&#x27;#75646b&#x27;);
+      this.path([[&#x27;M&#x27;,4,255],[&#x27;Q&#x27;,230,246,476,255],[&#x27;L&#x27;,480,272],[&#x27;L&#x27;,0,272],[&#x27;Z&#x27;]],earth?&#x27;#61694f&#x27;:&#x27;#25272b&#x27;);
       for(const [x,y] of [[28,72],[444,213]]){this.ellipse(x,y,12,5,&#x27;#41364b30&#x27;,null);this.path([[&#x27;M&#x27;,x-7,y],[&#x27;L&#x27;,x-9,y-8],[&#x27;L&#x27;,x-2,y-13],[&#x27;L&#x27;,x+7,y-10],[&#x27;L&#x27;,x+10,y],[&#x27;Z&#x27;]],&#x27;#827981&#x27;);}
+      for(const x of [108,290,430]){this.path([[&#x27;M&#x27;,x-21,34],[&#x27;L&#x27;,x-21,15],[&#x27;Q&#x27;,x, -12,x+21,15],[&#x27;L&#x27;,x+21,34],[&#x27;Z&#x27;]],&#x27;#10151b&#x27;,&#x27;#78705c&#x27;,2);for(let i=-1;i&lt;=1;i++)this.line(x+i*10,10,x+i*10,34,&#x27;#47444a&#x27;,1);}
+      for(let i=0;i&lt;2200;i++){const x=(i*127.13)%480,y=(i*71.77)%272;c.fillStyle=i%2?&#x27;#e8d8ba09&#x27;:&#x27;#00000012&#x27;;c.fillRect(x,y,.7,.7);}
       const shade=c.createRadialGradient(240,160,70,240,145,280);shade.addColorStop(0,&#x27;#15121b00&#x27;);shade.addColorStop(1,&#x27;#21132966&#x27;);c.fillStyle=shade;c.fillRect(0,0,480,272);
       this.background=layer;this.c=prior;
     }
@@ -1408,8 +1494,8 @@ html&gt;body{padding:0}&lt;/style&gt;
       const moving=prev&amp;&amp;Math.hypot(x-prev.x,y-prev.y)&gt;.05,walk=moving?Math.sin(t*15):Math.sin(t*3)*.12,bob=moving?Math.abs(walk)*1.5:Math.sin(t*3)*.5;
       const facing=enemy?(g.hero.x&lt;x?-1:1):(Math.cos(g.hero.face)&lt;0?-1:1),punch=enemy?0:Math.sin(Math.PI*Math.min(1,(.18-g.attack)/.18))*(g.attack&gt;0?1:0);
       this.memory.set(id,{x,y,hp,hurt:Math.max(0,hurt-this.dt)});this.ellipse(x,y+9,12,4,&#x27;#21183240&#x27;,null);
-      c.save();c.translate(x,y-bob);c.scale(facing,1);c.rotate(hurt&gt;0?Math.sin(hurt*50)*.12:0);
-      const skin=enemy?&#x27;#f4e6c9&#x27;:&#x27;#efb68d&#x27;,metal=&#x27;#829bb9&#x27;,outline=INK;
+      c.save();c.translate(x,y-bob);c.scale(facing*(enemy?.kind===&#x27;elite&#x27;?1.45:1),enemy?.kind===&#x27;elite&#x27;?1.45:1);c.rotate(hurt&gt;0?Math.sin(hurt*50)*.12:0);
+      const skin=g.shadow?&#x27;#292633&#x27;:enemy?&#x27;#c9bfa3&#x27;:&#x27;#d8bb97&#x27;,metal=g.shadow?&#x27;#373443&#x27;:&#x27;#77848a&#x27;,outline=INK;
       // Jointed limbs: each foot and hand swings independently from the torso.
       for(const side of [-1,1]){const foot=side*5+walk*side*2;this.line(side*4,1,foot,9,outline,5);this.line(side*4,1,foot,9,enemy?&#x27;#d5c4a6&#x27;:skin,3);this.ellipse(foot+1,10,enemy?3.5:4,2.5,!enemy&amp;&amp;g.rank(1)?metal:skin);}
       if(enemy){
@@ -1430,46 +1516,62 @@ html&gt;body{padding:0}&lt;/style&gt;
         this.line(-1,-25,3,-24,INK,1.2);this.line(6,-24,9,-25,INK,1.2);this.path([[&#x27;M&#x27;,1,-14],[&#x27;Q&#x27;,5,-12,8,-15]],null,INK,1);
         if(g.rank(2)){this.path([[&#x27;M&#x27;,-11,-19],[&#x27;L&#x27;,-12,-27],[&#x27;Q&#x27;,-8,-37,2,-35],[&#x27;Q&#x27;,12,-32,12,-25],[&#x27;L&#x27;,10,-19],[&#x27;L&#x27;,7,-27],[&#x27;L&#x27;,-5,-26],[&#x27;L&#x27;,-7,-18],[&#x27;Z&#x27;]],metal);this.line(0,-34,1,-28,&#x27;#d3e8ee&#x27;,2);}
       }c.restore();
+      if(g.shadow){this.ellipse(2,-22,2,1.8,&#x27;#d4f9ff&#x27;,null);this.ellipse(8,-22,2,1.8,&#x27;#d4f9ff&#x27;,null);}
+      if(enemy?.kind===&#x27;elite&#x27;){this.path([[&#x27;M&#x27;,-9,-11],[&#x27;L&#x27;,-6,-17],[&#x27;L&#x27;,8,-14],[&#x27;L&#x27;,9,-7],[&#x27;Z&#x27;]],&#x27;#65616a&#x27;);c.save();c.translate(13,-3);c.rotate(enemy.swing&gt;0?1.3:-.4);this.path([[&#x27;M&#x27;,-3,0],[&#x27;L&#x27;,-3,-27],[&#x27;L&#x27;,1,-34],[&#x27;L&#x27;,4,-27],[&#x27;L&#x27;,3,0],[&#x27;Z&#x27;]],&#x27;#bfb7a2&#x27;);this.line(-7,0,7,0,&#x27;#b38454&#x27;,3);c.restore();}
       if(!enemy){if(g.rank(7))this.ellipse(1,-8,2,2.5,&#x27;#b3f0e9&#x27;);if(g.rank(6))this.line(-13,-3,-9,-2,&#x27;#bd8feb&#x27;,2);if(g.rank(5))this.ellipse(handX+1,handY-1,1.2,1.2,&#x27;#f2d488&#x27;,null);
         if(g.rank(4)){c.save();c.translate(handX+1,handY);c.rotate(-.4+punch*1.9);this.path([[&#x27;M&#x27;,-2,-3],[&#x27;L&#x27;,-3,-22],[&#x27;L&#x27;,0,-28],[&#x27;L&#x27;,3,-22],[&#x27;L&#x27;,2,-3],[&#x27;Z&#x27;]],&#x27;#b9eef1&#x27;);this.line(0,-23,0,-5,&#x27;#f6ffff&#x27;,1);this.line(-6,-3,6,-3,&#x27;#ab8957&#x27;,2.5);this.line(0,-2,0,4,&#x27;#815961&#x27;,3);c.restore();}}
       c.restore();
       if(enemy){c.fillStyle=&#x27;#594b56&#x27;;c.fillRect(x-10,y-39,20,2);c.fillStyle=&#x27;#ea9165&#x27;;c.fillRect(x-10,y-39,20*enemy.hp/enemy.max,2);if(enemy.warning)this.text(&#x27;!&#x27;,x,y-44,10,&#x27;#ffe1a0&#x27;);}
     }
-    dragon(g){const b=g.boss,c=this.c,t=g.time;c.save();c.translate(b.x,b.y);const breathe=Math.sin(t*2.5);this.ellipse(3,18,49,9,&#x27;#27342245&#x27;,null);
-      this.path([[&#x27;M&#x27;,20,-14],[&#x27;Q&#x27;,44,-17,55,5],[&#x27;Q&#x27;,69,16,75,2],[&#x27;Q&#x27;,69,30,46,16],[&#x27;L&#x27;,21,10],[&#x27;Z&#x27;]],&#x27;#829469&#x27;);
-      c.save();c.translate(6,-22);c.rotate(Math.sin(t*2)*.07);this.path([[&#x27;M&#x27;,0,4],[&#x27;L&#x27;,23,-37],[&#x27;Q&#x27;,35,-12,45,-2],[&#x27;Q&#x27;,30,-6,33,9],[&#x27;Q&#x27;,18,0,17,14],[&#x27;Z&#x27;]],&#x27;#c5b98c&#x27;);this.line(0,4,23,-37,&#x27;#52634d&#x27;,3);this.line(0,4,33,9,&#x27;#687757&#x27;,1.5);c.restore();
-      this.ellipse(1,-2,30,27+breathe,b.hit?&#x27;#c9d6a5&#x27;:&#x27;#849b70&#x27;);this.ellipse(-11,5,15,19,&#x27;#c6bd91&#x27;,null);for(let n=0;n&lt;3;n++)this.path([[&#x27;M&#x27;,-23,-2+n*7],[&#x27;Q&#x27;,-12,2+n*7,-2,-1+n*7]],null,&#x27;#998f70&#x27;,1);
-      for(const x of [-18,18]){this.ellipse(x,19,9,9,&#x27;#7d9368&#x27;);for(let i=0;i&lt;3;i++)this.path([[&#x27;M&#x27;,x-6+i*5,23],[&#x27;Q&#x27;,x-9+i*5,30,x-1+i*5,26],[&#x27;Z&#x27;]],&#x27;#ece0ba&#x27;);}
-      this.ellipse(-22,-23,22,20,&#x27;#90a77a&#x27;);this.ellipse(-38,-14,17,10,&#x27;#afbc8a&#x27;);this.ellipse(-48,-15,2,1.5,&#x27;#59634e&#x27;,null);
-      for(const x of [-31,-8])this.path([[&#x27;M&#x27;,x,-37],[&#x27;Q&#x27;,x-9,-48,x-1,-55],[&#x27;Q&#x27;,x-1,-44,x+6,-38],[&#x27;Z&#x27;]],&#x27;#e9d7a6&#x27;);
-      this.ellipse(-29,-26,7,6,&#x27;#f7e7b8&#x27;);this.ellipse(-31,-25,2,4,&#x27;#504039&#x27;,null);this.line(-37,-31,-24,-29,&#x27;#4e634e&#x27;,2.5);
-      this.path([[&#x27;M&#x27;,-52,-9],[&#x27;Q&#x27;,-36,0,-21,-7]],null,INK,1.5);for(const x of [-45,-35,-25])this.path([[&#x27;M&#x27;,x,-6],[&#x27;L&#x27;,x+3,0],[&#x27;L&#x27;,x+5,-5],[&#x27;Z&#x27;]],&#x27;#fff0c9&#x27;);
-      for(let n=0;n&lt;4;n++)this.path([[&#x27;M&#x27;,12+n*6,-20+n*3],[&#x27;L&#x27;,19+n*6,-30+n*3],[&#x27;L&#x27;,21+n*6,-15+n*3],[&#x27;Z&#x27;]],&#x27;#677d5b&#x27;);c.restore();
-      this.path([[&#x27;M&#x27;,131,39],[&#x27;L&#x27;,349,39],[&#x27;Q&#x27;,354,39,354,43],[&#x27;Q&#x27;,354,47,349,47],[&#x27;L&#x27;,131,47],[&#x27;Q&#x27;,126,43,131,39],[&#x27;Z&#x27;]],&#x27;#394837&#x27;);c.fillStyle=&#x27;#c4d690&#x27;;c.fillRect(131,41,218*b.hp/b.max,4);this.text(&#x27;TERRAGRÁN · DRAGÓN DE TIERRA&#x27;,240,34,8,&#x27;#fff2cf&#x27;);}
+    shadowBoss(g){
+      const b=g.boss,c=this.c,color={mage:&#x27;#a0e3ec&#x27;,rogue:&#x27;#bba1df&#x27;,warrior:&#x27;#e0a078&#x27;}[b.style];
+      for(let i=3;i&gt;0;i--)this.ellipse(b.x,b.y+7,15+i*6,5+i*3,color+&#x27;16&#x27;,null);
+      const echo={...g,hero:{...b},shadow:true,attack:b.swing,rank:i=&gt;b.equipment[i]?.rank||0};
+      this.actor(b.x,b.y,null,echo,&#x27;shadow&#x27;);
+      if(b.phase===&#x27;warning&#x27;){this.ellipse(b.x,b.y-48,9+Math.sin(g.time*12)*2,9,color+&#x27;55&#x27;,color);this.text({mage:&#x27;❄&#x27;,rogue:&#x27;↟&#x27;,warrior:&#x27;†&#x27;}[b.style],b.x,b.y-44,13,color);}
+      c.fillStyle=&#x27;#101018&#x27;;c.fillRect(130,40,220,6);c.fillStyle=color;c.fillRect(131,41,218*b.hp/b.max,4);
+      this.text(&#x27;EL ECO · TU PROPIA SOMBRA&#x27;,240,34,8,&#x27;#e3d5bc&#x27;);
+    }
+    portrait(canvas,g){
+      const prior=this.c,memory=this.memory,sparks=this.sparks;canvas.width=600;canvas.height=420;this.c=canvas.getContext(&#x27;2d&#x27;);this.c.scale(2,2);this.memory=new Map();this.sparks=[];
+      const c=this.c,glow=c.createRadialGradient(150,100,8,150,100,130);glow.addColorStop(0,&#x27;#514448&#x27;);glow.addColorStop(1,&#x27;#101115&#x27;);c.fillStyle=glow;c.fillRect(0,0,300,210);
+      for(const r of [63,69,86])this.ellipse(150,100,r,r,&#x27;#00000000&#x27;,&#x27;#9a7d4d55&#x27;,.6);
+      for(let i=0;i&lt;16;i++){const a=i*Math.PI/8;this.star(150+Math.cos(a)*78,100+Math.sin(a)*78,2,&#x27;#a58a59&#x27;);}
+      c.save();c.translate(150,160);c.scale(3.1,3.1);this.actor(0,0,null,{...g,attack:0,rank:i=&gt;g.rank(i)},&#x27;portrait&#x27;);c.restore();
+      this.text(&#x27;✦  &#x27;+(g.hero.name||&#x27;EL SIN NOMBRE&#x27;).toUpperCase()+&#x27;  ✦&#x27;,150,193,9,&#x27;#d4bc90&#x27;);
+      this.c=prior;this.memory=memory;this.sparks=sparks;
+    }
     draw(g){
       const c=this.c,t=g.time;this.dt=Math.max(0,Math.min(.05,t-this.clock));if(t&lt;this.clock||this.lastHero!==g.hero){this.memory.clear();this.sparks=[];}this.lastHero=g.hero;this.clock=t;this.scene(g);c.drawImage(this.background,0,0,480,272);
       for(const x of [52,210,390]){this.path([[&#x27;M&#x27;,x-3,23],[&#x27;L&#x27;,x+3,23],[&#x27;L&#x27;,x+2,36],[&#x27;L&#x27;,x-2,36],[&#x27;Z&#x27;]],&#x27;#815962&#x27;);this.flame(x,23,t,.65);}
       const opened=!g.enemies.length&amp;&amp;g.mode===&#x27;play&#x27;;this.path([[&#x27;M&#x27;,458,158],[&#x27;L&#x27;,458,119],[&#x27;Q&#x27;,467,102,479,114],[&#x27;L&#x27;,480,158],[&#x27;Z&#x27;]],opened?&#x27;#405c55&#x27;:&#x27;#332c3e&#x27;);if(opened){this.text(&#x27;→&#x27;,470,142,19,&#x27;#c9f5cf&#x27;);}else for(let x=462;x&lt;480;x+=6)this.line(x,118,x,156,&#x27;#a2999d&#x27;,2);
-      for(const h of g.hazards){c.save();c.globalAlpha=h.fired?.75:.5+Math.sin(t*18)*.2;this.ellipse(h.x,h.y,h.radius,h.radius*.6,h.fired?&#x27;#edd1a3&#x27;:&#x27;#f4c48b55&#x27;,&#x27;#f4d398&#x27;,2);c.restore();if(h.fired)for(let i=-2;i&lt;=2;i++)this.path([[&#x27;M&#x27;,h.x+i*11-4,h.y+5],[&#x27;L&#x27;,h.x+i*11,h.y-12],[&#x27;L&#x27;,h.x+i*11+6,h.y+6],[&#x27;Z&#x27;]],&#x27;#a9a481&#x27;);}
+      for(const h of [...g.hazards,...g.enemies.filter(e=&gt;e.kind===&#x27;elite&#x27;&amp;&amp;e.warning).map(e=&gt;({x:e.x,y:e.y,type:&#x27;sword&#x27;,angle:e.face,radius:48}))]){
+        c.save();c.translate(h.x,h.y);c.globalAlpha=h.fired?.9:.6+Math.sin(t*14)*.15;
+        if(h.type===&#x27;sword&#x27;){c.rotate(h.angle);c.beginPath();c.moveTo(0,0);c.arc(0,0,h.radius,-1.21,1.21);c.closePath();c.fillStyle=h.fired?&#x27;#edbc8580&#x27;:&#x27;#d2865830&#x27;;c.fill();c.strokeStyle=&#x27;#d9a577&#x27;;c.lineWidth=1;c.stroke();}
+        else {this.ellipse(0,0,h.radius,h.radius,&#x27;#a187c32a&#x27;,&#x27;#bba1df&#x27;,1);for(let i=0;i&lt;9;i++){const x=Math.sin(i*7)*30,y=Math.cos(i*5)*29;if(h.fired){this.line(x-4,y-20,x,y,&#x27;#dbcfeb&#x27;,1);this.path([[&#x27;M&#x27;,x-3,y-4],[&#x27;L&#x27;,x,y],[&#x27;L&#x27;,x+1,y-5]],null,&#x27;#dbcfeb&#x27;);}else this.line(x-2,y,x+2,y,&#x27;#bba1df&#x27;,1);}}
+        c.restore();
+      }
       for(const b of g.chests)this.chest(b,g);
-      const living=new Set([&#x27;hero&#x27;]);const actors=g.enemies.map((e,i)=&gt;({e,y:e.y,id:e}));actors.push({e:null,y:g.hero.y,id:&#x27;hero&#x27;});actors.sort((a,b)=&gt;a.y-b.y);
-      if(g.boss&amp;&amp;g.boss.hp&gt;0)this.dragon(g);
+      const living=new Set([&#x27;hero&#x27;,&#x27;shadow&#x27;]);const actors=g.enemies.map((e,i)=&gt;({e,y:e.y,id:e}));actors.push({e:null,y:g.hero.y,id:&#x27;hero&#x27;});actors.sort((a,b)=&gt;a.y-b.y);
+      if(g.boss&amp;&amp;g.boss.hp&gt;0)this.shadowBoss(g);
       for(const a of actors){living.add(a.id);if(a.e)this.actor(a.e.x,a.e.y,a.e,g,a.id);else this.actor(g.hero.x,g.hero.y,null,g,&#x27;hero&#x27;);}
       for(const [id,old] of this.memory)if(!living.has(id)){this.sparks.push({x:old.x,y:old.y-13,time:t,text:&#x27;¡POF!&#x27;,color:&#x27;#fbe7c7&#x27;});this.memory.delete(id);}
-      for(const p of g.shots){const a=Math.atan2(p.vy,p.vx);c.save();c.translate(p.x,p.y);c.rotate(a);this.path([[&#x27;M&#x27;,-13,-4],[&#x27;Q&#x27;,-3,0,-13,4],[&#x27;L&#x27;,1,3],[&#x27;L&#x27;,1,-3],[&#x27;Z&#x27;]],p.earth?&#x27;#c9c29270&#x27;:&#x27;#f3ae7370&#x27;,null);if(p.earth)this.path([[&#x27;M&#x27;,-4,-3],[&#x27;L&#x27;,2,-5],[&#x27;L&#x27;,6,0],[&#x27;L&#x27;,2,5],[&#x27;L&#x27;,-4,3],[&#x27;Z&#x27;]],&#x27;#b9ae84&#x27;);else this.ellipse(0,0,5,4,&#x27;#ffc96f&#x27;,&#x27;#b66750&#x27;);c.restore();}
+      for(const p of g.shots){const a=Math.atan2(p.vy,p.vx);c.save();c.translate(p.x,p.y);c.rotate(a);this.path([[&#x27;M&#x27;,-13,-4],[&#x27;Q&#x27;,-3,0,-13,4],[&#x27;L&#x27;,1,3],[&#x27;L&#x27;,1,-3],[&#x27;Z&#x27;]],p.earth?&#x27;#c9c29270&#x27;:&#x27;#f3ae7370&#x27;,null);if(p.type===&#x27;ice&#x27;){this.star(0,0,7,&#x27;#b6edf5&#x27;);this.ellipse(0,0,3,3,&#x27;#f0ffff&#x27;,null);}else if(p.earth)this.path([[&#x27;M&#x27;,-4,-3],[&#x27;L&#x27;,2,-5],[&#x27;L&#x27;,6,0],[&#x27;L&#x27;,2,5],[&#x27;L&#x27;,-4,3],[&#x27;Z&#x27;]],&#x27;#b9ae84&#x27;);else this.ellipse(0,0,5,4,&#x27;#ffc96f&#x27;,&#x27;#b66750&#x27;);c.restore();}
       if(g.attack&gt;0){const h=g.hero,angle=h.face;c.save();c.translate(h.x,h.y-5);c.rotate(angle);c.globalAlpha=g.attack/.18;this.path([[&#x27;M&#x27;,20,-18],[&#x27;Q&#x27;,55,0,20,18],[&#x27;Q&#x27;,37,0,20,-18],[&#x27;Z&#x27;]],g.rank(4)?&#x27;#d6fcff&#x27;:&#x27;#fff0c3&#x27;,null);c.restore();}
       this.sparks=this.sparks.filter(s=&gt;t-s.time&lt;.45);for(const s of this.sparks){const age=(t-s.time)/.45;c.save();c.globalAlpha=1-age;this.star(s.x-12,s.y-4-age*12,4,s.color);this.star(s.x+14,s.y+3-age*12,3,s.color);this.text(s.text,s.x,s.y-age*12,9,INK);c.restore();}
+      const fog=c.createLinearGradient(0,210,0,272);fog.addColorStop(0,&#x27;#b4c2ba00&#x27;);fog.addColorStop(1,&#x27;#b4c2ba18&#x27;);c.fillStyle=fog;c.fillRect(0,210,480,62);
       for(const n of g.notices){this.text(n.text,n.x,n.y-16,7,&#x27;#fff0c6&#x27;);}
-      if(g.paused||[&#x27;ready&#x27;,&#x27;dead&#x27;,&#x27;won&#x27;].includes(g.mode)){this.path([[&#x27;M&#x27;,83,87],[&#x27;Q&#x27;,240,80,397,87],[&#x27;L&#x27;,392,166],[&#x27;Q&#x27;,240,173,88,166],[&#x27;Z&#x27;]],&#x27;#f3dfbceF&#x27;,&#x27;#554253&#x27;,2);this.text(g.mode===&#x27;ready&#x27;?&#x27;ELEMENTAL KNIGHT&#x27;:g.mode===&#x27;dead&#x27;?&#x27;¡A LA LONA!&#x27;:g.mode===&#x27;won&#x27;?&#x27;¡DRAGÓN DERROTADO!&#x27;:&#x27;UN RESPIRO&#x27;,240,117,17,&#x27;#4d3544&#x27;);this.text(g.mode===&#x27;ready&#x27;?&#x27;Una mazmorra. Mucha actitud. Cero armadura.&#x27;:g.mode===&#x27;dead&#x27;?&#x27;Sacudite el polvo y probá otra build.&#x27;:g.mode===&#x27;won&#x27;?&#x27;Enter: revisá tu botín lujoso.&#x27;:&#x27;Enter: atributos, set y mochila.&#x27;,240,142,9,&#x27;#685264&#x27;);}
+      if(g.paused||[&#x27;ready&#x27;,&#x27;dead&#x27;,&#x27;won&#x27;].includes(g.mode)){this.path([[&#x27;M&#x27;,83,87],[&#x27;Q&#x27;,240,80,397,87],[&#x27;L&#x27;,392,166],[&#x27;Q&#x27;,240,173,88,166],[&#x27;Z&#x27;]],&#x27;#f3dfbceF&#x27;,&#x27;#554253&#x27;,2);this.text(g.mode===&#x27;ready&#x27;?&#x27;ELEMENTAL KNIGHT&#x27;:g.mode===&#x27;dead&#x27;?&#x27;¡A LA LONA!&#x27;:g.mode===&#x27;won&#x27;?&#x27;¡SOMBRA DERROTADA!&#x27;:&#x27;UN RESPIRO&#x27;,240,117,17,&#x27;#4d3544&#x27;);this.text(g.mode===&#x27;ready&#x27;?&#x27;En la oscuridad, tu peor enemigo sos vos.&#x27;:g.mode===&#x27;dead&#x27;?&#x27;Sacudite el polvo y probá otra build.&#x27;:g.mode===&#x27;won&#x27;?&#x27;Enter: revisá tu botín lujoso.&#x27;:&#x27;Enter: atributos, set y mochila.&#x27;,240,142,9,&#x27;#685264&#x27;);}
     }
   }
   scope.ElementalPainter=Painter;
 })(globalThis);
 
+
 (() =&gt; {
   &#x27;use strict&#x27;;
   const root = document.getElementById(&#x27;ember-dungeon&#x27;), $ = selector =&gt; root.querySelector(selector);
-  const { Game, ITEMS, ATTRS } = globalThis.ElementalEngine, game = new Game();
+  const { Game, ITEMS, ATTRS, CLASSES } = globalThis.ElementalEngine, game = new Game();
   const canvas = $(&#x27;#ek-canvas&#x27;), painter = new globalThis.ElementalPainter(canvas);
   let panel = false, pausedBeforePanel = false, keys = {}, last = 0, lastRevision = -1, hudTimer = 0;
   const node = (tag, className, text) =&gt; { const e = document.createElement(tag); if (className) e.className = className; if (text !== undefined) e.textContent = text; return e; };
@@ -1484,12 +1586,14 @@ html&gt;body{padding:0}&lt;/style&gt;
     $(&#x27;#ek-life&#x27;).textContent = &#x27;Vida &#x27; + Math.ceil(h.hp) + &#x27;/&#x27; + s.maxHp;
     $(&#x27;#ek-energy&#x27;).textContent = &#x27;Energía &#x27; + Math.floor(h.stamina) + &#x27;/&#x27; + s.maxEnergy;
     $(&#x27;#ek-gold&#x27;).textContent = h.gold + &#x27; oro&#x27;; $(&#x27;#ek-points&#x27;).textContent = h.points + &#x27; puntos libres&#x27;;
-    $(&#x27;#ek-room&#x27;).textContent = &#x27;Nivel &#x27; + s.level + &#x27; · Sala &#x27; + game.room + &#x27;/5&#x27; + (game.boss ? &#x27; · Dragón&#x27; : &#x27;&#x27;);
+    $(&#x27;#ek-room&#x27;).textContent = &#x27;Nivel &#x27; + s.level + &#x27; · Sala &#x27; + game.room + &#x27;/5&#x27; + (game.boss ? &#x27; · La sombra&#x27; : &#x27;&#x27;);
     const odds = game.chances();
     $(&#x27;#ek-chances&#x27;).textContent = &#x27;Cofres: equipo &#x27; + Math.round(odds.gear * 100) + &#x27;% · poción &#x27; + Math.round(odds.potion * 100) + &#x27;% · resto oro&#x27;;
     $(&#x27;#ek-kills&#x27;).textContent = &#x27;Esqueletos &#x27; + game.kills + &#x27;/18&#x27;;
   }
   function inventory() {
+    painter.portrait($(&#x27;#ek-portrait&#x27;),game);
+    $(&#x27;#ek-identity&#x27;).textContent=game.hero.specialization?CLASSES[game.hero.specialization].name+&#x27; · &#x27;+CLASSES[game.hero.specialization].title:&#x27;Sin especialización · Nivel &#x27;+game.stats().level;
     const statBox = $(&#x27;#ek-stat-list&#x27;); statBox.replaceChildren();
     $(&#x27;#ek-available&#x27;).textContent = game.hero.points + &#x27; puntos disponibles para distribuir&#x27;;
     for (const [key, def] of Object.entries(ATTRS)) {
@@ -1508,6 +1612,7 @@ html&gt;body{padding:0}&lt;/style&gt;
     ITEMS.forEach((def, slot) =&gt; {
       const item = game.equipped[slot], card = node(&#x27;div&#x27;, &#x27;ek-slot&#x27;);
       card.append(node(&#x27;span&#x27;, &#x27;ek-slot-label&#x27;, def.group + &#x27; · &#x27; + def.slot), icon(item || { kind: &#x27;empty&#x27;, slot }), node(&#x27;span&#x27;, &#x27;ek-item-name&#x27; + (!item ? &#x27; ek-empty&#x27; : &#x27;&#x27;), item ? game.itemName(item) : &#x27;Vacío&#x27;));
+      if(item){card.dataset.rank=item.rank;card.append(node(&#x27;small&#x27;,&#x27;ek-item-detail&#x27;,ITEMS[slot].detail+&#x27; · Rango &#x27;+item.rank));}
       if (item) card.append(button(&#x27;Quitar&#x27;, () =&gt; game.unequip(slot), !game.canManage(), &#x27;Quitar &#x27; + def.name));
       slotBox.append(card);
     });
@@ -1537,7 +1642,8 @@ html&gt;body{padding:0}&lt;/style&gt;
   }
   function refresh() {
     const focused = document.activeElement?.getAttribute?.(&#x27;aria-label&#x27;);
-    $(&#x27;#ek-world&#x27;).hidden = panel || game.mode === &#x27;shop&#x27;; $(&#x27;#ek-character&#x27;).hidden = !panel; $(&#x27;#ek-shop&#x27;).hidden = panel || game.mode !== &#x27;shop&#x27;;
+    $(&#x27;#ek-world&#x27;).hidden = panel || [&#x27;shop&#x27;,&#x27;awakening&#x27;].includes(game.mode); $(&#x27;#ek-character&#x27;).hidden = !panel; $(&#x27;#ek-shop&#x27;).hidden = panel || game.mode !== &#x27;shop&#x27;;
+    $(&#x27;#ek-awakening&#x27;).hidden=panel || game.mode!==&#x27;awakening&#x27;;
     $(&#x27;#ek-panel&#x27;).setAttribute(&#x27;aria-expanded&#x27;, String(panel)); $(&#x27;#ek-message&#x27;).textContent = game.message;
     $(&#x27;#ek-start&#x27;).textContent = game.mode === &#x27;ready&#x27; ? &#x27;Entrar a la cripta&#x27; : &#x27;Reiniciar&#x27;;
     $(&#x27;#ek-attack&#x27;).textContent = (game.rank(4) ? &#x27;Espada&#x27; : &#x27;Puños&#x27;) + &#x27; · Espacio&#x27;;
@@ -1556,8 +1662,15 @@ html&gt;body{padding:0}&lt;/style&gt;
     refresh();
     if (panel) { $(&#x27;#ek-close&#x27;).focus({ preventScroll: true }); $(&#x27;#ek-character&#x27;).scrollIntoView({ block: &#x27;start&#x27; }); }
   }
+  let selectedClass=&#x27;mage&#x27;;
+  for(const [key,def] of Object.entries(CLASSES)){
+    const card=button(&#x27;&#x27;,()=&gt;{selectedClass=key;for(const b of $(&#x27;#ek-classes&#x27;).children)b.setAttribute(&#x27;aria-pressed&#x27;,String(b.dataset.class===key));});
+    card.dataset.class=key;card.setAttribute(&#x27;aria-pressed&#x27;,String(key===selectedClass));card.style.setProperty(&#x27;--class-color&#x27;,def.color);
+    card.append(node(&#x27;span&#x27;,&#x27;ek-class-sigil&#x27;,{mage:&#x27;❄&#x27;,rogue:&#x27;➶&#x27;,warrior:&#x27;†&#x27;}[key]),node(&#x27;strong&#x27;,&#x27;&#x27;,def.name),node(&#x27;small&#x27;,&#x27;&#x27;,def.title),node(&#x27;span&#x27;,&#x27;&#x27;,def.detail));$(&#x27;#ek-classes&#x27;).append(card);
+  }
+  $(&#x27;#ek-destiny&#x27;).onsubmit=e=&gt;{e.preventDefault();if(game.specialize($(&#x27;#ek-name&#x27;).value,selectedClass)){$(&#x27;#ek-name-error&#x27;).textContent=&#x27;&#x27;;keys={};refresh();}else $(&#x27;#ek-name-error&#x27;).textContent=&#x27;Escribí un nombre de 1 a 20 caracteres.&#x27;;};
   $(&#x27;#ek-panel&#x27;).onclick = $(&#x27;#ek-close&#x27;).onclick = $(&#x27;#ek-shop-build&#x27;).onclick = togglePanel;
-  $(&#x27;#ek-start&#x27;).onclick = () =&gt; { panel = false; keys = {}; game.reset(); refresh(); };
+  $(&#x27;#ek-start&#x27;).onclick = () =&gt; { panel = false; keys = {}; $(&#x27;#ek-name&#x27;).value=&#x27;&#x27;; game.reset(); refresh(); };
   $(&#x27;#ek-pause&#x27;).onclick = () =&gt; { keys = {}; game.paused = !game.paused; refresh(); };
   $(&#x27;#ek-enter-boss&#x27;).onclick = () =&gt; { game.enterBoss(); keys = {}; refresh(); };
   $(&#x27;#ek-open&#x27;).onclick = () =&gt; { game.openChest(); refresh(); };
@@ -1568,6 +1681,7 @@ html&gt;body{padding:0}&lt;/style&gt;
   for (const b of root.querySelectorAll(&#x27;[data-dir]&#x27;)) { b.onpointerdown = e =&gt; { e.preventDefault(); keys[b.dataset.dir] = true; b.setPointerCapture(e.pointerId); }; b.onpointerup = b.onpointercancel = () =&gt; { keys[b.dataset.dir] = false; }; }
   const map = { ArrowLeft: &#x27;left&#x27;, a: &#x27;left&#x27;, ArrowRight: &#x27;right&#x27;, d: &#x27;right&#x27;, ArrowUp: &#x27;up&#x27;, w: &#x27;up&#x27;, ArrowDown: &#x27;down&#x27;, s: &#x27;down&#x27; };
   document.addEventListener(&#x27;keydown&#x27;, e =&gt; {
+    if (/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)||game.mode===&#x27;awakening&#x27;) return;
     if (e.key === &#x27;Enter&#x27;) { e.preventDefault(); if (!e.repeat) togglePanel(); return; }
     if (e.key === &#x27;Escape&#x27; &amp;&amp; panel) { e.preventDefault(); togglePanel(); return; }
     if (panel) return;

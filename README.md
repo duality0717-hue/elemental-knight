@@ -1,4 +1,15 @@
-# Elemental Knight · La Cripta de Brasas — v0.4.1
+# Elemental Knight · La Cripta de Brasas — v0.5.0
+
+## v0.5.0 — El espejo de ceniza
+
+Estética original de animación clásica oscura: tinta, piedra envejecida, luz de velas, grano y niebla. El inventario se convierte en un grimorio con retrato equipado, marcos por rango, detalles de piezas y mochila manual.
+
+- Se conservan 18 esqueletos: 3, 4, 5 y 6 por sala. En la tercera, uno se reemplaza por un élite con 130 de vida y espada de 22 de daño; anuncia el golpe durante 0,75 segundos. Los demás conservan distancia y lanzan fuego.
+- El jefe es El Eco, una sombra del personaje con una copia visual de su equipo y 650 de vida. Alterna cinco bolas de hielo (12 de daño y ralentización), lluvia de flechas en una zona (18) y un arco de espada (28). Los ataques se anuncian antes de ejecutarse.
+- Al vencerlo se eligen nombre y especialización: Mago (+5 Energía), Rogue (+5 Agilidad) o Guerrero (+5 Fuerza). Esta versión desbloquea identidad y atributos; las habilidades propias de cada clase quedan para la próxima etapa. Luego se abre el cofre lujoso.
+- Se mantienen el RNG, los puntos, el oro y la curación por acierto. No hay regeneración pasiva. Nombre y clase duran esta partida, igual que el resto de la progresión.
+
+Validación: 21 pruebas de reglas y progresión con `node tests/game.test.cjs`. Reconstrucción: `node build.cjs`. Abrir `index.html` para jugar sin instalación.
 
 ## Cambios de v0.4.1 — Curación en combate
 

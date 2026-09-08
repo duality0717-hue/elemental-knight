@@ -17,13 +17,18 @@
     { slot: 'Collar', name: 'Corazón de invierno', group: 'Artefactos', detail: 'Recupera vida por baja', basePrice: 95 }
   ];
   const ROOMS = ['La entrada carbonizada', 'El osario', 'El santuario ardiente', 'Las forjas hundidas', 'El trono de ceniza'];
+  const CLASSES = {
+    mage: { name: 'Mago', attribute: 'energy', color: '#91d9ed', title: 'La voluntad del invierno', detail: '+5 Energía · Dominio arcano' },
+    rogue: { name: 'Rogue', attribute: 'agility', color: '#c5a6ef', title: 'El filo del silencio', detail: '+5 Agilidad · Precisión y velocidad' },
+    warrior: { name: 'Guerrero', attribute: 'strength', color: '#e6b17e', title: 'El juramento de hierro', detail: '+5 Fuerza · Poder cuerpo a cuerpo' }
+  };
   const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
   class Game {
     constructor(random = Math.random) { this.random = random; this.reset(); this.mode = 'ready'; }
     reset() {
       this.nextId = 1; this.room = 1; this.kills = 0; this.mode = 'play'; this.paused = false;
       this.time = 0; this.attack = 0; this.cooldown = 0; this.dashTime = 0; this.dashCooldown = 0;
-      this.hero = { x: 54, y: 136, face: 0, hp: 100, stamina: 52, gold: 0, points: 0, inv: 1.5,
+      this.hero = { x: 54, y: 136, face: 0, hp: 100, stamina: 52, gold: 0, points: 0, inv: 1.5, slow: 0, name: '', specialization: null,
         attributes: { strength: 1, energy: 1, vitality: 1, agility: 1 } };
       this.bag = []; this.equipped = Array(8).fill(null); this.stock = []; this.boss = null;
       this.effects = []; this.notices = []; this.revision = 0; this.rewardClaimed = false;
@@ -47,7 +52,9 @@
       this.shots = []; this.hazards = []; this.effects = []; this.notices = [];
       this.chests = [{ x: 70, y: 60 }, { x: 236, y: 218 }, { x: 412, y: 64 }].map(p => ({ ...p, open: false }));
       this.enemies = Array.from({ length: this.room + 2 }, (_, i) => ({ x: 240 + (i % 2) * 110, y: 55 + Math.floor(i / 2) * 52,
-        hp: 44 + this.room * 7, max: 44 + this.room * 7, slow: 0, fire: 2.5 + i * .75, warning: false }));
+        hp: this.room === 3 && i === 0 ? 130 : 44 + this.room * 7, max: this.room === 3 && i === 0 ? 130 : 44 + this.room * 7,
+        kind: this.room === 3 && i === 0 ? 'elite' : 'caster', slow: 0, fire: 2.5 + i * .75, warning: false,
+        phase: 'chase', timer: 1, face: Math.PI, swing: 0 }));
       this.revision++;
     }
     active() { return !this.paused && ['play', 'boss'].includes(this.mode); }
@@ -127,7 +134,7 @@
       for (const e of this.enemies) {
         const dx = e.x - this.hero.x, dy = e.y - this.hero.y, distance = Math.hypot(dx, dy);
         const dot = (dx * Math.cos(this.hero.face) + dy * Math.sin(this.hero.face)) / (distance || 1);
-        if (e.hp > 0 && distance < s.range && (dot > -.15 || distance < 17)) {
+        if (e.hp > 0 && distance < s.range + (e.kind === 'elite' ? 7 : 0) && (dot > -.15 || distance < 17)) {
           damageDealt += Math.min(e.hp, s.damage + (s.frost ? 10 : 0));
           e.hp -= s.damage + (s.frost ? 10 : 0); e.slow = this.rank(4) ? 1.6 : 0;
           e.x = clamp(e.x + Math.cos(this.hero.face) * 11, 22, 458); e.y = clamp(e.y + Math.sin(this.hero.face) * 11, 32, 243);
@@ -138,11 +145,11 @@
       if (previous && !this.enemies.length) { this.shots = []; this.hero.hp = Math.min(s.maxHp, this.hero.hp + 35); this.say('Sala despejada · +35 de vida. Revisá los cofres antes de avanzar.'); }
       if (this.mode === 'boss' && this.boss.hp > 0) {
         const dx = this.boss.x - this.hero.x, dy = this.boss.y - this.hero.y, dist = Math.hypot(dx, dy);
-        if (dist < s.range + 27 && (dx * Math.cos(this.hero.face) + dy * Math.sin(this.hero.face)) / (dist || 1) > -.1) {
+        if (dist < s.range + 12 && (dx * Math.cos(this.hero.face) + dy * Math.sin(this.hero.face)) / (dist || 1) > -.1) {
           damageDealt += Math.min(this.boss.hp, s.damage);
           this.boss.hp = Math.max(0, this.boss.hp - s.damage);
           this.boss.hit = .15;
-          if (!this.boss.hp) { this.mode = 'reward'; this.shots = []; this.hazards = []; this.chests = [{ x: 330, y: 136, open: false, luxury: true }]; this.say('¡Cayó Terragrán! Acercate al cofre lujoso y abrilo con E.'); }
+          if (!this.boss.hp) { this.mode = 'awakening'; this.shots = []; this.hazards = []; this.chests = [{ x: 330, y: 136, open: false, luxury: true }]; this.say('Tu sombra cayó. Elegí tu nombre y tu especialización.'); }
         }
       }
       // One recovery per successful swing, even when it hits multiple targets.
@@ -166,7 +173,7 @@
       const pool = ITEMS.map((_, i) => i); this.stock = [];
       for (let i = 0; i < 6; i++) { const slot = pool.splice(Math.floor(this.random() * pool.length), 1)[0], rank = this.random() < .3 ? 2 : 1;
         this.stock.push({ ...this.gear(slot, rank), price: ITEMS[slot].basePrice + (rank - 1) * 35, sold: false }); }
-      this.say('Tienda de la quinta sala · Vida y energía restauradas. Comprá piezas y equipalas antes del dragón.');
+      this.say('Tienda de la quinta sala · Vida y energía restauradas. Prepará tu build: tu sombra te espera.');
     }
     buy(id) {
       if (this.mode !== 'shop') return false;
@@ -178,8 +185,20 @@
       if (this.mode !== 'shop') return false;
       this.mode = 'boss'; this.paused = false; this.enemies = []; this.chests = []; this.shots = []; this.hazards = [];
       this.hero.x = 70; this.hero.y = 136; this.hero.face = 0; this.hero.inv = 2;
-      this.boss = { x: 335, y: 136, hp: 650, max: 650, timer: 1.4, phase: 'rest', cycle: 0, hit: 0, target: null };
-      this.say('Terragrán, dragón de tierra · Salí de los círculos antes del impacto. Shift permite esquivar.'); return true;
+      this.boss = { x: 335, y: 136, hp: 650, max: 650, timer: 1.4, phase: 'rest', cycle: 0, hit: 0, target: null,
+        style: 'mage', face: Math.PI, swing: 0, equipment: this.equipped.map(i => i ? { ...i } : null) };
+      this.say('EL ECO · Tu propia sombra. Hielo, lluvia de flechas y espada. Mirá las señales antes de atacar.'); return true;
+    }
+    specialize(name, specialization) {
+      if (this.mode !== 'awakening' || this.hero.specialization || !CLASSES[specialization] || typeof name !== 'string') return false;
+      const clean = name.trim();
+      if (!clean || Array.from(clean).length > 20 || /[\u0000-\u001f\u007f]/.test(clean)) { this.say('Elegí un nombre de 1 a 20 caracteres.'); return false; }
+      const before = this.stats(), key = CLASSES[specialization].attribute;
+      this.hero.name = clean; this.hero.specialization = specialization;
+      this.hero.attributes[key] = Math.min(100, this.hero.attributes[key] + 5);
+      this.hero.stamina += this.stats().maxEnergy - before.maxEnergy;
+      this.mode = 'reward'; this.paused = false;
+      this.say(clean + ', ' + CLASSES[specialization].name + ': tu camino acaba de comenzar. Abrí el cofre lujoso con E.'); return true;
     }
     advance() {
       if (this.mode !== 'play' || this.enemies.length) return false;
@@ -188,45 +207,77 @@
       return true;
     }
     bossTick(dt) {
-      const b = this.boss; b.hit = Math.max(0, b.hit - dt); b.timer -= dt;
-      if (b.timer <= 0) {
-        if (b.phase === 'rest') { b.phase = 'warning'; b.timer = 1; b.target = { x: this.hero.x, y: this.hero.y }; this.hazards.push({ ...b.target, radius: 35, timer: 1, life: 1.25, fired: false }); }
-        else { b.phase = 'rest'; b.timer = b.hp < b.max / 2 ? 1.4 : 2; b.cycle++;
-          const base = Math.atan2(this.hero.y - b.y, this.hero.x - b.x);
-          for (const offset of [-.35, 0, .35]) this.shots.push({ x: b.x - 12, y: b.y, vx: Math.cos(base + offset) * 72, vy: Math.sin(base + offset) * 72, life: 6, earth: true }); }
+      const b = this.boss; b.hit = Math.max(0, b.hit - dt); b.swing = Math.max(0, b.swing - dt); b.timer -= dt;
+      const dx = this.hero.x - b.x, dy = this.hero.y - b.y, distance = Math.hypot(dx, dy) || 1;
+      if (b.phase === 'rest') {
+        b.face = Math.atan2(dy, dx);
+        const meleeNext = b.cycle % 3 === 2, desired = meleeNext ? 48 : 115;
+        const move = distance > desired + 10 ? 1 : distance < desired - 25 ? -1 : 0;
+        b.x = clamp(b.x + dx / distance * move * 38 * dt, 36, 444); b.y = clamp(b.y + dy / distance * move * 38 * dt, 50, 228);
       }
-      if (Math.hypot(this.hero.x - b.x, this.hero.y - b.y) < 34) this.hurt(18);
-      for (const h of this.hazards) { h.timer -= dt; h.life -= dt; if (h.timer <= 0 && !h.fired) { h.fired = true; if (Math.hypot(h.x - this.hero.x, h.y - this.hero.y) < h.radius) this.hurt(24); } }
+      if (b.timer <= 0) {
+        if (b.phase === 'rest') {
+          b.style = ['mage', 'rogue', 'warrior'][b.cycle % 3]; b.phase = 'warning'; b.timer = 1;
+          b.target = { x: this.hero.x, y: this.hero.y }; b.face = Math.atan2(dy, dx);
+          if (b.style === 'rogue') this.hazards.push({ ...b.target, type: 'arrows', radius: 42, timer: 1, life: 1.45, fired: false });
+          if (b.style === 'warrior') this.hazards.push({ x: b.x, y: b.y, type: 'sword', angle: b.face, radius: 72, timer: 1, life: 1.35, fired: false });
+          this.say(b.style === 'mage' ? 'SOMBRA · Mago: prepara bolas de hielo.' : b.style === 'rogue' ? 'SOMBRA · Rogue: salí de la zona de flechas.' : 'SOMBRA · Guerrero: esquivá el arco de la espada.');
+        } else {
+          if (b.style === 'mage') { const base = Math.atan2(b.target.y - b.y, b.target.x - b.x); for (const offset of [-.36, -.18, 0, .18, .36]) this.shots.push({ x: b.x, y: b.y - 6, vx: Math.cos(base + offset) * 90, vy: Math.sin(base + offset) * 90, life: 5, type: 'ice' }); }
+          if (b.style === 'warrior') b.swing = .35;
+          b.phase = 'rest'; b.timer = b.hp < b.max / 2 ? 1.6 : 2; b.cycle++;
+        }
+      }
+      for (const h of this.hazards) { h.timer -= dt; h.life -= dt; if (h.timer <= 0 && !h.fired) {
+        h.fired = true; const ax = this.hero.x - h.x, ay = this.hero.y - h.y, dist = Math.hypot(ax, ay);
+        const inArc = h.type !== 'sword' || (ax * Math.cos(h.angle) + ay * Math.sin(h.angle)) / (dist || 1) > .35;
+        if (dist < h.radius && inArc) this.hurt(h.type === 'sword' ? 28 : 18);
+      } }
       this.hazards = this.hazards.filter(h => h.life > 0);
+    }
+    eliteTick(e, dt) {
+      const dx = this.hero.x - e.x, dy = this.hero.y - e.y, distance = Math.hypot(dx, dy) || 1;
+      e.swing = Math.max(0, e.swing - dt); e.timer -= dt;
+      if (e.phase === 'windup') {
+        if (e.timer <= 0) { const dot = (dx * Math.cos(e.face) + dy * Math.sin(e.face)) / distance;
+          if (distance < 48 && dot > .2) this.hurt(22);
+          e.phase = 'recover'; e.timer = 1; e.swing = .3; e.warning = false;
+        }
+      } else if (e.phase === 'recover') { if (e.timer <= 0) e.phase = 'chase'; }
+      else { e.face = Math.atan2(dy, dx); if (distance > 30) { e.x += dx / distance * (e.slow > 0 ? 13 : 32) * dt; e.y += dy / distance * (e.slow > 0 ? 13 : 32) * dt; }
+        if (distance < 48) { e.phase = 'windup'; e.timer = .75; e.warning = true; } }
     }
     tick(dt, keys = {}) {
       if (this.paused || !['play', 'boss', 'reward'].includes(this.mode)) return;
       this.time += dt; this.hero.inv = Math.max(0, this.hero.inv - dt); this.attack = Math.max(0, this.attack - dt);
       this.cooldown = Math.max(0, this.cooldown - dt); this.dashCooldown = Math.max(0, this.dashCooldown - dt);
+      this.hero.slow = Math.max(0, this.hero.slow - dt);
       const s = this.stats();
       this.hero.stamina = Math.min(s.maxEnergy, this.hero.stamina + dt * 15);
       let dx = (keys.right ? 1 : 0) - (keys.left ? 1 : 0), dy = (keys.down ? 1 : 0) - (keys.up ? 1 : 0), len = Math.hypot(dx, dy);
       if (len) this.hero.face = Math.atan2(dy, dx);
       if (this.dashTime > 0) { this.dashTime -= dt; dx = Math.cos(this.hero.face); dy = Math.sin(this.hero.face); len = 1; }
-      if (len) { const speed = this.dashTime > 0 ? 270 : s.speed; this.hero.x = clamp(this.hero.x + dx / len * speed * dt, 20, 460); this.hero.y = clamp(this.hero.y + dy / len * speed * dt, 32, 243); }
+      if (len) { const speed = this.dashTime > 0 ? 270 : s.speed * (this.hero.slow > 0 ? .7 : 1); this.hero.x = clamp(this.hero.x + dx / len * speed * dt, 20, 460); this.hero.y = clamp(this.hero.y + dy / len * speed * dt, 32, 243); }
       if (keys.hit) this.strike();
       for (const e of this.enemies) {
         if (!this.active()) break;
         e.slow = Math.max(0, e.slow - dt); const ax = this.hero.x - e.x, ay = this.hero.y - e.y, distance = Math.hypot(ax, ay) || 1;
+        if (e.kind === 'elite') { this.eliteTick(e, dt); continue; }
         const speed = e.slow > 0 ? 12 : 20 + this.room * 2;
-        if (distance > 15) { e.x += ax / distance * speed * dt; e.y += ay / distance * speed * dt; }
+        const direction = distance > 115 ? 1 : distance < 65 ? -1 : 0;
+        e.x = clamp(e.x + ax / distance * speed * dt * direction, 22, 458); e.y = clamp(e.y + ay / distance * speed * dt * direction, 36, 243);
         if (distance < 17) this.hurt();
         e.fire -= dt; e.warning = e.fire < .5;
         if (e.fire < 0 && this.active()) { e.fire = 3.8 + this.random(); this.shots.push({ x: e.x, y: e.y, vx: ax / distance * 66, vy: ay / distance * 66, life: 5 }); }
       }
       if (this.mode === 'boss') this.bossTick(dt);
       for (const p of this.shots) { p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt;
-        if (Math.hypot(p.x - this.hero.x, p.y - this.hero.y) < 10 && this.active()) { this.hurt(p.earth ? 18 : 10 + this.room); p.life = 0; } }
+        if (Math.hypot(p.x - this.hero.x, p.y - this.hero.y) < 10 && this.active()) { const hit = this.hurt(p.type === 'ice' ? 12 : 10 + this.room); if (hit && p.type === 'ice') this.hero.slow = 1.2; p.life = 0; } }
       this.shots = this.shots.filter(p => p.life > 0 && p.x > 16 && p.x < 464 && p.y > 24 && p.y < 252);
       for (const n of this.notices) { n.life -= dt; n.y -= dt * 10; } this.notices = this.notices.filter(n => n.life > 0);
       if (this.mode === 'play' && !this.enemies.length && this.hero.x > 445 && Math.abs(this.hero.y - 136) < 25) this.advance();
     }
   }
-  scope.ElementalEngine = { Game, ITEMS, ATTRS, ROOMS };
+  scope.ElementalEngine = { Game, ITEMS, ATTRS, ROOMS, CLASSES };
   if (typeof module !== 'undefined' && module.exports) module.exports = scope.ElementalEngine;
 })(globalThis);

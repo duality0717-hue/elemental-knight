@@ -1,7 +1,7 @@
 (() => {
   'use strict';
   const root = document.getElementById('ember-dungeon'), $ = selector => root.querySelector(selector);
-  const { Game, ITEMS, ATTRS } = globalThis.ElementalEngine, game = new Game();
+  const { Game, ITEMS, ATTRS, CLASSES } = globalThis.ElementalEngine, game = new Game();
   const canvas = $('#ek-canvas'), painter = new globalThis.ElementalPainter(canvas);
   let panel = false, pausedBeforePanel = false, keys = {}, last = 0, lastRevision = -1, hudTimer = 0;
   const node = (tag, className, text) => { const e = document.createElement(tag); if (className) e.className = className; if (text !== undefined) e.textContent = text; return e; };
@@ -16,12 +16,14 @@
     $('#ek-life').textContent = 'Vida ' + Math.ceil(h.hp) + '/' + s.maxHp;
     $('#ek-energy').textContent = 'Energía ' + Math.floor(h.stamina) + '/' + s.maxEnergy;
     $('#ek-gold').textContent = h.gold + ' oro'; $('#ek-points').textContent = h.points + ' puntos libres';
-    $('#ek-room').textContent = 'Nivel ' + s.level + ' · Sala ' + game.room + '/5' + (game.boss ? ' · Dragón' : '');
+    $('#ek-room').textContent = 'Nivel ' + s.level + ' · Sala ' + game.room + '/5' + (game.boss ? ' · La sombra' : '');
     const odds = game.chances();
     $('#ek-chances').textContent = 'Cofres: equipo ' + Math.round(odds.gear * 100) + '% · poción ' + Math.round(odds.potion * 100) + '% · resto oro';
     $('#ek-kills').textContent = 'Esqueletos ' + game.kills + '/18';
   }
   function inventory() {
+    painter.portrait($('#ek-portrait'),game);
+    $('#ek-identity').textContent=game.hero.specialization?CLASSES[game.hero.specialization].name+' · '+CLASSES[game.hero.specialization].title:'Sin especialización · Nivel '+game.stats().level;
     const statBox = $('#ek-stat-list'); statBox.replaceChildren();
     $('#ek-available').textContent = game.hero.points + ' puntos disponibles para distribuir';
     for (const [key, def] of Object.entries(ATTRS)) {
@@ -40,6 +42,7 @@
     ITEMS.forEach((def, slot) => {
       const item = game.equipped[slot], card = node('div', 'ek-slot');
       card.append(node('span', 'ek-slot-label', def.group + ' · ' + def.slot), icon(item || { kind: 'empty', slot }), node('span', 'ek-item-name' + (!item ? ' ek-empty' : ''), item ? game.itemName(item) : 'Vacío'));
+      if(item){card.dataset.rank=item.rank;card.append(node('small','ek-item-detail',ITEMS[slot].detail+' · Rango '+item.rank));}
       if (item) card.append(button('Quitar', () => game.unequip(slot), !game.canManage(), 'Quitar ' + def.name));
       slotBox.append(card);
     });
@@ -69,7 +72,8 @@
   }
   function refresh() {
     const focused = document.activeElement?.getAttribute?.('aria-label');
-    $('#ek-world').hidden = panel || game.mode === 'shop'; $('#ek-character').hidden = !panel; $('#ek-shop').hidden = panel || game.mode !== 'shop';
+    $('#ek-world').hidden = panel || ['shop','awakening'].includes(game.mode); $('#ek-character').hidden = !panel; $('#ek-shop').hidden = panel || game.mode !== 'shop';
+    $('#ek-awakening').hidden=panel || game.mode!=='awakening';
     $('#ek-panel').setAttribute('aria-expanded', String(panel)); $('#ek-message').textContent = game.message;
     $('#ek-start').textContent = game.mode === 'ready' ? 'Entrar a la cripta' : 'Reiniciar';
     $('#ek-attack').textContent = (game.rank(4) ? 'Espada' : 'Puños') + ' · Espacio';
@@ -88,8 +92,15 @@
     refresh();
     if (panel) { $('#ek-close').focus({ preventScroll: true }); $('#ek-character').scrollIntoView({ block: 'start' }); }
   }
+  let selectedClass='mage';
+  for(const [key,def] of Object.entries(CLASSES)){
+    const card=button('',()=>{selectedClass=key;for(const b of $('#ek-classes').children)b.setAttribute('aria-pressed',String(b.dataset.class===key));});
+    card.dataset.class=key;card.setAttribute('aria-pressed',String(key===selectedClass));card.style.setProperty('--class-color',def.color);
+    card.append(node('span','ek-class-sigil',{mage:'❄',rogue:'➶',warrior:'†'}[key]),node('strong','',def.name),node('small','',def.title),node('span','',def.detail));$('#ek-classes').append(card);
+  }
+  $('#ek-destiny').onsubmit=e=>{e.preventDefault();if(game.specialize($('#ek-name').value,selectedClass)){$('#ek-name-error').textContent='';keys={};refresh();}else $('#ek-name-error').textContent='Escribí un nombre de 1 a 20 caracteres.';};
   $('#ek-panel').onclick = $('#ek-close').onclick = $('#ek-shop-build').onclick = togglePanel;
-  $('#ek-start').onclick = () => { panel = false; keys = {}; game.reset(); refresh(); };
+  $('#ek-start').onclick = () => { panel = false; keys = {}; $('#ek-name').value=''; game.reset(); refresh(); };
   $('#ek-pause').onclick = () => { keys = {}; game.paused = !game.paused; refresh(); };
   $('#ek-enter-boss').onclick = () => { game.enterBoss(); keys = {}; refresh(); };
   $('#ek-open').onclick = () => { game.openChest(); refresh(); };
@@ -100,6 +111,7 @@
   for (const b of root.querySelectorAll('[data-dir]')) { b.onpointerdown = e => { e.preventDefault(); keys[b.dataset.dir] = true; b.setPointerCapture(e.pointerId); }; b.onpointerup = b.onpointercancel = () => { keys[b.dataset.dir] = false; }; }
   const map = { ArrowLeft: 'left', a: 'left', ArrowRight: 'right', d: 'right', ArrowUp: 'up', w: 'up', ArrowDown: 'down', s: 'down' };
   document.addEventListener('keydown', e => {
+    if (/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)||game.mode==='awakening') return;
     if (e.key === 'Enter') { e.preventDefault(); if (!e.repeat) togglePanel(); return; }
     if (e.key === 'Escape' && panel) { e.preventDefault(); togglePanel(); return; }
     if (panel) return;
