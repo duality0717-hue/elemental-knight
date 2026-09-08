@@ -1,7 +1,8 @@
 <div id="ember-dungeon">
-  <header class="ek-header"><div><span class="ek-eyebrow">ELEMENTAL KNIGHT</span><h2>La Cripta de Brasas</h2></div><span class="ek-version">v0.5.0 · El espejo de ceniza</span></header>
+  <header class="ek-header"><div><span class="ek-eyebrow">ELEMENTAL KNIGHT</span><h2 id="ek-title">La Cripta de Brasas</h2></div><span class="ek-version">v0.6.0 · La catedral de la peste</span></header>
   <div class="ek-hud"><span id="ek-life"></span><span id="ek-energy"></span><span id="ek-gold"></span><span id="ek-points"></span><span id="ek-room"></span></div>
-  <div id="ek-world"><canvas id="ek-canvas" width="1440" height="816" aria-label="Mazmorra de dibujos animados. Aventurero, esqueletos de fuego y tu propia sombra."></canvas></div>
+  <div id="ek-world"><canvas id="ek-canvas" width="1440" height="816" aria-label="Catedral gótica en penumbras. Explorá las puertas, esquivá los ataques y derrotá a los enemigos."></canvas></div>
+  <section id="ek-exploration" hidden aria-label="Exploración de la sala"><div><span class="ek-eyebrow">CARTOGRAFÍA DEL DESCENSO</span><h3 id="ek-location"></h3><p id="ek-route"></p><p class="ek-muted">Caminá hasta una puerta para cruzarla. Los anexos pertenecen a la misma sala. El umbral dorado lleva a la siguiente.</p><p id="ek-class-help"></p></div><div><div id="ek-map" role="img" aria-label="Mapa de los anexos descubiertos"></div><p class="ek-map-legend">◆ Vos · ○ Explorado · ? Sin explorar · ✦ Umbral</p></div></section>
   <section id="ek-character" hidden aria-label="Atributos, equipo y mochila">
     <div class="ek-panel-top"><div><span class="ek-eyebrow">EL GRIMORIO DEL VIAJERO</span><h2>Tu alma, tu arsenal</h2></div><button type="button" id="ek-close">Cerrar · Enter</button></div>
     <div class="ek-character-grid">
@@ -21,7 +22,7 @@
     <span class="ek-eyebrow">LA SOMBRA HA CAÍDO</span><h2>Ahora, elegí quién sos.</h2><p>De las cenizas de tu reflejo nacen tres caminos.</p>
     <form id="ek-destiny"><label for="ek-name">El nombre de tu personaje</label><input id="ek-name" maxlength="20" required placeholder="Escribí tu nombre" autocomplete="off"><div id="ek-classes"></div><p id="ek-name-error" role="alert"></p><button class="ek-primary" type="submit">Sellar mi destino →</button></form>
   </section>
-  <div class="ek-actions"><button type="button" class="ek-primary" id="ek-start">Entrar a la cripta</button><button type="button" id="ek-attack">Atacar · Espacio</button><button type="button" id="ek-open">Cofre · E</button><button type="button" id="ek-dash">Esquivar · Shift</button><button type="button" id="ek-panel" aria-expanded="false">Personaje · Enter</button><button type="button" id="ek-pause">Pausa</button></div>
+  <div class="ek-actions"><button type="button" class="ek-primary" id="ek-next-chapter" hidden>Descender al capítulo II →</button><button type="button" class="ek-primary" id="ek-start">Entrar a la cripta</button><button type="button" id="ek-attack">Atacar · Espacio</button><button type="button" id="ek-open">Cofre · E</button><button type="button" id="ek-dash">Esquivar · Shift</button><button type="button" id="ek-panel" aria-expanded="false">Personaje · Enter</button><button type="button" id="ek-pause">Pausa</button></div>
   <div class="ek-controls"><div class="ek-pad"><button type="button" data-dir="left" aria-label="Izquierda">←</button><button type="button" data-dir="up" aria-label="Arriba">↑</button><button type="button" data-dir="down" aria-label="Abajo">↓</button><button type="button" data-dir="right" aria-label="Derecha">→</button></div><span>WASD / flechas · Espacio: atacar · Shift: esquivar</span></div>
   <p id="ek-message" aria-live="polite"></p><div class="ek-footer"><span id="ek-chances"></span><span id="ek-kills"></span></div>
 </div>

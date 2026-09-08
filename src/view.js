@@ -16,10 +16,11 @@
     $('#ek-life').textContent = 'Vida ' + Math.ceil(h.hp) + '/' + s.maxHp;
     $('#ek-energy').textContent = 'Energía ' + Math.floor(h.stamina) + '/' + s.maxEnergy;
     $('#ek-gold').textContent = h.gold + ' oro'; $('#ek-points').textContent = h.points + ' puntos libres';
-    $('#ek-room').textContent = 'Nivel ' + s.level + ' · Sala ' + game.room + '/5' + (game.boss ? ' · La sombra' : '');
+    $('#ek-room').textContent = 'Cap. ' + game.chapter + ' · Nivel ' + s.level + ' · Sala ' + game.room + '/5';
+    $('#ek-life').classList.toggle('ek-poisoned',game.hero.poison>0);
     const odds = game.chances();
     $('#ek-chances').textContent = 'Cofres: equipo ' + Math.round(odds.gear * 100) + '% · poción ' + Math.round(odds.potion * 100) + '% · resto oro';
-    $('#ek-kills').textContent = 'Esqueletos ' + game.kills + '/18';
+    $('#ek-kills').textContent = 'Esqueletos del capítulo ' + game.chapterKills + '/18';
   }
   function inventory() {
     painter.portrait($('#ek-portrait'),game);
@@ -74,9 +75,14 @@
     const focused = document.activeElement?.getAttribute?.('aria-label');
     $('#ek-world').hidden = panel || ['shop','awakening'].includes(game.mode); $('#ek-character').hidden = !panel; $('#ek-shop').hidden = panel || game.mode !== 'shop';
     $('#ek-awakening').hidden=panel || game.mode!=='awakening';
+    $('#ek-title').textContent=game.chapter===2?'La catedral de la peste':'La Cripta de Brasas';
+    $('#ek-next-chapter').hidden=panel||game.mode!=='chapter-complete';
+    $('#ek-exploration').hidden=panel||game.chapter!==2||!game.zones||game.mode!=='play';
+    if(!$('#ek-exploration').hidden)exploration();
+    $('#ek-enter-boss').textContent=game.chapter===2?'Enfrentar al guerrero de la peste →':'Enfrentar a mi sombra →';
     $('#ek-panel').setAttribute('aria-expanded', String(panel)); $('#ek-message').textContent = game.message;
     $('#ek-start').textContent = game.mode === 'ready' ? 'Entrar a la cripta' : 'Reiniciar';
-    $('#ek-attack').textContent = (game.rank(4) ? 'Espada' : 'Puños') + ' · Espacio';
+    $('#ek-attack').textContent = (game.chapter===2&&game.hero.specialization==='mage'?'Hielo':game.chapter===2&&game.hero.specialization==='rogue'?'Flecha':game.rank(4)?'Espada':'Puños') + ' · Espacio';
     $('#ek-attack').disabled = !game.active(); $('#ek-dash').disabled = !game.active();
     $('#ek-open').disabled = panel || !['play', 'reward'].includes(game.mode);
     $('#ek-pause').disabled = panel || !['play', 'boss', 'reward'].includes(game.mode);
@@ -84,6 +90,17 @@
     updateHud(); if (panel) inventory(); if (game.mode === 'shop' && !panel) shop();
     if (panel && focused) { for (const b of root.querySelectorAll('[aria-label]')) if (b.getAttribute('aria-label') === focused && !b.disabled) { b.focus({ preventScroll: true }); break; } }
     lastRevision = game.revision;
+  }
+  function exploration(){
+    const z=game.zones[game.zoneId],dirs={up:'arriba',right:'derecha',down:'abajo',left:'izquierda'};
+    $('#ek-location').textContent='Sala '+game.room+' · '+z.name;
+    $('#ek-route').textContent=game.enemies.length?(game.enemies.length===1?'Derrotá al enemigo':'Derrotá a los '+game.enemies.length+' enemigos')+' para abrir las puertas.':'Puertas abiertas: '+Object.keys(z.doors).map(d=>dirs[d]).join(' · ')+'.';
+    $('#ek-class-help').textContent=CLASSES[game.hero.specialization].name+' · '+({mage:'Lanzás hielo que ralentiza a los esbirros.',rogue:'Disparás flechas rápidas a distancia.',warrior:'Tu espada conserva el daño, alcance y efectos de tus artefactos.'}[game.hero.specialization])+' Apuntá con la dirección de movimiento o un clic en la mazmorra.';
+    const visible=Object.values(game.zones).filter(n=>n.visited||Object.values(game.zones).some(v=>v.visited&&Object.values(v.doors).includes(n.id)));
+    const minX=Math.min(...visible.map(n=>n.x)),minY=Math.min(...visible.map(n=>n.y)),maxX=Math.max(...visible.map(n=>n.x)),maxY=Math.max(...visible.map(n=>n.y));
+    const map=$('#ek-map');map.replaceChildren();map.style.gridTemplateColumns='repeat('+(maxX-minX+1)+',28px)';map.style.gridTemplateRows='repeat('+(maxY-minY+1)+',28px)';
+    for(const n of visible){const tile=node('span','ek-map-cell'+(n.id===z.id?' ek-current':n.visited?' ek-visited':''),n.id===z.id?'◆':!n.visited?'?':n.id==='exit'?'✦':'○');tile.style.gridColumn=n.x-minX+1;tile.style.gridRow=n.y-minY+1;tile.title=n.visited?n.name:'Anexo sin explorar';map.append(tile);}
+    map.setAttribute('aria-label',visible.filter(n=>n.visited).length+' de 7 anexos explorados. Ubicación: '+z.name);
   }
   function togglePanel() {
     keys = {};
@@ -101,6 +118,7 @@
   $('#ek-destiny').onsubmit=e=>{e.preventDefault();if(game.specialize($('#ek-name').value,selectedClass)){$('#ek-name-error').textContent='';keys={};refresh();}else $('#ek-name-error').textContent='Escribí un nombre de 1 a 20 caracteres.';};
   $('#ek-panel').onclick = $('#ek-close').onclick = $('#ek-shop-build').onclick = togglePanel;
   $('#ek-start').onclick = () => { panel = false; keys = {}; $('#ek-name').value=''; game.reset(); refresh(); };
+  $('#ek-next-chapter').onclick=()=>{keys={};panel=false;game.beginChapter2();refresh();};
   $('#ek-pause').onclick = () => { keys = {}; game.paused = !game.paused; refresh(); };
   $('#ek-enter-boss').onclick = () => { game.enterBoss(); keys = {}; refresh(); };
   $('#ek-open').onclick = () => { game.openChest(); refresh(); };
@@ -112,6 +130,7 @@
   const map = { ArrowLeft: 'left', a: 'left', ArrowRight: 'right', d: 'right', ArrowUp: 'up', w: 'up', ArrowDown: 'down', s: 'down' };
   document.addEventListener('keydown', e => {
     if (/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)||game.mode==='awakening') return;
+    if(e.key==='Enter'&&['ek-next-chapter','ek-start'].includes(e.target.id))return;
     if (e.key === 'Enter') { e.preventDefault(); if (!e.repeat) togglePanel(); return; }
     if (e.key === 'Escape' && panel) { e.preventDefault(); togglePanel(); return; }
     if (panel) return;

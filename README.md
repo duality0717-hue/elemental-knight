@@ -1,4 +1,22 @@
-# Elemental Knight · La Cripta de Brasas — v0.5.0
+# Elemental Knight — v0.6.0
+
+## v0.6.0 — Capítulo II: La catedral de la peste
+
+Después de derrotar a tu sombra, elegir nombre y especialización y abrir su cofre, **Descender al capítulo II** continúa la partida con todos tus atributos, oro, puntos, mochila y equipo. El descenso restaura vida y energía. Reiniciar comienza una partida nueva desde el capítulo I; la progresión todavía no se guarda al cerrar o recargar.
+
+Las primeras cuatro salas del capítulo II son laberintos de **siete anexos cada una**: atrio con cuatro puertas, corredores con dos, un circuito y caminos sin salida. El mapa descubre los sectores al explorarlos. Cruzar una puerta común conserva el número de sala; solo el umbral dorado permite avanzar. La orientación varía entre salas y partidas. Hay que despejar los enemigos para abrir puertas. Los cofres abiertos y enemigos derrotados no reaparecen al regresar.
+
+Se mantienen **18 esqueletos por capítulo**, distribuidos 3/4/5/6 entre las cuatro salas. En la tercera, uno es un élite de espada con 190 de vida. Los tres cofres de cada sala están repartidos entre los anexos. El RNG sigue siendo equipo 5/10/15/20/25%, poción 15/25/35/45/55% y oro en el resto. La recuperación de 35 de vida se entrega una vez al despejar toda la sala, no por cada anexo.
+
+En el capítulo II, Mago lanza hielo que ralentiza a los esbirros, Rogue dispara flechas y Guerrero mantiene el combate cuerpo a cuerpo con los efectos de su equipo. Espacio ataca; la dirección de movimiento o un clic en el escenario determina hacia dónde. Los proyectiles del jugador curan solo al acertar, con los mismos límites que la espada.
+
+La sala 5 conserva la tienda antes del jefe. **Mórtigo**, un guerrero gigante de 1000 de vida, alterna espadazos envenenados, charcos de miasma y salvas de veneno. Los ataques se anuncian durante 1,1 segundos. El veneno dura cuatro segundos, no se acumula y se congela al pausar. **El Eco aparece como aliado**: te sigue y dispara al jefe, sin dañarte ni activar tu curación. Puede dar el golpe final. La victoria entrega un cofre lujoso y conserva tu identidad.
+
+El escenario se redibujó como una catedral gótica oscura: vidrieras rotas, contrafuertes, estatuas encapuchadas, cadenas, huesos, telarañas, luz lunar y velas. Los esbirros tienen túnicas y siluetas más sombrías; Mórtigo tiene ilustración propia de armadura, hombreras con púas y espada que gotea veneno. El rediseño también alcanza al capítulo I.
+
+**Verificación:** `node tests/game.test.cjs` y `node tests/chapter2.test.cjs` (29 pruebas); `node build.cjs` reconstruye el juego. `node tests/preview.cjs` genera escenarios de revisión en `.qa/`, excluidos del juego publicado. Abrí `index.html` para jugar sin instalación.
+
+---
 
 ## v0.5.0 — El espejo de ceniza
 

@@ -76,3 +76,13 @@
 #ember-dungeon #ek-classes strong{font:23px Georgia,serif;color:var(--class-color)}#ember-dungeon .ek-class-sigil{font:52px Georgia,serif;color:var(--class-color);text-shadow:0 0 25px var(--class-color)}
 #ember-dungeon #ek-classes small{color:#c1b29c}#ember-dungeon #ek-name-error{color:#f3a39c;margin:12px}
 @media(max-width:520px){#ember-dungeon #ek-classes{grid-template-columns:1fr}#ember-dungeon #ek-classes button{padding:15px}#ember-dungeon #ek-character{padding:12px}#ember-dungeon h2{font-size:23px}}
+
+#ember-dungeon{--ek-bg:#090f16;--ek-surface:#121c23;--ek-line:#3d4d4c;--ek-text:#d9d7c4;--ek-muted:#a1b0aa;--ek-gold:#c4b17c;background:radial-gradient(ellipse at top,#202a2d,#0a1018 65%);border-color:#56605a}
+#ember-dungeon .ek-header{border-color:#485751}#ember-dungeon #ek-canvas{border-color:#5d6860;box-shadow:0 12px 40px #0008;}
+#ember-dungeon .ek-poisoned{color:#c4e38c}#ember-dungeon #ek-exploration{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;padding:18px 14px;background:#101b22;border-bottom:1px solid #475b51}
+#ember-dungeon #ek-exploration h3{margin:5px 0 8px;font-size:17px}#ember-dungeon #ek-exploration p{font-size:12px;max-width:580px;margin:6px 0;color:#b7c5ba}
+#ember-dungeon #ek-class-help{color:#c9bc96!important}#ember-dungeon #ek-map{display:grid;gap:4px;justify-content:center;min-width:130px;margin:4px 0 8px}
+#ember-dungeon .ek-map-cell{display:grid;place-items:center;border:1px dashed #596b66;color:#81968d;background:#15202a;font-size:13px}
+#ember-dungeon .ek-map-cell.ek-visited{border-style:solid;color:#c1bfa5;background:#35453e}#ember-dungeon .ek-map-cell.ek-current{border:1px solid #d4c18a;color:#e6d7ac;background:#675c3b}
+#ember-dungeon .ek-map-legend{font-size:11px!important;text-align:center}
+@media(max-width:520px){#ember-dungeon #ek-exploration{grid-template-columns:1fr}#ember-dungeon #ek-map{justify-content:start}#ember-dungeon .ek-map-legend{text-align:left}}
