@@ -1,18 +1,19 @@
 <div id="ember-dungeon">
- <div class="viz-row" style="justify-content:space-between"><strong>LA CRIPTA DE BRASAS</strong><span class="text-small">Prototipo · pixel dungeon</span></div>
- <div class="viz-row tabular-nums" style="margin:10px 0;justify-content:space-between"><span id="ed-hp">Vida 100 / 100</span><span id="ed-room">Sala 1 / 3</span><span id="ed-kills">Esqueletos 0 / 12</span></div>
- <canvas width="480" height="272" aria-label="Mazmorra pixel art con un caballero de escarcha y esqueletos de fuego">Usá WASD o las flechas para caminar y Espacio para atacar.</canvas>
+ <div class="viz-row" style="justify-content:space-between"><strong>LA CRIPTA DE BRASAS</strong><span class="text-small">v0.2.0 · cofres y fortuna</span></div>
+ <div class="viz-row tabular-nums" style="margin:10px 0;justify-content:space-between"><span id="ed-hp">Vida 100 / 100</span><span id="ed-room">Sala 1 / 5</span><span id="ed-kills">Esqueletos 0 / 25</span><span id="ed-gold">Oro 0</span><span id="ed-chance">Equipo por cofre 5%</span></div>
+ <canvas width="480" height="272" aria-label="Mazmorra pixel art con un aventurero sin equipo y esqueletos de fuego">Usá WASD o las flechas para caminar y Espacio para atacar.</canvas>
  <div class="viz-controls" style="margin-top:10px">
-  <button class="btn btn-primary" id="ed-start" type="button">Entrar a la cripta</button><button class="btn" id="ed-hit" type="button">Espada · Espacio</button><button class="btn" id="ed-pause" type="button" disabled>Pausa</button><button class="btn" id="ed-bag" type="button" aria-expanded="false">Equipo · 8/8</button>
+  <button class="btn btn-primary" id="ed-start" type="button">Entrar a la cripta</button><button class="btn" id="ed-hit" type="button">Puños · Espacio</button><button class="btn" id="ed-chest" type="button">Abrir cofre · E</button><button class="btn" id="ed-pause" type="button" disabled>Pausa</button><button class="btn" id="ed-bag" type="button" aria-expanded="false">Equipo · 0/8</button>
  </div>
- <div class="viz-row" style="margin-top:8px"><button class="btn" data-dir="left" aria-label="Izquierda" type="button">←</button><button class="btn" data-dir="up" aria-label="Arriba" type="button">↑</button><button class="btn" data-dir="down" aria-label="Abajo" type="button">↓</button><button class="btn" data-dir="right" aria-label="Derecha" type="button">→</button><span class="text-small">WASD / flechas · Espacio: atacar</span></div>
- <div id="ed-message" aria-live="polite" style="margin-top:10px">Eliminá a los guardianes para abrir cada puerta.</div>
+ <div class="viz-row" style="margin-top:8px"><button class="btn" data-dir="left" aria-label="Izquierda" type="button">←</button><button class="btn" data-dir="up" aria-label="Arriba" type="button">↑</button><button class="btn" data-dir="down" aria-label="Abajo" type="button">↓</button><button class="btn" data-dir="right" aria-label="Derecha" type="button">→</button><span class="text-small">WASD / flechas · Espacio: atacar · E: cofre</span></div>
+ <div id="ed-message" aria-live="polite" style="margin-top:10px">Empezás sin equipo. Buscá cofres y ganá oro derrotando esqueletos.</div>
  <div id="ed-equipment" hidden style="margin-top:14px">
   <div class="viz-grid"><div><strong>Armadura · Guardián de hierro</strong><div id="ed-armor"></div></div><div><strong>Artefactos · Juramento de escarcha</strong><div id="ed-artifacts"></div></div></div>
   <div id="ed-stats" class="text-small" style="margin-top:10px"></div>
  </div>
 </div>
 <style>
+#ember-dungeon{max-width:840px;margin:0 auto}
 #ember-dungeon canvas{display:block;width:100%;height:auto;image-rendering:pixelated;touch-action:none;background:#11101c;margin-top:8px}
 #ember-dungeon .ed-slot{display:flex;gap:8px;align-items:center;margin-top:9px}
 #ember-dungeon .ed-slot span{display:block}
@@ -21,61 +22,92 @@
 (()=>{
  const root=document.getElementById('ember-dungeon'),q=s=>root.querySelector(s),canvas=q('canvas'),c=canvas.getContext('2d');
  const slots=[
-  {group:'armor',slot:'Pechera',name:'Coraza del guardián',desc:'−3 de daño recibido',on:true},
-  {group:'armor',slot:'Botas',name:'Botas del guardián',desc:'+16 de velocidad',on:true},
-  {group:'armor',slot:'Casco',name:'Yelmo del guardián',desc:'−2 de daño recibido',on:true},
-  {group:'armor',slot:'Guantes',name:'Guanteletes del guardián',desc:'+4 de daño',on:true},
-  {group:'artifacts',slot:'Arma',name:'Espada de escarcha',desc:'24 de daño · ralentiza',on:true},
-  {group:'artifacts',slot:'Anillo',name:'Anillo de hielo',desc:'+6 de daño',on:true},
-  {group:'artifacts',slot:'Pulsera',name:'Pulsera del deshielo',desc:'Ataques un 20% más rápidos',on:true},
-  {group:'artifacts',slot:'Collar',name:'Corazón de invierno',desc:'Recupera 6 de vida por baja',on:true}
+  {group:'armor',slot:'Pechera',name:'Coraza del guardián',desc:'−3 de daño recibido',on:false,owned:false},
+  {group:'armor',slot:'Botas',name:'Botas del guardián',desc:'+16 de velocidad',on:false,owned:false},
+  {group:'armor',slot:'Casco',name:'Yelmo del guardián',desc:'−2 de daño recibido',on:false,owned:false},
+  {group:'armor',slot:'Guantes',name:'Guanteletes del guardián',desc:'+4 de daño',on:false,owned:false},
+  {group:'artifacts',slot:'Arma',name:'Espada de escarcha',desc:'24 de daño · ralentiza',on:false,owned:false},
+  {group:'artifacts',slot:'Anillo',name:'Anillo de hielo',desc:'+6 de daño',on:false,owned:false},
+  {group:'artifacts',slot:'Pulsera',name:'Pulsera del deshielo',desc:'Ataques un 20% más rápidos',on:false,owned:false},
+  {group:'artifacts',slot:'Collar',name:'Corazón de invierno',desc:'Recupera 6 de vida por baja',on:false,owned:false}
  ];
- let state='ready',room=1,kills=0,t=0,last=0,hero,enemies=[],shots=[],fx=[],attack=0,cooldown=0,keys={},flash=0;
- const on=i=>slots[i].on;
- function stats(){return {damage:(on(4)?24:5)+(on(3)?4:0)+(on(5)?6:0),armor:(on(0)?3:0)+(on(2)?2:0)+(slots.slice(0,4).every(s=>s.on)?2:0),speed:68+(on(1)?16:0),delay:on(6)?.34:.43,frost:slots.slice(4).every(s=>s.on)};}
- function equipment(){for(const group of ['armor','artifacts']){const box=q('#ed-'+group);box.replaceChildren();slots.forEach((s,i)=>{if(s.group!==group)return;const label=document.createElement('label');label.className='form-check ed-slot';const input=document.createElement('input');input.type='checkbox';input.className='form-check-input';input.checked=s.on;input.onchange=()=>{s.on=input.checked;updateStats();};const span=document.createElement('span');const a=document.createElement('span');a.textContent=s.slot+' · '+s.name;const b=document.createElement('span');b.className='text-small';b.textContent=s.desc;span.append(a,b);label.append(input,span);box.append(label);});}updateStats();}
- function updateStats(){const s=stats();q('#ed-stats').textContent='Daño '+s.damage+' · Reducción de daño '+s.armor+' · Hierro 4/4: +2 de protección '+(slots.slice(0,4).every(s=>s.on)?'(activo)':'(inactivo)')+' · Escarcha 4/4: +10 contra esqueletos de fuego '+(s.frost?'(activo)':'(inactivo)');q('#ed-bag').textContent='Equipo · '+slots.filter(s=>s.on).length+'/8';}
+ const ROOM_NAMES=['La entrada carbonizada','El osario','El santuario ardiente','Las forjas hundidas','El trono de ceniza'];
+ const TOTAL_ROOMS=5,TOTAL_ENEMIES=25;
+ let state='ready',room=1,kills=0,t=0,last=0,hero,enemies=[],shots=[],fx=[],chests=[],popups=[],attack=0,cooldown=0,keys={},flash=0;
+ function lootChance(){return room*5/100;}
+ function goldReward(){return 4+room*2+Math.floor(Math.random()*5);}
+ const on=i=>slots[i].owned&&slots[i].on;
+ function stats(){return {damage:(on(4)?24:16)+(on(3)?4:0)+(on(5)?6:0),armor:(on(0)?3:0)+(on(2)?2:0)+(slots.slice(0,4).every(s=>s.on)?2:0),speed:84+(on(1)?16:0),delay:on(6)?.34:.43,frost:slots.slice(4).every(s=>s.on)};}
+ function equipment(){for(const group of ['armor','artifacts']){const box=q('#ed-'+group);box.replaceChildren();slots.forEach((s,i)=>{if(s.group!==group)return;const label=document.createElement('label');label.className='form-check ed-slot';const input=document.createElement('input');input.type='checkbox';input.className='form-check-input';input.checked=s.on;input.disabled=!s.owned;input.onchange=()=>{s.on=s.owned&&input.checked;updateStats();};const span=document.createElement('span');const a=document.createElement('span');a.textContent=s.slot+' · '+(s.owned?s.name:'Vacío');const b=document.createElement('span');b.className='text-small';b.textContent=s.owned?s.desc:'Por descubrir en un cofre';span.append(a,b);label.append(input,span);box.append(label);});}updateStats();}
+ function updateStats(){const s=stats();q('#ed-hit').textContent=(on(4)?'Espada':'Puños')+' · Espacio';q('#ed-stats').textContent='Daño '+s.damage+' · Reducción de daño '+s.armor+' · Hierro 4/4: +2 de protección '+(slots.slice(0,4).every(s=>s.on)?'(activo)':'(inactivo)')+' · Escarcha 4/4: +10 contra esqueletos de fuego '+(s.frost?'(activo)':'(inactivo)');q('#ed-bag').textContent='Equipo · '+slots.filter(s=>s.on).length+'/8';}
  function message(s){q('#ed-message').textContent=s;}
- function hud(){q('#ed-hp').textContent='Vida '+Math.ceil(hero.hp)+' / 100';q('#ed-room').textContent='Sala '+room+' / 3';q('#ed-kills').textContent='Esqueletos '+kills+' / 12';}
- function spawnRoom(){hero.x=54;hero.y=136;hero.face=0;hero.inv=1;shots=[];fx=[];enemies=Array.from({length:room+2},(_,i)=>({x:240+(i%2)*115,y:53+Math.floor(i/2)*65,hp:room===3?100:80,max:room===3?100:80,slow:0,fire:1.8+i*.8,seed:i}));hud();}
- function restart(){hero={x:54,y:136,hp:100,face:0,inv:0};room=1;kills=0;attack=cooldown=0;state='play';q('#ed-start').textContent='Reiniciar';q('#ed-pause').disabled=false;q('#ed-pause').textContent='Pausa';spawnRoom();message('Sala 1: la entrada carbonizada.');}
+ function hud(){q('#ed-hp').textContent='Vida '+Math.ceil(hero.hp)+' / 100';q('#ed-room').textContent='Sala '+room+' / '+TOTAL_ROOMS;q('#ed-kills').textContent='Esqueletos '+kills+' / '+TOTAL_ENEMIES;q('#ed-gold').textContent='Oro '+hero.gold;q('#ed-chance').textContent='Equipo por cofre '+Math.round(lootChance()*100)+'%';}
+ function spawnRoom(){hero.x=54;hero.y=136;hero.face=0;hero.inv=1;shots=[];fx=[];popups=[];chests=[{x:70,y:60,open:false},{x:236,y:218,open:false},{x:412,y:64,open:false}];enemies=Array.from({length:room+2},(_,i)=>({x:240+(i%2)*115,y:55+Math.floor(i/2)*52,hp:48+room*8,max:48+room*8,slow:0,fire:1.8+i*.8,seed:i}));hud();}
+ function restart(){slots.forEach(s=>{s.owned=false;s.on=false;});equipment();keys={};hero={x:54,y:136,hp:100,gold:0,face:0,inv:0};room=1;kills=0;attack=cooldown=0;state='play';q('#ed-start').textContent='Reiniciar';q('#ed-pause').disabled=false;q('#ed-pause').textContent='Pausa';spawnRoom();message('Sala 1 · '+ROOM_NAMES[0]+'. Sin equipo: usá los puños y buscá cofres.');}
  q('#ed-start').onclick=restart;
  q('#ed-bag').onclick=()=>{const panel=q('#ed-equipment');panel.hidden=!panel.hidden;q('#ed-bag').setAttribute('aria-expanded',String(!panel.hidden));if(!panel.hidden&&state==='play')togglePause();};
  function togglePause(){if(state==='play'){state='pause';q('#ed-pause').textContent='Seguir';message('En pausa. Podés revisar y cambiar tu equipo.');}else if(state==='pause'){state='play';q('#ed-pause').textContent='Pausa';message('Eliminá a los esqueletos y avanzá por la puerta derecha.');}}
  q('#ed-pause').onclick=togglePause;
  function particles(x,y,color,n=12){for(let i=0;i<n;i++)fx.push({x,y,vx:(Math.random()-.5)*90,vy:(Math.random()-.5)*90,life:.45,color});}
- function strike(){if(state!=='play'||cooldown>0)return;const s=stats();cooldown=s.delay;attack=.19;for(const e of enemies){if(e.hp<=0)continue;const dx=e.x-hero.x,dy=e.y-hero.y,dist=Math.hypot(dx,dy),dot=(dx*Math.cos(hero.face)+dy*Math.sin(hero.face))/(dist||1);if(dist<46&&(dot>-.15||dist<17)){e.hp-=s.damage+(s.frost?10:0);e.slow=on(4)?1.6:0;e.x=Math.max(22,Math.min(458,e.x+Math.cos(hero.face)*9));e.y=Math.max(30,Math.min(245,e.y+Math.sin(hero.face)*9));particles(e.x,e.y,'#a7f1ff');if(e.hp<=0){kills++;if(on(7))hero.hp=Math.min(100,hero.hp+6);particles(e.x,e.y,'#ffb54f',20);}}}enemies=enemies.filter(e=>e.hp>0);if(!enemies.length){shots=[];message(room===3?'¡La cripta está limpia! Cruzá el portal para salir.':'Puerta abierta. Avanzá hacia la derecha.');}hud();}
+ function strike(){if(state!=='play'||cooldown>0)return;const s=stats();cooldown=s.delay;attack=.19;for(const e of enemies){if(e.hp<=0)continue;const dx=e.x-hero.x,dy=e.y-hero.y,dist=Math.hypot(dx,dy),dot=(dx*Math.cos(hero.face)+dy*Math.sin(hero.face))/(dist||1);if(dist<(on(4)?46:31)&&(dot>-.15||dist<17)){e.hp-=s.damage+(s.frost?10:0);e.slow=on(4)?1.6:0;e.x=Math.max(22,Math.min(458,e.x+Math.cos(hero.face)*9));e.y=Math.max(30,Math.min(245,e.y+Math.sin(hero.face)*9));particles(e.x,e.y,'#a7f1ff');if(e.hp<=0){kills++;const coins=goldReward();hero.gold+=coins;popups.push({x:e.x,y:e.y-24,text:'+'+coins+' oro',life:1.1});if(on(7))hero.hp=Math.min(100,hero.hp+6);particles(e.x,e.y,'#ffb54f',20);}}}enemies=enemies.filter(e=>e.hp>0);if(!enemies.length){shots=[];message(room===TOTAL_ROOMS?'¡La cripta está limpia! Revisá los cofres y cruzá el portal.':'Puerta abierta. Revisá los cofres antes de salir por la derecha.');}hud();}
  q('#ed-hit').onclick=strike;
+ q('#ed-hit').onpointerdown=e=>{e.preventDefault();keys.hit=true;q('#ed-hit').setPointerCapture(e.pointerId);strike();};
+ q('#ed-hit').onpointerup=q('#ed-hit').onpointercancel=()=>keys.hit=false;
+ function openChest(){
+  if(state!=='play')return;
+  const chest=chests.find(b=>!b.open&&Math.hypot(b.x-hero.x,b.y-hero.y)<30);
+  if(!chest){message('Acercate a un cofre cerrado y presioná E.');return;}
+  chest.open=true;
+  const available=slots.filter(s=>!s.owned);
+  if(Math.random()<lootChance()&&available.length){
+   const item=available[Math.floor(Math.random()*available.length)];item.owned=item.on=true;
+   particles(chest.x,chest.y,'#a7f1ff',24);equipment();
+   message('¡Encontraste '+item.name+'! '+item.slot+' equipado.');
+   popups.push({x:chest.x,y:chest.y-18,text:'¡Equipo!',life:1.6});
+  }else{
+   message('Cofre vacío. Probabilidad de equipo en esta sala: '+Math.round(lootChance()*100)+'%.');
+   popups.push({x:chest.x,y:chest.y-18,text:'Vacío',life:1.3});
+  }
+  hud();
+ }
+ q('#ed-chest').onclick=openChest;
+ canvas.onpointerdown=e=>{if(state!=='play')return;const r=canvas.getBoundingClientRect();hero.face=Math.atan2((e.clientY-r.top)*272/r.height-hero.y,(e.clientX-r.left)*480/r.width-hero.x);q('#ed-hit').focus({preventScroll:true});strike();};
  const mapping={ArrowLeft:'left',a:'left',ArrowRight:'right',d:'right',ArrowUp:'up',w:'up',ArrowDown:'down',s:'down'};
- root.addEventListener('keydown',e=>{const k=mapping[e.key];if(k){keys[k]=true;e.preventDefault();}if(e.code==='Space'&&state==='play'&&e.target.tagName!=='INPUT'){e.preventDefault();keys.hit=true;strike();}});
- root.addEventListener('keyup',e=>{if(mapping[e.key])keys[mapping[e.key]]=false;if(e.code==='Space')keys.hit=false;});
+ root.addEventListener('keydown',e=>{const k=mapping[e.key]||mapping[e.key.toLowerCase()];if(e.key.toLowerCase()==='e'&&!e.repeat){e.preventDefault();openChest();}if(k){keys[k]=true;e.preventDefault();}if(e.code==='Space'&&state==='play'&&e.target.tagName!=='INPUT'){e.preventDefault();keys.hit=true;strike();}});
+ root.addEventListener('keyup',e=>{const k=mapping[e.key]||mapping[e.key.toLowerCase()];if(k)keys[k]=false;if(e.code==='Space')keys.hit=false;});
  for(const b of root.querySelectorAll('[data-dir]')){b.onpointerdown=e=>{e.preventDefault();keys[b.dataset.dir]=true;b.setPointerCapture(e.pointerId);};b.onpointerup=b.onpointercancel=()=>keys[b.dataset.dir]=false;}
  function blur(){keys={};if(state==='play')togglePause();}window.addEventListener('blur',blur);document.addEventListener('visibilitychange',()=>{if(document.hidden)blur();});
- function hurt(){if(hero.inv>0)return;hero.hp=Math.max(0,hero.hp-Math.max(3,17-stats().armor));hero.inv=.85;flash=.12;particles(hero.x,hero.y,'#ed6672');hud();if(hero.hp<=0){state='dead';q('#ed-pause').disabled=true;message('Caíste en la cripta. Reiniciá para intentarlo otra vez.');}}
+ function hurt(){if(state!=='play'||hero.inv>0)return;hero.hp=Math.max(0,hero.hp-Math.max(3,17-stats().armor));hero.inv=.85;flash=.12;particles(hero.x,hero.y,'#ed6672');hud();if(hero.hp<=0){state='dead';q('#ed-pause').disabled=true;message('Caíste en la cripta. Reiniciá para intentarlo otra vez.');}}
  function tick(dt){if(state!=='play')return;t+=dt;hero.inv=Math.max(0,hero.inv-dt);attack=Math.max(0,attack-dt);cooldown=Math.max(0,cooldown-dt);flash=Math.max(0,flash-dt);
  let dx=(keys.right?1:0)-(keys.left?1:0),dy=(keys.down?1:0)-(keys.up?1:0),len=Math.hypot(dx,dy);if(len){hero.face=Math.atan2(dy,dx);hero.x=Math.max(20,Math.min(460,hero.x+dx/len*stats().speed*dt));hero.y=Math.max(32,Math.min(243,hero.y+dy/len*stats().speed*dt));}if(keys.hit)strike();
  for(const e of enemies){e.slow=Math.max(0,e.slow-dt);const ax=hero.x-e.x,ay=hero.y-e.y,dist=Math.hypot(ax,ay)||1;const speed=e.slow>0?13:24+room*2;if(dist>14){e.x+=ax/dist*speed*dt;e.y+=ay/dist*speed*dt;}if(dist<17)hurt();if(state!=='play')break;e.fire-=dt;if(e.fire<0){e.fire=3.2+Math.random();shots.push({x:e.x,y:e.y,vx:ax/dist*76,vy:ay/dist*76,life:5});}}
  for(const p of shots){p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;if(Math.hypot(p.x-hero.x,p.y-hero.y)<11){hurt();p.life=0;}}
  shots=shots.filter(p=>p.life>0&&p.x>16&&p.x<464&&p.y>24&&p.y<252);
- for(const p of fx){p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;}fx=fx.filter(p=>p.life>0);
- if(state==='play'&&!enemies.length&&hero.x>444&&Math.abs(hero.y-136)<25){if(room<3){room++;hero.hp=Math.min(100,hero.hp+20);spawnRoom();message('Sala '+room+(room===3?': el santuario ardiente.':': el osario.')+' Recuperaste 20 de vida.');}else{state='won';q('#ed-pause').disabled=true;message('¡Victoria! Derrotaste a los 12 esqueletos de fuego.');}}
+ for(const p of fx){p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;}fx=fx.filter(p=>p.life>0);for(const p of popups){p.life-=dt;p.y-=dt*12;}popups=popups.filter(p=>p.life>0);
+ if(state==='play'&&!enemies.length&&hero.x>444&&Math.abs(hero.y-136)<25){if(room<TOTAL_ROOMS){room++;hero.hp=Math.min(100,hero.hp+20);spawnRoom();message('Sala '+room+' · '+ROOM_NAMES[room-1]+'. +20 de vida. Equipo por cofre: '+Math.round(lootChance()*100)+'%.');}else{state='won';q('#ed-pause').disabled=true;message('¡Victoria! Derrotaste a los '+TOTAL_ENEMIES+' esqueletos de fuego y reuniste '+hero.gold+' de oro.');}}
  }
  function rect(x,y,w,h,color){c.fillStyle=color;c.fillRect(Math.round(x),Math.round(y),w,h);}
  function sprite(x,y,enemy=false,slow=false){x=Math.round(x);y=Math.round(y);rect(x-9,y+9,19,4,'#14121c');let step=state==='play'?Math.sin(t*10+(enemy?x:0))*2:0;
  if(enemy){const flame=Math.floor(Math.sin(t*15+x)*3);rect(x-8,y-17,16,18,'#b33232');rect(x-5,y-22+flame,4,12,'#ff7b32');rect(x+3,y-24-flame,4,14,'#ffb84a');rect(x-4,y-16,10,9,slow?'#a5e8ee':'#eee0c2');rect(x-3,y-13,3,3,'#562f37');rect(x+2,y-13,3,3,'#562f37');rect(x-1,y-7,3,13,'#cabb9b');for(let i=0;i<3;i++)rect(x-5,y-5+i*3,11,1,'#eee0c2');rect(x-9,y-5,2,11,'#eee0c2');rect(x+8,y-5,2,11,'#eee0c2');rect(x-5,y+6,3,6+Math.round(step),'#cabb9b');rect(x+3,y+6,3,6-Math.round(step),'#cabb9b');}
- else{rect(x-6,y+5,5,8+Math.round(step),on(1)?'#929fb2':'#705959');rect(x+2,y+5,5,8-Math.round(step),on(1)?'#929fb2':'#705959');rect(x-8,y-6,16,13,on(0)?'#7888a2':'#665175');if(on(0)){rect(x-5,y-6,10,3,'#bacbda');rect(x-1,y-3,3,9,'#acc0d4');}rect(x-5,y-16,11,10,'#dbb49c');if(on(2)){rect(x-7,y-19,15,11,'#9cacc0');rect(x-5,y-13,11,3,'#202737');rect(x-1,y-20,3,13,'#d4e8ef');}rect(x-11,y-4,4,7,on(3)?'#b6c8d8':'#dbb49c');rect(x+9,y-4,4,7,on(3)?'#b6c8d8':'#dbb49c');if(on(7))rect(x,y-5,2,3,'#7fecff');if(on(6))rect(x-11,y+1,4,2,'#65c9e6');if(on(5))rect(x+11,y+1,2,2,'#faf2a5');}
+ else{rect(x-6,y+5,5,8+Math.round(step),on(1)?'#929fb2':'#dbb49c');rect(x+2,y+5,5,8-Math.round(step),on(1)?'#929fb2':'#dbb49c');rect(x-8,y-6,16,13,on(0)?'#7888a2':'#dbb49c');if(on(0)){rect(x-5,y-6,10,3,'#bacbda');rect(x-1,y-3,3,9,'#acc0d4');}if(!on(0))rect(x-6,y+3,13,5,'#9b8a7d');rect(x-5,y-16,11,10,'#dbb49c');if(!on(2))rect(x-6,y-18,13,4,'#62464c');if(on(2)){rect(x-7,y-19,15,11,'#9cacc0');rect(x-5,y-13,11,3,'#202737');rect(x-1,y-20,3,13,'#d4e8ef');}rect(x-11,y-4,4,7,on(3)?'#b6c8d8':'#dbb49c');rect(x+9,y-4,4,7,on(3)?'#b6c8d8':'#dbb49c');if(on(7))rect(x,y-5,2,3,'#7fecff');if(on(6))rect(x-11,y+1,4,2,'#65c9e6');if(on(5))rect(x+11,y+1,2,2,'#faf2a5');}
  }
- function render(){c.imageSmoothingEnabled=false;rect(0,0,480,272,'#15131f');for(let y=24;y<256;y+=16)for(let x=16;x<464;x+=16){let n=(x*7+y*13)%23;rect(x,y,15,15,n<8?'#262331':n<15?'#2c2837':'#302b3b');if(n<3)rect(x+3,y+8,5,1,'#3a3447');}
+ function render(){c.imageSmoothingEnabled=false;rect(0,0,480,272,'#15131f');for(let y=24;y<256;y+=16)for(let x=16;x<464;x+=16){let n=(x*7+y*13)%23;rect(x,y,15,15,room===4?(n<8?'#282936':'#303340'):room===5?(n<8?'#33232c':'#402b33'):(n<8?'#262331':n<15?'#2c2837':'#302b3b'));if(n<3)rect(x+3,y+8,5,1,'#3a3447');}
  for(let x=0;x<480;x+=24){rect(x,0,23,12,'#484052');rect(x-12,13,23,12,'#383244');rect(x,255,23,16,'#484052');}for(let y=25;y<255;y+=20){rect(0,y,15,19,'#484052');rect(464,y,16,19,'#484052');}
  for(const [x,y] of [[52,20],[210,20],[390,20]]){rect(x-3,y-6,6,9,'#76503c');rect(x-4,y-12,8,7,'#f17f3f');rect(x-1,y-15+(Math.floor(t*8)%3),3,9,'#ffd27a');}
  const opened=enemies.length===0&&state!=='ready';rect(459,112,21,49,opened?'#367879':'#181622');for(let i=0;i<3;i++)rect(463+i*5,114,2,44,opened?'#8ce8e4':'#716070');
+ for(const b of chests){
+  rect(b.x-12,b.y+7,25,4,'#14121c');rect(b.x-11,b.y-5,22,14,'#754930');rect(b.x-9,b.y-3,18,9,'#a56d36');
+  rect(b.x-11,b.y-7,22,3,'#e0b369');rect(b.x-7,b.y-5,2,14,'#d4a44d');rect(b.x+6,b.y-5,2,14,'#d4a44d');
+  if(b.open){rect(b.x-9,b.y-8,18,7,'#231f28');rect(b.x-11,b.y-13,22,4,'#bd8a4d');}
+  else{rect(b.x-2,b.y-2,4,5,'#f7d88e');if(state==='play'&&Math.hypot(b.x-hero.x,b.y-hero.y)<30){c.font='11px monospace';c.textAlign='center';c.fillStyle='#ffe2a5';c.fillText('E · '+Math.round(lootChance()*100)+'%',b.x,b.y-16);}}
+ }
  for(const e of enemies){sprite(e.x,e.y,true,e.slow>0);rect(e.x-10,e.y-29,20,2,'#181622');rect(e.x-10,e.y-29,Math.ceil(20*e.hp/e.max),2,'#ef8655');}
  for(const p of shots){rect(p.x-4,p.y-4,8,8,'#cf4c36');rect(p.x-2,p.y-2,4,4,'#ffcd69');}
- if(hero){c.globalAlpha=hero.inv>0&&Math.floor(t*14)%2?.5:1;sprite(hero.x,hero.y);c.globalAlpha=1;if(on(4)){c.save();c.translate(Math.round(hero.x),Math.round(hero.y));c.rotate(hero.face+(attack>0?(.19-attack)*12-1.1:.55));rect(11,-2,20,3,'#acedef');rect(29,-1,5,1,'#ecffff');rect(11,-5,3,9,'#5a9fae');rect(6,-1,6,2,'#705d6e');c.restore();}if(attack>0){c.strokeStyle=on(4)?'#bcfaff':'#e1bea0';c.lineWidth=3;c.beginPath();c.arc(hero.x,hero.y,37,hero.face-1.1,hero.face+1.1);c.stroke();}}
- for(const p of fx)rect(p.x,p.y,2,2,p.color);if(flash>0){c.globalAlpha=.18;rect(0,0,480,272,'#ff453f');c.globalAlpha=1;}
- if(state!=='play'){rect(97,88,286,85,'#14131f');rect(97,88,286,2,'#809cae');c.textAlign='center';c.fillStyle='#ece5d4';c.font='bold 17px monospace';c.fillText(state==='ready'?'LA CRIPTA DE BRASAS':state==='pause'?'EN PAUSA':state==='won'?'CRIPTA CONQUISTADA':'HAS CAÍDO',240,119);c.font='11px monospace';c.fillStyle='#a9c8ce';c.fillText(state==='ready'?'Hierro contra fuego. Escarcha contra hueso.':state==='pause'?'Revisá tu set y seguí explorando.':state==='won'?'12 guardianes derrotados. Saliste con vida.':'Tu próximo intento empieza con Reiniciar.',240,145);}
+ if(hero){c.globalAlpha=hero.inv>0&&Math.floor(t*14)%2?.5:1;sprite(hero.x,hero.y);c.globalAlpha=1;if(on(4)){c.save();c.translate(Math.round(hero.x),Math.round(hero.y));c.rotate(hero.face+(attack>0?(.19-attack)*12-1.1:.55));rect(11,-2,20,3,'#acedef');rect(29,-1,5,1,'#ecffff');rect(11,-5,3,9,'#5a9fae');rect(6,-1,6,2,'#705d6e');c.restore();}if(attack>0){c.strokeStyle=on(4)?'#bcfaff':'#e1bea0';c.lineWidth=3;c.beginPath();c.arc(hero.x,hero.y,on(4)?37:23,hero.face-1.1,hero.face+1.1);c.stroke();}}
+ for(const p of fx)rect(p.x,p.y,2,2,p.color);for(const p of popups){c.font='11px monospace';c.textAlign='center';c.fillStyle='#ffe2a5';c.fillText(p.text,p.x,p.y);}if(flash>0){c.globalAlpha=.18;rect(0,0,480,272,'#ff453f');c.globalAlpha=1;}
+ if(state!=='play'){rect(97,88,286,85,'#14131f');rect(97,88,286,2,'#809cae');c.textAlign='center';c.fillStyle='#ece5d4';c.font='bold 17px monospace';c.fillText(state==='ready'?'LA CRIPTA DE BRASAS':state==='pause'?'EN PAUSA':state==='won'?'CRIPTA CONQUISTADA':'HAS CAÍDO',240,119);c.font='11px monospace';c.fillStyle='#a9c8ce';c.fillText(state==='ready'?'Sin equipo. Sin oro. Todo por encontrar.':state==='pause'?'Revisá tu set y seguí explorando.':state==='won'?'25 guardianes derrotados. '+hero.gold+' de oro.':'Tu próximo intento empieza con Reiniciar.',240,145);}
  }
- equipment();hero={x:100,y:195,hp:100,face:0,inv:0};enemies=[{x:320,y:190,hp:80,max:80,slow:0}];render();
+ equipment();hero={x:100,y:195,hp:100,gold:0,face:0,inv:0};enemies=[{x:320,y:190,hp:80,max:80,slow:0}];render();
  function loop(now){const dt=Math.min(.035,(now-last)/1000||0);last=now;tick(dt);render();requestAnimationFrame(loop);}requestAnimationFrame(loop);
 })();
 </script>
