@@ -963,6 +963,7 @@
   for (const b of root.querySelectorAll('[data-dir]')) { b.onpointerdown = e => { e.preventDefault(); keys[b.dataset.dir] = true; b.setPointerCapture(e.pointerId); }; b.onpointerup = b.onpointercancel = () => { keys[b.dataset.dir] = false; }; }
   const map = { ArrowLeft: 'left', a: 'left', ArrowRight: 'right', d: 'right', ArrowUp: 'up', w: 'up', ArrowDown: 'down', s: 'down' };
   document.addEventListener('keydown', e => {
+    if (document.querySelector('#ek-settings[open]')) return;
     if (/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)||game.mode==='awakening') return;
     if(e.key==='Escape'&&expandedFallback){expandedFallback=false;fullscreenState();return;}
     if(e.key==='Enter'&&['ek-next-chapter','ek-start','ek-fullscreen','ek-save','ek-load'].includes(e.target.id))return;
@@ -976,6 +977,7 @@
   });
   document.addEventListener('keyup', e => { const k = map[e.key] || map[e.key.toLowerCase()]; if (k) keys[k] = false; if (e.code === 'Space') keys.hit = false; });
   function blur() { saveGame(); keys = {}; if (game.active() || game.mode === 'reward') { game.paused = true; refresh(); } }
+  window.addEventListener('knight:settings', blur);
   window.addEventListener('pagehide',()=>saveGame());
   window.addEventListener('blur', blur); document.addEventListener('visibilitychange', () => { if (document.hidden) blur(); });
   canvas.onpointerdown = e => { if (!game.active()) return; const r = canvas.getBoundingClientRect(); game.hero.face = Math.atan2((e.clientY - r.top) * 272 / r.height - game.hero.y, (e.clientX - r.left) * 480 / r.width - game.hero.x); game.strike(); };
@@ -984,6 +986,36 @@
     saveTimer+=dt;if(saveTimer>=5){saveTimer=0;saveGame();}
     hudTimer += dt; if (hudTimer > .12) { updateHud(); hudTimer = 0; } if (lastRevision !== game.revision) refresh(); requestAnimationFrame(frame); }
   requestAnimationFrame(frame);
+})();
+
+(function () {
+  const api = window.knightDesktop;
+  if (!api) return;
+  const button = document.createElement('button');
+  button.type = 'button'; button.textContent = 'Configuración';
+  document.querySelector('.ek-window-actions').append(button);
+  const dialog = document.createElement('dialog');
+  dialog.id = 'ek-settings';
+  dialog.style.cssText = 'background:#111b28;color:#eee;border:1px solid #b89b60;border-radius:12px;padding:28px;max-width:480px';
+  dialog.innerHTML = '<h2>Configuración</h2><p id="ek-app-version"></p><label for="ek-update-mode">Actualizaciones</label> <select id="ek-update-mode"><option value="manual">Manuales</option><option value="automatic">Automáticas</option></select><p>Manual: elegís cuándo buscar, descargar e instalar. Automático: busca al abrir y cada hora, descarga y se instala al cerrar el juego.</p><p>Cambiar a manual evita la instalación al cerrar; una descarga iniciada puede terminar.</p><p id="ek-update-state" role="status"></p><button id="ek-update-check">Buscar actualizaciones</button> <button id="ek-update-download" hidden>Descargar</button> <button id="ek-update-install" hidden>Guardar, instalar y reiniciar</button><p><button id="ek-settings-close">Volver al juego</button></p>';
+  document.body.append(dialog);
+  const $ = selector => dialog.querySelector(selector);
+  function render(s) {
+    $('#ek-app-version').textContent = 'Elemental Knight · ' + s.version;
+    $('#ek-update-mode').value = s.mode;
+    $('#ek-update-state').textContent = s.message;
+    $('#ek-update-check').disabled = !s.supported || ['checking','downloading','downloaded'].includes(s.phase);
+    $('#ek-update-download').hidden = s.phase !== 'available';
+    $('#ek-update-install').hidden = s.phase !== 'downloaded';
+  }
+  async function run(task) { try { const result = await task(); if(result) render(result); } catch { $('#ek-update-state').textContent = 'No se pudo completar la operación. Intentá de nuevo.'; } }
+  button.onclick = () => { window.dispatchEvent(new Event('knight:settings')); dialog.showModal(); run(api.get); };
+  $('#ek-settings-close').onclick = () => dialog.close();
+  $('#ek-update-mode').onchange = e => run(() => api.setMode(e.target.value));
+  $('#ek-update-check').onclick = () => run(api.check);
+  $('#ek-update-download').onclick = () => run(api.download);
+  $('#ek-update-install').onclick = () => { document.querySelector('#ek-save').click(); run(api.install); };
+  api.subscribe(render); run(api.get);
 })();
 
 </script>

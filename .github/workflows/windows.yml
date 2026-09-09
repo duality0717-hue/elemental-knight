@@ -1,0 +1,31 @@
+name: Windows installer
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - run: npm test
+      - run: npm run dist:win
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Elemental-Knight-Windows
+          path: |
+            dist/*.exe
+            dist/*.blockmap
+            dist/latest.yml
+      - name: Publish tagged release
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create $env:GITHUB_REF_NAME dist/*.exe dist/*.blockmap dist/latest.yml --title "Elemental Knight $env:GITHUB_REF_NAME" --generate-notes
