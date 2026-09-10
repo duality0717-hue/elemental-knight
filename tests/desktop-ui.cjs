@@ -22,7 +22,7 @@ app.whenReady().then(async()=>{
       const deposit=document.querySelector('#ek-vault-bag button');assert(deposit,'deposit button');deposit.click();
       assert(g.vault.some(i=>i.id===item.id),'vault deposit');
       document.querySelector('#ek-vault-items button').click();assert(!g.vault.length,'vault withdrawal');
-      assert(document.querySelector('#ek-account-form button').disabled,'unconfigured online login disabled');
+      assert(!document.querySelector('#ek-account-form button').disabled,'configured online login enabled');
       return 'PASS: game boot, ten slots, elemental skill, lobby, vault transfers, account gate';
     })()`);
     console.log(result);clearTimeout(timer);app.exit(0);

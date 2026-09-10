@@ -19,6 +19,8 @@ jobs:
           node-version: '22'
       - run: npm ci
       - run: npm test
+      - name: Verify dedicated online service
+        run: node tests/cloud-live.cjs
       - run: npm run dist:win
       - name: Verify game UI and lobby
         run: ./node_modules/.bin/electron tests/desktop-ui.cjs

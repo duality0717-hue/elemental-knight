@@ -1,20 +1,23 @@
 -- Apply in a dedicated Supabase project for Elemental Knight.
 begin;
+create schema if not exists knight_private;
+revoke all on schema knight_private from public, anon;
+grant usage on schema knight_private to authenticated;
 create table if not exists public.knight_saves (
   user_id uuid primary key references auth.users(id) on delete cascade,
   document jsonb not null,
   revision integer not null default 1 check (revision > 0),
   updated_at timestamptz not null default now(),
   constraint bounded_save check (octet_length(document::text) <= 1000000),
-  constraint versioned_save check ((document->>'version')::integer = 2 and jsonb_typeof(document->'data') = 'object')
+  constraint versioned_save check ((document->>'version') is not distinct from '2' and jsonb_typeof(document->'data') is not distinct from 'object')
 );
 alter table public.knight_saves enable row level security;
 drop policy if exists own_save on public.knight_saves;
-create policy own_save on public.knight_saves for select to authenticated using (auth.uid()=user_id);
+create policy own_save on public.knight_saves for select to authenticated using ((select auth.uid())=user_id);
 revoke all on public.knight_saves from anon, authenticated;
 grant select on public.knight_saves to authenticated;
 
-create or replace function public.save_knight(p_document jsonb, p_revision integer)
+create or replace function knight_private.save_knight(p_document jsonb, p_revision integer)
 returns integer language plpgsql security definer set search_path = '' as $$
 declare uid uuid := auth.uid(); result integer;
 begin
@@ -34,6 +37,12 @@ begin
   if result is null then raise exception 'Save conflict' using errcode='40001'; end if;
   return result;
 end $$;
+revoke all on function knight_private.save_knight(jsonb,integer) from public,anon;
+grant execute on function knight_private.save_knight(jsonb,integer) to authenticated;
+create or replace function public.save_knight(p_document jsonb, p_revision integer)
+returns integer language sql security invoker set search_path = '' as $$
+  select knight_private.save_knight(p_document,p_revision);
+$$;
 revoke all on function public.save_knight(jsonb,integer) from public,anon;
 grant execute on function public.save_knight(jsonb,integer) to authenticated;
 commit;
