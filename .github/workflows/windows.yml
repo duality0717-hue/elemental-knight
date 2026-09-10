@@ -34,6 +34,7 @@ jobs:
         with:
           name: Elemental-Knight-Encounter-Previews
           path: .qa/*.png
+          include-hidden-files: true
           if-no-files-found: ignore
       - name: Install and launch on Windows
         shell: pwsh
