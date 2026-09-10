@@ -3,7 +3,7 @@ const { Game, ATTRS } = require('../src/engine.js');
 let checks = 0;
 function test(name, fn) { fn(); checks++; console.log('PASS ' + name); }
 function game(roll=.99) { const g = new Game(() => roll); g.reset(); return g; }
-function open(g, index=0) { g.hero.x=g.chests[index].x;g.hero.y=g.chests[index].y;return g.openChest(); }
+function open(g, index=0) { g.chests[index].guard=null; g.hero.x=g.chests[index].x;g.hero.y=g.chests[index].y;return g.openChest(); }
 test('start empty; attributes 1/100; no gold, no free points',()=>{
  const g=game();assert.equal(g.hero.hp,100);assert.equal(g.hero.gold,0);assert.equal(g.hero.points,0);assert.equal(g.bag.length,0);assert(g.equipped.every(i=>i===null));assert(Object.values(g.hero.attributes).every(x=>x===1));assert.equal(g.stats().damage,12);
 });

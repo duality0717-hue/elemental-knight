@@ -24,6 +24,17 @@ jobs:
       - run: npm run dist:win
       - name: Verify game UI and lobby
         run: ./node_modules/.bin/electron tests/desktop-ui.cjs
+      - name: Verify encounters and third act UI
+        env:
+          EK_QA_DIR: .qa
+        run: ./node_modules/.bin/electron tests/encounters-ui.cjs
+      - name: Upload encounter previews
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Elemental-Knight-Encounter-Previews
+          path: .qa/*.png
+          if-no-files-found: ignore
       - name: Install and launch on Windows
         shell: pwsh
         run: |

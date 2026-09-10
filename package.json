@@ -9,7 +9,7 @@
   "scripts": {
     "build": "node build.cjs",
     "start": "npm run build && electron .",
-    "test": "node tests/game.test.cjs && node tests/chapter2.test.cjs && node tests/save.test.cjs && node --test tests/updates.test.cjs tests/equipment.test.cjs tests/cloud.test.cjs",
+    "test": "node tests/game.test.cjs && node tests/chapter2.test.cjs && node tests/save.test.cjs && node --test tests/updates.test.cjs tests/equipment.test.cjs tests/cloud.test.cjs tests/encounters.test.cjs",
     "dist:win": "npm run build && electron-builder --win nsis --x64 --publish never"
   },
   "dependencies": { "electron-updater": "^6.6.2" },

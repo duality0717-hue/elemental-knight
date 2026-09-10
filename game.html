@@ -188,7 +188,7 @@
   class Game {
     constructor(random = Math.random) { this.random = random; this.reset(); this.mode = 'ready'; }
     reset() {
-      this.nextId = 1; this.chapter = 1; this.room = 1; this.kills = 0; this.mode = 'play'; this.paused = false;
+      this.keyFragments = []; this.nextId = 1; this.chapter = 1; this.room = 1; this.kills = 0; this.mode = 'play'; this.paused = false;
       this.zones = null; this.zoneId = null; this.ally = null; this.doorCooldown = 0; this.chapterKills = 0;
       this.friendlyShots = [];
       this.time = 0; this.attack = 0; this.cooldown = 0; this.dashTime = 0; this.dashCooldown = 0;
@@ -247,24 +247,50 @@
       this.hero.stamina-=25;this.skillCooldown=18;
       const radius=element==='magma'?85:element==='electric'?500:150;
       this.skillEffect={element,x:this.hero.x,y:this.hero.y,radius,life:1};
-      let targets=(this.mode==='boss'?[this.boss]:this.enemies).filter(e=>e.hp>0&&Math.hypot(e.x-this.hero.x,e.y-this.hero.y)<radius);
+      let targets=(this.mode==='boss'?[this.boss,...this.enemies]:this.enemies).filter(e=>e.hp>0&&!e.dormant&&Math.hypot(e.x-this.hero.x,e.y-this.hero.y)<radius);
       if(element==='electric')targets=targets.sort((a,b)=>Math.hypot(a.x-this.hero.x,a.y-this.hero.y)-Math.hypot(b.x-this.hero.x,b.y-this.hero.y)).slice(0,3);
       const damage={ice:45,electric:70,magma:100,poison:20}[element]+this.stats().damage*.3;
       for(const e of targets){e.hp=Math.max(0,e.hp-damage);if(element==='ice')e.slow=4;if(element==='poison')e.venom={remaining:6,tick:1};if(!e.hp){if(e===this.boss)this.defeatBoss();else this.kill(e);}}
-      const before=this.enemies.length;this.enemies=this.enemies.filter(e=>e.hp>0);if(before&&!this.enemies.length)this.clearedCombat();
+      const before=this.enemies.filter(e=>!e.dormant).length;this.enemies=this.enemies.filter(e=>e.hp>0);if(before&&!this.combatants().length)this.clearedCombat();
       this.say(ELEMENTS[element].skill+' · '+targets.length+' objetivo(s).');return true;
     }
     spawnRoom() {
-      if (this.chapter === 2 && this.room < 5) { this.createLabyrinth(); return; }
+      if (this.chapter >= 2 && this.room < 5) { this.createLabyrinth(); return; }
       this.hero.x = 54; this.hero.y = 136; this.hero.inv = 1.5; this.hero.face = 0;
       this.shots = []; this.hazards = []; this.effects = []; this.notices = [];
-      this.chests = [{ x: 70, y: 60 }, { x: 236, y: 218 }, { x: 412, y: 64 }].map(p => ({ ...p, open: false }));
+      this.chests = this.makeChests(3, 'room', this.room < 5);
       this.enemies = Array.from({ length: this.room + 2 }, (_, i) => ({ x: 240 + (i % 2) * 110, y: 55 + Math.floor(i / 2) * 52,
         hp: this.room === 3 && i === 0 ? 130 : 44 + this.room * 7, max: this.room === 3 && i === 0 ? 130 : 44 + this.room * 7,
         kind: this.room === 3 && i === 0 ? 'elite' : 'caster', slow: 0, fire: 2.5 + i * .75, warning: false,
         phase: 'chase', timer: 1, face: Math.PI, swing: 0 }));
       this.revision++;
     }
+    shuffledPositions() {
+      // Finite shuffle: spacing and doorway clearance also hold with a constant RNG.
+      const points=[];
+      for(const y of [85,145,205])for(const x of [110,175,305,370])points.push({x,y});
+      for(let i=points.length-1;i>0;i--){const j=Math.floor(this.random()*(i+1));[points[i],points[j]]=[points[j],points[i]];}
+      return points;
+    }
+    makeChests(count, zone, haunted=true) {
+      return this.shuffledPositions().slice(0,count).map((p,i)=>({...p,open:false,id:`${this.chapter}-${this.room}-${zone}-${i}`,guard:haunted&&this.random()<.30?'ghost':null,triggered:false}));
+    }
+    makeEnemy(kind,x,y,extra={}) {
+      const elite=kind==='elite',hp=elite?150+this.chapter*20:kind==='ghost'?65:44+this.room*6+this.chapter*4;
+      return {x,y,hp,max:hp,kind,slow:0,fire:2.2+this.random(),warning:false,phase:'chase',timer:1,face:Math.PI,swing:0,...extra};
+    }
+    triggerChests() {
+      if(!this.active()||this.mode!=='play')return;
+      for(const b of this.chests){
+        if(b.open||b.triggered||!b.guard||Math.hypot(b.x-this.hero.x,b.y-this.hero.y)>70)continue;
+        b.triggered=true;
+        if(b.guard==='ghost')this.enemies.push(this.makeEnemy('ghost',b.x,b.y,{guardian:b.id}));
+        else for(const e of this.enemies)if(e.guardian===b.id)e.dormant=false;
+        this.say(b.guard==='ghost'?'¡Un fantasma emerge del cofre! Derrotalo para abrirlo.':'¡Los dos custodios del cofre despertaron!');
+      }
+    }
+    combatants() { return this.enemies.filter(e=>e.hp>0&&!e.dormant); }
+    guarded(b) { return !!b.guard&&(!b.triggered||this.enemies.some(e=>e.hp>0&&e.guardian===b.id)); }
     active() { return !this.paused && ['play', 'boss'].includes(this.mode); }
     canManage() { return !['dead', 'ready'].includes(this.mode); }
     invest(key) {
@@ -326,17 +352,20 @@
       const chest = this.mode === 'shop' ? this.chests[shopIndex] : this.chests.find(b => !b.open && Math.hypot(b.x - this.hero.x, b.y - this.hero.y) < 32);
       if (chest?.open) return false;
       if (!chest) { this.say('Acercate a un cofre y presioná E.'); return false; }
+      this.triggerChests();
+      if(this.guarded(chest)){this.say('Derrotá a los guardianes antes de abrir el cofre.');return false;}
       chest.open = true;
       if(chest.luxury&&this.rewardClaimed)return false;
       const item=this.rollLoot(chest.luxury?'boss':'normal');
       const message=item?(item.kind==='gold'?'Encontraste '+item.amount+' de oro.':'Encontraste '+this.itemName(item)+'.'):'El cofre no contenía botín.';
-      if(chest.luxury){this.rewardClaimed=true;this.mode=this.chapter===1?'chapter-complete':'won';}
+      if(chest.luxury){this.rewardClaimed=true;this.mode=this.chapter<3?'chapter-complete':'won';}
       this.say(message);
       return true;
     }
     kill(enemy) {
       if (enemy.rewarded) return;
       enemy.rewarded = true; this.kills++; this.chapterKills++; this.hero.points++;
+      if(enemy.keyFragment&&!this.keyFragments.includes(enemy.keyFragment)){this.keyFragments.push(enemy.keyFragment);this.notices.push({x:enemy.x,y:enemy.y-40,text:'Fragmento de llave '+this.keyFragments.length+'/2',life:3});}
       const loot=this.rollLoot(enemy.kind==='elite'?'elite':'normal');
       const gold=loot?.kind==='gold'?loot.amount:0;
       if (this.rank(7)) this.hero.hp = Math.min(this.stats().maxHp, this.hero.hp + this.rank(7) * 6);
@@ -346,7 +375,7 @@
       if (!this.active() || this.cooldown > 0) return;
       const s = this.stats(); this.cooldown = s.delay; this.attack = .18; let damageDealt = 0;
       const weapon=this.weaponType();
-      if (['staff','bow'].includes(weapon)||(!weapon&&this.chapter === 2 && ['mage', 'rogue'].includes(this.hero.specialization))) {
+      if (['staff','bow'].includes(weapon)||(!weapon&&this.chapter >= 2 && ['mage', 'rogue'].includes(this.hero.specialization))) {
         const type = weapon==='bow'||(!weapon&&this.hero.specialization==='rogue') ? 'arrow' : this.equipped[4]?.element||this.equipped[8]?.element||'ice', speed = type === 'arrow' ? 220 : 155;
         this.friendlyShots.push({ x: this.hero.x, y: this.hero.y, vx: Math.cos(this.hero.face) * speed, vy: Math.sin(this.hero.face) * speed, life: 2.8, damage: s.damage, type, owner: 'hero' });
         return;
@@ -354,18 +383,18 @@
       for (const e of this.enemies) {
         const dx = e.x - this.hero.x, dy = e.y - this.hero.y, distance = Math.hypot(dx, dy);
         const dot = (dx * Math.cos(this.hero.face) + dy * Math.sin(this.hero.face)) / (distance || 1);
-        if (e.hp > 0 && distance < s.range + (e.kind === 'elite' ? 7 : 0) && (dot > -.15 || distance < 17)) {
+        if (e.hp > 0 && !e.dormant && distance < s.range + (e.kind === 'elite' ? 7 : 0) && (dot > -.15 || distance < 17)) {
           damageDealt += Math.min(e.hp, s.damage + (s.frost ? 10 : 0));
           e.hp -= s.damage; e.slow = this.equipped[4]?.element==='ice' ? 1.6 : 0;
           e.x = clamp(e.x + Math.cos(this.hero.face) * 11, 22, 458); e.y = clamp(e.y + Math.sin(this.hero.face) * 11, 32, 243);
           if (e.hp <= 0) this.kill(e);
         }
       }
-      const previous = this.enemies.length; this.enemies = this.enemies.filter(e => e.hp > 0);
-      if (previous && !this.enemies.length) this.clearedCombat();
+      const previous = this.enemies.filter(e=>!e.dormant).length; this.enemies = this.enemies.filter(e => e.hp > 0);
+      if (previous && !this.combatants().length) this.clearedCombat();
       if (this.mode === 'boss' && this.boss.hp > 0) {
         const dx = this.boss.x - this.hero.x, dy = this.boss.y - this.hero.y, dist = Math.hypot(dx, dy);
-        if (dist < s.range + (this.chapter === 2 ? 27 : 12) && (dx * Math.cos(this.hero.face) + dy * Math.sin(this.hero.face)) / (dist || 1) > -.1) {
+        if (dist < s.range + (this.chapter >= 2 ? 27 : 12) && (dx * Math.cos(this.hero.face) + dy * Math.sin(this.hero.face)) / (dist || 1) > -.1) {
           damageDealt += Math.min(this.boss.hp, s.damage);
           this.boss.hp = Math.max(0, this.boss.hp - s.damage);
           this.boss.hit = .15;
@@ -393,7 +422,7 @@
       const pool = ITEMS.map((_, i) => i).filter(i=>i!==9||this.evolution>=2); this.stock = [];
       for (let i = 0; i < 6; i++) { const slot = pool.splice(Math.floor(this.random() * pool.length), 1)[0], rank = this.random() < .3 ? 2 : 1;
         const quality=Object.keys(QUALITIES)[Math.floor(this.random()*3)];this.stock.push({ ...this.gear(slot, rank,{quality}), price: ITEMS[slot].basePrice + (QUALITIES[quality].power - 1) * 35, sold: false }); }
-      this.say('Tienda de la quinta sala · Vida y energía restauradas. Prepará tu build: ' + (this.chapter===2?'Mórtigo te espera.':'tu sombra te espera.'));
+      this.say('Tienda de la quinta sala · Vida y energía restauradas. Prepará tu build: ' + (this.chapter===3?'Aracnia espera tras el sello de dos fragmentos.':this.chapter===2?'Mórtigo te espera.':'tu sombra te espera.'));
     }
     buy(id) {
       if (this.mode !== 'shop') return false;
@@ -403,9 +432,14 @@
     }
     enterBoss() {
       if (this.mode !== 'shop') return false;
+      if(this.chapter===3&&this.keyFragments.length!==2){this.say('Necesitás los dos fragmentos de llave de los élites arácnidos.');return false;}
       this.mode = 'boss'; this.paused = false; this.enemies = []; this.chests = []; this.shots = []; this.hazards = [];
       this.hero.x = 70; this.hero.y = 136; this.hero.face = 0; this.hero.inv = 2;
       this.friendlyShots = []; this.zones = null; this.hero.poison = 0;
+      if(this.chapter===3){
+        this.boss={x:335,y:145,hp:1500,max:1500,timer:1.8,phase:'rest',cycle:0,hit:0,style:'bite',face:Math.PI,swing:0,kind:'spider-queen'};this.ally=null;
+        this.say('ARACNIA · Madre de las profundidades. Esquivá colmillos, seda y veneno; destruí sus crías.');return true;
+      }
       if (this.chapter === 2) {
         this.boss = { x: 335, y: 150, hp: 1000, max: 1000, timer: 1.6, phase: 'rest', cycle: 0, hit: 0, style: 'cleave', face: Math.PI, swing: 0, kind: 'plague' };
         this.ally = { x: 115, y: 180, face: 0, hp: 1, fire: 1, swing: 0, equipment: this.equipped.map(i => i ? { ...i } : null) };
@@ -428,12 +462,13 @@
       this.say(clean + ', ' + CLASSES[specialization].name + ': tu camino acaba de comenzar. Abrí el cofre lujoso con E.'); return true;
     }
     advance() {
-      if (this.mode !== 'play' || this.enemies.length || this.chapter === 2) return false;
+      if (this.mode !== 'play' || this.enemies.length || this.chapter >= 2) return false;
       if (this.room < 4) { this.room++; this.spawnRoom(); this.say('Sala ' + this.room + ' · ' + ROOMS[this.room - 1]); }
       else this.enterShop();
       return true;
     }
     bossTick(dt) {
+      if(this.chapter===3){this.spiderBossTick(dt);return;}
       if (this.chapter === 2) { this.plagueTick(dt); return; }
       const b = this.boss; b.hit = Math.max(0, b.hit - dt); b.swing = Math.max(0, b.swing - dt); b.timer -= dt;
       const dx = this.hero.x - b.x, dy = this.hero.y - b.y, distance = Math.hypot(dx, dy) || 1;
@@ -470,6 +505,14 @@
       this.hero.hp = this.stats().maxHp; this.hero.stamina = this.stats().maxEnergy; this.hero.poison = 0;
       this.spawnRoom(); this.say('CAPÍTULO II · La catedral de la peste. ' + this.hero.name + ', explorá los anexos y encontrá el umbral dorado hacia la sala 2.'); return true;
     }
+    beginChapter3() {
+      // Older 0.8.1 saves ended chapter II in 'won'.
+      if(this.chapter!==2||!['chapter-complete','won'].includes(this.mode)||!this.rewardClaimed)return false;
+      this.chapter=3;this.room=1;this.chapterKills=0;this.keyFragments=[];this.boss=null;this.ally=null;
+      this.mode='play';this.paused=false;this.rewardClaimed=false;this.stock=[];this.friendlyShots=[];
+      this.hero.hp=this.stats().maxHp;this.hero.stamina=this.stats().maxEnergy;this.hero.poison=0;
+      this.spawnRoom();this.say('ACTO III · Las cavernas de seda. Buscá a los portadores de fragmentos en las salas 2 y 4.');return true;
+    }
     createLabyrinth() {
       // A connected loop, two dead ends and a hidden exit; rotate it per room.
       const layout = [['hub',0,0,'Atrio de los lamentos'],['north',0,-1,'Galería de santos ciegos'],['east',1,0,'Relicario vacío'],['west',-1,0,'Pasaje de las cadenas'],['south',0,1,'Sepulcro de ceniza'],['cross',-1,-1,'Osario de los juramentos'],['exit',-2,-1,'Umbral sellado']];
@@ -482,12 +525,20 @@
       }
       const [ex,ey]=rotate(0,-1), exitDir=Object.keys(directions).find(d=>directions[d][0]===ex&&directions[d][1]===ey);
       this.zones.exit.doors[exitDir]='next';
-      for(let i=0;i<this.room+2;i++) {
-        const elite=this.room===3&&i===this.room+1, hp=elite?190:65+this.room*9;
-        const e={x:300+(i%2)*60,y:115+(i%3)*35,hp,max:hp,kind:elite?'elite':'caster',slow:0,fire:2.5+i*.5,warning:false,phase:'chase',timer:1,face:Math.PI,swing:0};
-        this.zones[i===0?'hub':i===1?'cross':'exit'].enemies.push(e);
-      }
-      for(const [id,x,y] of [['hub',85,205],['east',330,105],['south',150,130]])this.zones[id].chests.push({x,y,open:false});
+      const caveNames=['Vestíbulo de seda','Gruta de los huevos','Nido de cristal','Túnel de quitina','Fosa de las mudas','Cámara de los colmillos','Sello de la matriarca'];
+      Object.values(this.zones).forEach((z,zi)=>{
+        if(this.chapter===3)z.name=caveNames[zi];
+        const points=this.shuffledPositions(),count=3+Math.floor(this.random()*3);
+        for(let i=0;i<count;i++){
+          const kind=['melee','area','caster'][i%3],p=points[i];
+          z.enemies.push(this.makeEnemy(kind,p.x,p.y,{species:this.chapter===3?'spider':'undead'}));
+        }
+        z.chests=this.makeChests(zi===0?2:1,z.id);
+      });
+      if(this.chapter===2&&this.room===3)this.zones.cross.enemies.push(this.makeEnemy('elite',350,175));
+      if(this.chapter===3&&[2,4].includes(this.room))this.zones.cross.enemies.push(this.makeEnemy('elite',350,175,{species:'spider',keyFragment:this.room===2?'fang':'silk'}));
+      const z=this.zones.east,b=z.chests[0];b.guard='elites';b.special=true;
+      for(const side of [-1,1])z.enemies.push(this.makeEnemy('elite',b.x+side*30,b.y,{guardian:b.id,dormant:true,species:this.chapter===3?'spider':'undead'}));
       this.zoneId='hub';this.enterZone('hub');this.hero.x=240;this.hero.y=175;
     }
     enterZone(id, fromDirection) {
@@ -498,43 +549,44 @@
       this.revision++;
     }
     doors() {
-      if(this.chapter===2&&this.zones&&this.mode==='play')return this.zones[this.zoneId].doors;
+      if(this.chapter>=2&&this.zones&&this.mode==='play')return this.zones[this.zoneId].doors;
       return this.mode==='play'&&this.chapter===1?{right:'next'}:{};
     }
     travel(direction) {
-      if(!this.active()||this.mode!=='play'||this.enemies.length||this.doorCooldown>0)return false;
+      if(!this.active()||this.mode!=='play'||this.combatants().length||this.doorCooldown>0)return false;
       const target=this.doors()[direction];if(!target)return false;
       if(this.chapter===1)return this.advance();
       const current=this.zones[this.zoneId];current.enemies=this.enemies;
       if(target==='next') {
-        if(Object.values(this.zones).some(z=>z.enemies.some(e=>e.hp>0))){this.say('El umbral sigue sellado. Quedan enemigos en los anexos.');this.doorCooldown=1;return false;}
+        if(Object.values(this.zones).some(z=>z.enemies.some(e=>e.hp>0&&!e.dormant))){this.say('El umbral sigue sellado. Quedan enemigos en los anexos.');this.doorCooldown=1;return false;}
         if(this.room===4){this.zones=null;this.zoneId=null;this.enterShop();}
         else {this.room++;this.spawnRoom();this.say('Sala '+this.room+'/5 · Un nuevo laberinto. Encontrá el umbral dorado.');}
       } else {this.enterZone(target,direction);this.say('Sala '+this.room+' · '+this.zones[target].name+'. Seguís explorando la misma sala.');}
       return true;
     }
     clearedCombat() {
+      if(this.mode==='boss')return;
       this.shots=[];
-      if(this.chapter===2&&this.zones){const z=this.zones[this.zoneId];z.enemies=this.enemies;z.cleared=true;
-        if(Object.values(this.zones).some(n=>n.enemies.some(e=>e.hp>0))){this.say('Anexo despejado. Las puertas se abren; seguí explorando.');return;}
+      if(this.chapter>=2&&this.zones){const z=this.zones[this.zoneId];z.enemies=this.enemies;z.cleared=true;
+        if(Object.values(this.zones).some(n=>n.enemies.some(e=>e.hp>0&&!e.dormant))){this.say('Anexo despejado. Las puertas se abren; seguí explorando.');return;}
       }
       this.hero.hp=Math.min(this.stats().maxHp,this.hero.hp+35);this.say('Sala despejada · +35 de vida. Revisá los cofres y buscá la salida.');
     }
     defeatBoss() {
       if(this.chapter===2)this.evolution=2;
-      this.boss.hp=0;this.mode=this.chapter===1?'awakening':'reward';this.shots=[];this.hazards=[];this.friendlyShots=[];this.hero.poison=0;
+      this.enemies=[];this.boss.hp=0;this.mode=this.chapter===1?'awakening':'reward';this.shots=[];this.hazards=[];this.friendlyShots=[];this.hero.poison=0;
       this.chests=[{x:330,y:136,open:false,luxury:true}];
-      this.say(this.chapter===1?'Tu sombra cayó. Elegí tu nombre y tu especialización.':'Mórtigo cayó. Tu sombra inclina la cabeza: sobrevivieron juntos. Abrí el cofre lujoso con E.');
+      this.say(this.chapter===1?'Tu sombra cayó. Elegí tu nombre y tu especialización.':this.chapter===3?'Aracnia cayó. Las cavernas quedan libres de su reinado. Abrí el cofre final.':'Mórtigo cayó. Tu sombra inclina la cabeza: sobrevivieron juntos. Abrí el cofre lujoso con E.');
     }
     friendlyTick(dt) {
       for(const p of this.friendlyShots){p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;
-        const targets=this.mode==='boss'?[this.boss]:this.enemies;
-        const target=targets.find(e=>e.hp>0&&Math.hypot(e.x-p.x,e.y-p.y)<(e===this.boss?28:e.kind==='elite'?17:12));
+        const targets=this.mode==='boss'?[this.boss,...this.enemies]:this.enemies;
+        const target=targets.find(e=>e.hp>0&&!e.dormant&&Math.hypot(e.x-p.x,e.y-p.y)<(e===this.boss?28:e.kind==='elite'?17:12));
         if(!target)continue;const dealt=Math.min(target.hp,p.damage);target.hp=Math.max(0,target.hp-p.damage);target.hit=.15;p.life=0;
         if(p.type==='ice'&&target!==this.boss)target.slow=1.6;
         if(p.type==='poison')target.venom={remaining:3,tick:1};
         if(p.owner==='hero')this.hero.hp=Math.min(this.stats().maxHp,this.hero.hp+Math.min(this.stats().lifeOnHit,dealt*.08));
-        if(!target.hp){if(target===this.boss){this.defeatBoss();break;}this.kill(target);const previous=this.enemies.length;this.enemies=this.enemies.filter(e=>e.hp>0);if(previous&&!this.enemies.length)this.clearedCombat();}
+        if(!target.hp){if(target===this.boss){this.defeatBoss();break;}this.kill(target);const previous=this.enemies.filter(e=>!e.dormant).length;this.enemies=this.enemies.filter(e=>e.hp>0);if(previous&&!this.combatants().length)this.clearedCombat();}
       }
       this.friendlyShots=this.friendlyShots.filter(p=>p.life>0&&p.x>16&&p.x<464&&p.y>24&&p.y<252);
     }
@@ -562,16 +614,49 @@
         if(a.fire<=0){a.fire=1.4;a.swing=.18;this.friendlyShots.push({x:a.x,y:a.y,vx:Math.cos(a.face)*170,vy:Math.sin(a.face)*170,life:3,damage:18,type:'echo',owner:'ally'});}
       }
     }
+    areaHazardsTick(dt) {
+      for(const h of this.hazards){
+        h.timer-=dt;h.life-=dt;
+        if(h.timer>0)continue;
+        const first=!h.fired;h.fired=true;
+        const dx=this.hero.x-h.x,dy=this.hero.y-h.y,d=Math.hypot(dx,dy);
+        const arc=h.type!=='sword'||(dx*Math.cos(h.angle)+dy*Math.sin(h.angle))/(d||1)>.35;
+        if(d<h.radius&&arc&&(first||['poison','web'].includes(h.type))){
+          if(h.type==='web')this.hero.slow=Math.max(this.hero.slow,1.3);
+          if(this.hurt(h.damage||12)&&h.type==='poison'){this.hero.poison=3;this.hero.poisonTick=1;}
+        }
+      }
+      this.hazards=this.hazards.filter(h=>h.life>0);
+    }
+    spiderBossTick(dt) {
+      const b=this.boss;b.timer-=dt;b.hit=Math.max(0,b.hit-dt);b.swing=Math.max(0,b.swing-dt);
+      const dx=this.hero.x-b.x,dy=this.hero.y-b.y,d=Math.hypot(dx,dy)||1;
+      if(b.phase==='rest'){b.face=Math.atan2(dy,dx);if(d>85){b.x=clamp(b.x+dx/d*30*dt,55,425);b.y=clamp(b.y+dy/d*30*dt,65,215);}}
+      if(b.timer<=0){
+        if(b.phase==='rest'){
+          b.style=['bite','web','volley','brood'][b.cycle%4];b.phase='warning';b.timer=1.2;b.target={x:this.hero.x,y:this.hero.y};
+          if(b.style==='bite')this.hazards.push({x:b.x,y:b.y,type:'sword',angle:b.face,radius:96,timer:1.2,life:1.6,damage:34,fired:false});
+          if(b.style==='web')for(const offset of [-45,0,45])this.hazards.push({x:clamp(b.target.x+offset,40,440),y:b.target.y,type:'web',radius:30,timer:1.2,life:5,damage:6,fired:false});
+          this.say({bite:'ARACNIA · Colmillos: salí del arco rojo.',web:'ARACNIA · Seda atrapante: salí de los círculos blancos.',volley:'ARACNIA · Abanico de veneno: prepará la esquiva.',brood:'ARACNIA · ¡La puesta está por eclosionar!'}[b.style]);
+        }else{
+          if(b.style==='bite')b.swing=.4;
+          if(b.style==='volley')for(const offset of [-.6,-.4,-.2,0,.2,.4,.6])this.shots.push({x:b.x,y:b.y,vx:Math.cos(b.face+offset)*105,vy:Math.sin(b.face+offset)*105,life:4,type:'poison'});
+          if(b.style==='brood')for(let i=0;i<3&&this.enemies.length<6;i++)this.enemies.push(this.makeEnemy('melee',clamp(b.x-40+i*35,35,445),clamp(b.y+45,45,235),{species:'spider',hp:42,max:42}));
+          b.phase='rest';b.timer=b.hp<b.max*.4?1.3:2;b.cycle++;
+        }
+      }
+      this.areaHazardsTick(dt);
+    }
     eliteTick(e, dt) {
       const dx = this.hero.x - e.x, dy = this.hero.y - e.y, distance = Math.hypot(dx, dy) || 1;
       e.swing = Math.max(0, e.swing - dt); e.timer -= dt;
       if (e.phase === 'windup') {
         if (e.timer <= 0) { const dot = (dx * Math.cos(e.face) + dy * Math.sin(e.face)) / distance;
-          if (distance < 48 && dot > .2) this.hurt(22);
+          if (distance < 48 && dot > .2) this.hurt(e.kind==='elite'?22:e.kind==='ghost'?15:11);
           e.phase = 'recover'; e.timer = 1; e.swing = .3; e.warning = false;
         }
       } else if (e.phase === 'recover') { if (e.timer <= 0) e.phase = 'chase'; }
-      else { e.face = Math.atan2(dy, dx); if (distance > 30) { e.x += dx / distance * (e.slow > 0 ? 13 : 32) * dt; e.y += dy / distance * (e.slow > 0 ? 13 : 32) * dt; }
+      else { e.face = Math.atan2(dy, dx); if (distance > 30) { e.x += dx / distance * (e.slow > 0 ? 13 : e.kind==='elite'?32:44) * dt; e.y += dy / distance * (e.slow > 0 ? 13 : e.kind==='elite'?32:44) * dt; }
         if (distance < 48) { e.phase = 'windup'; e.timer = .75; e.warning = true; } }
     }
     tick(dt, keys = {}) {
@@ -584,7 +669,7 @@
         if(e.venom.tick<=0){e.venom.tick+=1;e.hp=Math.max(0,e.hp-6);if(!e.hp){if(e===this.boss)this.defeatBoss();else this.kill(e);}}
         if(!e.venom.remaining)e.venom=null;
       }
-      const aliveBefore=this.enemies.length;this.enemies=this.enemies.filter(e=>e.hp>0);if(aliveBefore&&!this.enemies.length)this.clearedCombat();
+      const aliveBefore=this.enemies.filter(e=>!e.dormant).length;this.enemies=this.enemies.filter(e=>e.hp>0);if(aliveBefore&&!this.combatants().length)this.clearedCombat();
       this.time += dt; this.hero.inv = Math.max(0, this.hero.inv - dt); this.attack = Math.max(0, this.attack - dt);
       this.cooldown = Math.max(0, this.cooldown - dt); this.dashCooldown = Math.max(0, this.dashCooldown - dt);
       this.hero.slow = Math.max(0, this.hero.slow - dt);
@@ -598,24 +683,26 @@
       if (this.dashTime > 0) { this.dashTime -= dt; dx = Math.cos(this.hero.face); dy = Math.sin(this.hero.face); len = 1; }
       if (len) { const speed = this.dashTime > 0 ? 270 : s.speed * (this.hero.slow > 0 ? .7 : 1); this.hero.x = clamp(this.hero.x + dx / len * speed * dt, 20, 460); this.hero.y = clamp(this.hero.y + dy / len * speed * dt, 32, 243); }
       if (keys.hit) this.strike();
+      this.triggerChests();
       for (const e of this.enemies) {
+        if(e.dormant)continue;
         if (!this.active()) break;
         e.slow = Math.max(0, e.slow - dt); const ax = this.hero.x - e.x, ay = this.hero.y - e.y, distance = Math.hypot(ax, ay) || 1;
-        if (e.kind === 'elite') { this.eliteTick(e, dt); continue; }
+        if (['elite','melee','ghost'].includes(e.kind)) { this.eliteTick(e, dt); continue; }
         const speed = e.slow > 0 ? 12 : 20 + this.room * 2;
         const direction = distance > 115 ? 1 : distance < 65 ? -1 : 0;
         e.x = clamp(e.x + ax / distance * speed * dt * direction, 22, 458); e.y = clamp(e.y + ay / distance * speed * dt * direction, 36, 243);
         if (distance < 17) this.hurt();
         e.fire -= dt; e.warning = e.fire < .5;
-        if (e.fire < 0 && this.active()) { e.fire = 3.8 + this.random(); this.shots.push({ x: e.x, y: e.y, vx: ax / distance * 66, vy: ay / distance * 66, life: 5 }); }
+        if (e.fire < 0 && this.active()) { e.fire = 3.8 + this.random(); if(e.kind==='area')this.hazards.push({x:this.hero.x,y:this.hero.y,type:e.species==='spider'?'poison':'blast',radius:30,timer:1,life:e.species==='spider'?3:1.4,fired:false});else this.shots.push({ x: e.x, y: e.y, vx: ax / distance * 80, vy: ay / distance * 80, life: 5,type:e.species==='spider'?'poison':'arrow' }); }
       }
-      if (this.mode === 'boss') this.bossTick(dt);
+      if (this.mode === 'boss') this.bossTick(dt);else if(this.active())this.areaHazardsTick(dt);
       for (const p of this.shots) { p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt;
         if (Math.hypot(p.x - this.hero.x, p.y - this.hero.y) < 10 && this.active()) { const hit = this.hurt(p.type === 'ice' ? 12 : 10 + this.room); if (hit && p.type === 'ice') this.hero.slow = 1.2; if(hit&&p.type==='poison'){this.hero.poison=4;this.hero.poisonTick=1;} p.life = 0; } }
       this.shots = this.shots.filter(p => p.life > 0 && p.x > 16 && p.x < 464 && p.y > 24 && p.y < 252);
       for (const n of this.notices) { n.life -= dt; n.y -= dt * 10; } this.notices = this.notices.filter(n => n.life > 0);
       if(this.active())this.friendlyTick(dt);
-      if(this.mode==='play'&&!this.enemies.length){const h=this.hero;
+      if(this.mode==='play'&&!this.combatants().length){const h=this.hero;
         const dir=h.x>445&&Math.abs(h.y-136)<23?'right':h.x<35&&Math.abs(h.y-136)<23?'left':h.y<43&&Math.abs(h.x-240)<23?'up':h.y>235&&Math.abs(h.x-240)<23?'down':null;
         if(dir)this.travel(dir);
       }
@@ -633,15 +720,16 @@
   const gear=i=>i&&Number.isInteger(i.id)&&i.kind==='gear'&&Number.isInteger(i.slot)&&i.slot>=0&&i.slot<10&&Number.isInteger(i.rank)&&i.rank>=1&&i.rank<=100&&Object.hasOwn(ELEMENTS,i.element)&&Number.isInteger(i.level)&&i.level>=0&&i.level<=25&&([5,6,7].includes(i.slot)?i.quality===null:Object.hasOwn(QUALITIES,i.quality))&&(![4,8].includes(i.slot)||Object.hasOwn(WEAPONS,i.weapon))&&(i.slot!==4||i.weapon!=='shield')&&(i.slot!==8||!twoHanded(i))&&(i.slot!==9||['cape','wings'].includes(i.style));
   const item=i=>gear(i)||(i&&Number.isInteger(i.id)&&i.kind==='potion'&&Object.hasOwn(ATTRS,i.attribute)&&Number.isFinite(i.power)&&i.power>0);
   const equipment=a=>Array.isArray(a)&&a.length===10&&a.every((i,slot)=>i===null||(gear(i)&&i.slot===slot))&&!(twoHanded(a[4])&&a[8]);
-  const enemy=e=>finite(e,['x','y','hp','max','slow','fire','timer','face','swing'])&&['elite','caster'].includes(e.kind)&&['chase','windup','recover'].includes(e.phase);
-  const chest=b=>finite(b,['x','y'])&&typeof b.open==='boolean';
+  const enemy=e=>finite(e,['x','y','hp','max','slow','fire','timer','face','swing'])&&['elite','caster','melee','area','ghost'].includes(e.kind)&&['chase','windup','recover'].includes(e.phase)&&(e.dormant===undefined||typeof e.dormant==='boolean')&&(e.guardian===undefined||typeof e.guardian==='string')&&(e.keyFragment===undefined||['fang','silk'].includes(e.keyFragment));
+  const chest=b=>finite(b,['x','y'])&&typeof b.open==='boolean'&&(b.guard===undefined||b.guard===null||['ghost','elites'].includes(b.guard))&&(!b.guard||(typeof b.id==='string'&&typeof b.triggered==='boolean'));
   const zone=z=>finite(z,['x','y'])&&typeof z.name==='string'&&z.doors&&list(z.enemies,enemy)&&list(z.chests,chest);
   function valid(d){
-    if(!d||![1,2].includes(d.chapter)||!Number.isInteger(d.room)||d.room<1||d.room>5||!['play','boss','shop','awakening','reward','chapter-complete','won'].includes(d.mode))return false;
+    if(!d||![1,2,3].includes(d.chapter)||!Number.isInteger(d.room)||d.room<1||d.room>5||!['play','boss','shop','awakening','reward','chapter-complete','won'].includes(d.mode))return false;
+    if(!Array.isArray(d.keyFragments)||d.keyFragments.length>2||new Set(d.keyFragments).size!==d.keyFragments.length||!d.keyFragments.every(k=>['fang','silk'].includes(k)))return false;
     if(!finite(d,['nextId','kills','chapterKills','time','attack','cooldown','dashTime','dashCooldown','doorCooldown','revision']))return false;
     if(!finite(d.hero,['x','y','hp','stamina','gold','points','inv','face','slow','poison','poisonTick'])||d.hero.hp<=0||typeof d.hero.name!=='string'||d.hero.name.length>40)return false;
     if(d.hero.specialization!==null&&!Object.hasOwn(CLASSES,d.hero.specialization))return false;
-    if(d.chapter===2&&!d.hero.specialization)return false;
+    if(d.chapter>=2&&!d.hero.specialization)return false;
     if(!Object.keys(ATTRS).every(k=>Number.isInteger(d.hero.attributes?.[k])&&d.hero.attributes[k]>=1&&d.hero.attributes[k]<=100))return false;
     if(!equipment(d.equipped)||!list(d.bag,item)||!list(d.vault,item)||d.vault.length>200||!list(d.stock,i=>gear(i)&&Number.isFinite(i.price)))return false;
     if(![0,1,2].includes(d.evolution)||(!Number.isFinite(d.skillCooldown))||d.skillCooldown<0||d.skillCooldown>18||(d.equipped[9]&&d.evolution<2))return false;
@@ -655,7 +743,7 @@
     if(d.ally!==null&&(!finite(d.ally,['x','y','hp','face','fire','swing'])||!equipment(d.ally.equipment)))return false;
     if(d.zones!==null){if(typeof d.zones!=='object'||Object.keys(d.zones).length!==7||!Object.hasOwn(d.zones,d.zoneId)||!Object.values(d.zones).every(zone))return false;
       for(const z of Object.values(d.zones))for(const [dir,target] of Object.entries(z.doors))if(!['up','right','down','left'].includes(dir)||(target!=='next'&&!Object.hasOwn(d.zones,target)))return false;
-    }else if(d.chapter===2&&d.mode==='play')return false;
+    }else if(d.chapter>=2&&d.mode==='play')return false;
     return true;
   }
   function encode(game){
@@ -669,8 +757,9 @@
       if(save.version===1){const d=save.data;const migrate=i=>{if(!i||i.kind!=='gear')return; i.element='ice';i.level=Math.min(25,Math.max(0,(i.rank||1)-1));i.quality=[5,6,7].includes(i.slot)?null:['bronze','silver','gold'][Math.min(2,(i.rank||1)-1)];if(i.slot===4)i.weapon='sword';};
         for(const a of [d.equipped,d.bag,d.stock,d.boss?.equipment,d.ally?.equipment])if(Array.isArray(a))a.forEach(migrate);
         for(const a of [d.equipped,d.boss?.equipment,d.ally?.equipment])if(Array.isArray(a)&&a.length===8)a.push(null,null);
-        d.evolution=d.chapter===2&&['reward','won'].includes(d.mode)?2:d.hero?.specialization?1:0;d.skillCooldown=0;d.skillEffect=null;d.vault=[];
+        d.evolution=d.chapter>=2&&['reward','won'].includes(d.mode)?2:d.hero?.specialization?1:0;d.skillCooldown=0;d.skillEffect=null;d.vault=[];
       }
+      if(save.data.keyFragments===undefined)save.data.keyFragments=[];
       if(!valid(save.data))return null;
       const g=new Game();for(const key of Object.keys(g))if(key!=='random'&&Object.hasOwn(save.data,key))g[key]=save.data[key];
       if(g.zones){g.zones[g.zoneId].enemies=g.enemies;g.zones[g.zoneId].chests=g.chests;}
@@ -731,6 +820,7 @@
     scene(g){
       const key=[g.chapter,g.room,g.zoneId,g.boss?.kind,!!g.boss].join('-');if(this.bgKey===key&&this.background)return;
       this.bgKey=key;const prior=this.c,layer=document.createElement('canvas');layer.width=1440;layer.height=816;this.c=layer.getContext('2d');const c=this.c;c.scale(3,3);
+      if(g.chapter===3){this.cavern(g);this.background=layer;this.c=prior;return;}
       const green=g.chapter===2,base=green?'#152022':'#1c1c23';
       c.fillStyle='#070b10';c.fillRect(0,0,480,272);
       const floor=c.createRadialGradient(245,160,20,240,145,285);floor.addColorStop(0,green?'#35423d':'#39373d');floor.addColorStop(1,'#0b1117');c.fillStyle=floor;c.fillRect(15,52,450,200);
@@ -771,9 +861,43 @@
       const shade=c.createRadialGradient(240,148,75,240,136,260);shade.addColorStop(0,'#03081100');shade.addColorStop(.7,'#03081122');shade.addColorStop(1,'#030811d0');c.fillStyle=shade;c.fillRect(0,0,480,272);
       this.background=layer;this.c=prior;
     }
+    cavern(g){
+      const c=this.c;c.fillStyle='#080c11';c.fillRect(0,0,480,272);
+      const glow=c.createRadialGradient(265,150,5,240,140,260);glow.addColorStop(0,'#35403d');glow.addColorStop(1,'#0b1018');c.fillStyle=glow;c.fillRect(12,40,456,214);
+      for(let i=0;i<75;i++){const x=25+(i*71+g.room*13)%430,y=64+(i*43)%179;this.path([['M',x-8,y],['L',x-4,y-4],['L',x+9,y-3],['L',x+13,y+4],['L',x+2,y+7],['Z']],i%3?'#27312f':'#465047','#111c2299',.7);}
+      this.path([['M',0,0],['L',480,0],['L',480,58],['L',440,43],['L',404,65],['L',365,41],['L',324,57],['L',274,36],['L',240,48],['L',190,35],['L',144,59],['L',90,40],['L',35,62],['L',0,48],['Z']],'#222a2a','#070c12',3);
+      for(let i=0;i<16;i++){const x=12+i*31;this.path([['M',x-9,29],['L',x+9,26],['L',x+3,48+(i*17)%27],['Z']],'#3b4640','#10191b');this.line(x,31,x+3,48+(i*17)%27,'#81908055',.7);}
+      for(const [x,y] of [[25,215],[455,92],[448,228],[36,87]]){
+        for(let i=0;i<3;i++)this.path([['M',x-9+i*7,y+11],['L',x-5+i*7,y-18-i*5],['L',x+2+i*7,y+10],['Z']],i%2?'#727780':'#43565c','#121c23',1);
+      }
+      for(const [x,y,sign] of [[12,50,1],[468,50,-1],[12,244,1],[468,244,-1]]){
+        for(let i=0;i<7;i++){const a=i*Math.PI/12;this.line(x,y,x+Math.cos(a)*75*sign,y+Math.sin(a)*55*(y>200?-1:1),'#d2e1d04f',.7);}
+        for(const r of [20,38,56,74]){const pts=[];for(let i=0;i<7;i++){const a=i*Math.PI/12;pts.push([i?'L':'M',x+Math.cos(a)*r*sign,y+Math.sin(a)*r*.73*(y>200?-1:1)]);}this.path(pts,null,'#c4d8cd45',.6);}
+      }
+      for(let i=0;i<9;i++){const x=55+i*45,y=244+Math.sin(i*7)*4;this.ellipse(x,y,5,8,'#87937d','#28372e');this.line(x-2,y-3,x+2,y+4,'#d6dfba',.6);}
+      const shade=c.createRadialGradient(240,148,75,240,136,275);shade.addColorStop(0,'#00000000');shade.addColorStop(1,'#030812b0');c.fillStyle=shade;c.fillRect(0,0,480,272);
+    }
+    spider(e,g,queen=false){
+      const c=this.c,scale=queen?3:e.kind==='elite'?1.65:.8,color=e.kind==='area'?'#a793cf':e.kind==='caster'?'#8dbe84':'#bb957b';
+      this.memory.set(e,{x:e.x,y:e.y,hp:e.hp});c.save();c.translate(e.x,e.y);c.scale(scale,scale);this.ellipse(0,7,22,7,'#00000070',null);
+      for(const side of [-1,1])for(let i=0;i<4;i++){const sway=e.dormant?0:Math.sin(g.time*9+i*1.7)*3;this.path([['M',side*5,-2+i*3],['L',side*(16+i%2*4),-15+i*9+sway],['L',side*(25+i%2*3),-10+i*8-sway]],null,queen?'#a0b8a0':color,queen?2:1.5);}
+      this.ellipse(0,1,11,14,queen?'#343b48':e.kind==='elite'?'#534b62':'#4b474b','#11131c',1.5);this.ellipse(0,4,5,8,queen?'#9a456c':color,null);
+      this.ellipse(0,-12,9,7,'#424750','#121721',1);for(const side of [-1,1])for(let i=0;i<3;i++)this.ellipse(side*(2+i*2.4),-14+i,1.2,1.5,queen?'#ff768b':'#e6eea0',null);
+      for(const side of [-1,1])this.path([['M',side*4,-16],['L',side*6,-24],['L',side*1,-20]],null,'#eee0bd',2);
+      c.restore();
+      if(queen){c.fillStyle='#15151f';c.fillRect(125,13,230,6);c.fillStyle='#d776a2';c.fillRect(126,14,228*e.hp/e.max,4);this.text('ARACNIA · MADRE DE LAS PROFUNDIDADES',240,30,8,'#ecd0e4');}
+      else{c.fillStyle='#392d3e';c.fillRect(e.x-12,e.y-30*scale,24,3);c.fillStyle=color;c.fillRect(e.x-12,e.y-30*scale,24*e.hp/e.max,3);this.text(e.keyFragment?'PORTADORA · FRAGMENTO':e.dormant?'DORMIDA':e.kind==='elite'?'ÉLITE':{melee:'MORDEDORA',area:'TEJEDORA',caster:'ESCUPIDORA'}[e.kind],e.x,e.y-34*scale,5,e.keyFragment?'#f7d98a':color);}
+      if(e.warning||queen&&e.phase==='warning')this.text('!',e.x,e.y-(queen?84:40*scale),12,'#ffc2bc');
+    }
+    ghost(e,g){
+      const c=this.c,x=e.x,y=e.y+Math.sin(g.time*5)*4;c.save();c.globalAlpha=.8;
+      this.path([['M',x-12,y+10],['Q',x-14,y-26,x,y-28],['Q',x+14,y-26,x+12,y+10],['L',x+5,y+4],['L',x,y+12],['L',x-6,y+5],['Z']],'#aadbe7','#e1ffff',1.3);
+      for(const offset of [-4,4])this.ellipse(x+offset,y-17,2,3,'#273657',null);this.ellipse(x,y-8,3,4,'#273657',null);c.restore();
+      this.memory.set(e,{x:e.x,y:e.y,hp:e.hp});this.text('FANTASMA',x,y-35,6,'#c8f4ff');c.fillStyle='#91d8e2';c.fillRect(x-12,y-32,24*e.hp/e.max,2);
+    }
     doorway(dir,target,g){
       const c=this.c,positions={up:[240,39,0],right:[463,136,Math.PI/2],down:[240,251,Math.PI],left:[17,136,-Math.PI/2]},[x,y,a]=positions[dir];
-      const unlocked=!g.enemies.length,final=target==='next',color=final?'#d6b371':'#87a49b';c.save();c.translate(x,y);c.rotate(a);
+      const unlocked=!g.combatants().length,final=target==='next',color=final?'#d6b371':'#87a49b';c.save();c.translate(x,y);c.rotate(a);
       this.path([['M',-20,13],['L',-20,-14],['Q',0,-40,20,-14],['L',20,13],['Z']],'#060c12','#777e6e',3);
       this.path([['M',-14,13],['L',-14,-13],['Q',0,-30,14,-13],['L',14,13],['Z']],unlocked?color+'35':'#10171e','#151f25',1);
       if(unlocked){this.line(-13,9,13,9,color,1);this.path([['M',0,4],['L',0,-13],['M',-5,-8],['L',0,-14],['L',5,-8]],null,color,1.5);}
@@ -784,14 +908,16 @@
     flame(x,y,t,size=1){const c=this.c;c.save();c.translate(x,y);c.scale(size,size);const sway=Math.sin(t*9+x)*2;
       this.path([['M',-6,3],['Q',-12,-6,-4,-15],['Q',-4,-7,0,-11],['Q',4,-19,2,-24],['Q',14,-8,7,2],['Q',0,8,-6,3],['Z']],'#ee7648','#924b47',.7);
       this.path([['M',-3,3],['Q',-6,-4,sway,-11],['Q',5,-3,3,4],['Z']],'#ffde8b',null);c.restore();}
-    chest(b,g){const c=this.c;c.save();c.translate(b.x,b.y);this.ellipse(0,8,15,5,'#201c363f',null);const wood=b.luxury?'#809bb8':'#ad734d',gold=b.luxury?'#ffe2a0':'#dab47a';
+    chest(b,g){const c=this.c;c.save();c.translate(b.x,b.y);this.ellipse(0,8,15,5,'#201c363f',null);const wood=b.luxury?'#809bb8':b.special?'#7146a6':'#ad734d',gold=b.luxury?'#ffe2a0':b.special?'#d7b2ff':'#dab47a';
       this.path([['M',-12,-4],['L',12,-4],['L',11,9],['Q',0,13,-11,9],['Z']],wood);
       this.path([['M',-12,-4],['Q',-13,-15,0,-14],['Q',13,-14,12,-4],['Z']],b.open?'#5d4551':wood);
       if(b.open)this.path([['M',-12,-9],['L',-10,-18],['Q',0,-22,12,-16],['L',12,-9],['Z']],wood);
       this.line(-7,-12,-7,9,gold,2.5);this.line(7,-12,7,9,gold,2.5);this.ellipse(0,-1,2.5,3.5,gold);this.line(0,-1,0,1,INK,1);
       if(b.luxury){this.star(-17,-14,3,'#ffe7a0');this.star(17,-5,2,'#fff2cb');}
-      if(!b.open&&Math.hypot(g.hero.x-b.x,g.hero.y-b.y)<32)this.text(b.luxury?'E · LUJOSO':'E · ABRIR',0,-23,7,'#ebd9b3');c.restore();}
+      if(!b.open&&Math.hypot(g.hero.x-b.x,g.hero.y-b.y)<32)this.text(g.guarded(b)?'COFRE SELLADO':b.luxury?'E · LUJOSO':'E · ABRIR',0,-23,7,'#ebd9b3');c.restore();}
     actor(x,y,enemy,g,id){
+      if(enemy?.species==='spider'){this.spider(enemy,g,false);return;}
+      if(enemy?.kind==='ghost'){this.ghost(enemy,g);return;}
       const c=this.c,t=g.time,prev=this.memory.get(id),hp=enemy?enemy.hp:g.hero.hp;
       let hurt=prev?.hurt||0;if(prev&&hp<prev.hp){hurt=.22;this.sparks.push({x,y:y-18,time:t,text:enemy?'✦':'−',color:enemy?'#ffedb4':'#ffb5a2'});}
       const moving=prev&&Math.hypot(x-prev.x,y-prev.y)>.05,walk=moving?Math.sin(t*15):Math.sin(t*3)*.12,bob=moving?Math.abs(walk)*1.5:Math.sin(t*3)*.5;
@@ -825,7 +951,7 @@
       if(!enemy){if(g.rank(7))this.ellipse(1,-8,2,2.5,'#b3f0e9');if(g.rank(6))this.line(-13,-3,-9,-2,'#bd8feb',2);if(g.rank(5))this.ellipse(handX+1,handY-1,1.2,1.2,'#f2d488',null);
         for(const slot of [4,8])if(g.rank(slot)){const gear=g.equipped?.[slot];c.save();c.translate(slot===4?handX-10:-21,-19);this.weaponIcon(gear?.weapon||'sword',scope.ElementalEngine.QUALITIES[gear?.quality]?.color||'#aaa',scope.ElementalEngine.ELEMENTS[gear?.element]?.color||'#b9eef1');c.restore();}}
       c.restore();
-      if(enemy){c.fillStyle='#594b56';c.fillRect(x-10,y-39,20,2);c.fillStyle='#ea9165';c.fillRect(x-10,y-39,20*enemy.hp/enemy.max,2);if(enemy.warning)this.text('!',x,y-44,10,'#ffe1a0');}
+      if(enemy){if(enemy.dormant)this.text('DORMIDO',x,y-53,6,'#caa7ed');else if(enemy.kind==='melee'){this.line(x+14,y-5,x+14,y-28,'#e5b487',2);this.line(x+9,y-7,x+19,y-7,'#d79c65',2);}else if(enemy.kind==='area'){this.ellipse(x-15,y-15,5,5,'#ad70c6','#f1caff');}else if(enemy.kind==='caster'){this.path([['M',x+12,y-25],['Q',x+28,y-15,x+12,y-5]],null,'#b8dce6',2);this.line(x+12,y-25,x+12,y-5,'#b8dce6');}c.fillStyle='#594b56';c.fillRect(x-10,y-39,20,2);c.fillStyle='#ea9165';c.fillRect(x-10,y-39,20*enemy.hp/enemy.max,2);if(enemy.warning)this.text('!',x,y-44,10,'#ffe1a0');}
     }
     shadowBoss(g){
       const b=g.boss,c=this.c,color={mage:'#a0e3ec',rogue:'#bba1df',warrior:'#e0a078'}[b.style];
@@ -867,18 +993,20 @@
     }
     draw(g){
       const c=this.c,t=g.time;this.dt=Math.max(0,Math.min(.05,t-this.clock));if(t<this.clock||this.lastHero!==g.hero){this.memory.clear();this.sparks=[];}this.lastHero=g.hero;this.clock=t;this.scene(g);c.drawImage(this.background,0,0,480,272);
-      for(const x of [115,365]){this.path([['M',x-3,23],['L',x+3,23],['L',x+2,36],['L',x-2,36],['Z']],'#815962');this.flame(x,23,t,.65);}
+      for(const x of (g.chapter===3?[]:[115,365])){this.path([['M',x-3,23],['L',x+3,23],['L',x+2,36],['L',x-2,36],['Z']],'#815962');this.flame(x,23,t,.65);}
       for(const [dir,target] of Object.entries(g.doors()))this.doorway(dir,target,g);
-      for(const h of [...g.hazards,...g.enemies.filter(e=>e.kind==='elite'&&e.warning).map(e=>({x:e.x,y:e.y,type:'sword',angle:e.face,radius:48}))]){
+      for(const h of [...g.hazards,...g.enemies.filter(e=>['elite','melee','ghost'].includes(e.kind)&&e.warning).map(e=>({x:e.x,y:e.y,type:'sword',angle:e.face,radius:48}))]){
         c.save();c.translate(h.x,h.y);c.globalAlpha=h.fired?.9:.6+Math.sin(t*14)*.15;
-        if(h.type==='poison'){this.ellipse(0,0,h.radius,h.radius*.75,h.fired?'#8aaf4a55':'#a6bc5022','#c3d888',1);for(let i=0;i<8;i++)this.ellipse(Math.sin(i*13)*h.radius*.7,Math.cos(i*7)*h.radius*.5-(h.fired?Math.sin(t*3+i)*6:0),2+i%3,2+i%3,'#d4e78935',null);}
+        if(h.type==='web'){this.ellipse(0,0,h.radius,h.radius,'#d7e9e92a','#e2eef0',1);for(let i=0;i<8;i++){const a=i*Math.PI/4;this.line(0,0,Math.cos(a)*h.radius,Math.sin(a)*h.radius,'#dae9ee80',.7);}this.ellipse(0,0,h.radius*.5,h.radius*.5,'#00000000','#e2eef0',.7);}
+        else if(h.type==='blast'){this.ellipse(0,0,h.radius,h.radius,h.fired?'#dd7ba580':'#dd7ba522','#ef9ecd',1.5);}
+        else if(h.type==='poison'){this.ellipse(0,0,h.radius,h.radius*.75,h.fired?'#8aaf4a55':'#a6bc5022','#c3d888',1);for(let i=0;i<8;i++)this.ellipse(Math.sin(i*13)*h.radius*.7,Math.cos(i*7)*h.radius*.5-(h.fired?Math.sin(t*3+i)*6:0),2+i%3,2+i%3,'#d4e78935',null);}
         else if(h.type==='sword'){c.rotate(h.angle);c.beginPath();c.moveTo(0,0);c.arc(0,0,h.radius,-1.21,1.21);c.closePath();c.fillStyle=h.fired?'#edbc8580':'#d2865830';c.fill();c.strokeStyle='#d9a577';c.lineWidth=1;c.stroke();}
         else {this.ellipse(0,0,h.radius,h.radius,'#a187c32a','#bba1df',1);for(let i=0;i<9;i++){const x=Math.sin(i*7)*30,y=Math.cos(i*5)*29;if(h.fired){this.line(x-4,y-20,x,y,'#dbcfeb',1);this.path([['M',x-3,y-4],['L',x,y],['L',x+1,y-5]],null,'#dbcfeb');}else this.line(x-2,y,x+2,y,'#bba1df',1);}}
         c.restore();
       }
       for(const b of g.chests)this.chest(b,g);
       const living=new Set(['hero','shadow','ally']);const actors=g.enemies.map((e,i)=>({e,y:e.y,id:e}));actors.push({e:null,y:g.hero.y,id:'hero'});actors.sort((a,b)=>a.y-b.y);
-      if(g.boss&&g.boss.hp>0){if(g.chapter===2)this.plagueBoss(g);else this.shadowBoss(g);}
+      if(g.boss&&g.boss.hp>0){if(g.chapter===3)this.spider(g.boss,g,true);else if(g.chapter===2)this.plagueBoss(g);else this.shadowBoss(g);}
       if(g.ally)this.allyActor(g);
       for(const a of actors){living.add(a.id);if(a.e)this.actor(a.e.x,a.e.y,a.e,g,a.id);else this.actor(g.hero.x,g.hero.y,null,g,'hero');}
       for(const [id,old] of this.memory)if(!living.has(id)){this.sparks.push({x:old.x,y:old.y-13,time:t,text:'✧',color:'#fbe7c7'});this.memory.delete(id);}
@@ -893,8 +1021,8 @@
       for(let i=0;i<22;i++){const x=(i*71+t*(i%2?2:-2)+480)%480,y=70+(i*31)%170;this.ellipse(x,y+Math.sin(t+i)*5,.5,.5,'#d0cab338',null);}
       if(g.mode==='ready'||g.mode==='dead'||g.mode==='won'||g.mode==='chapter-complete'){
         c.fillStyle='#050a13d9';c.fillRect(76,78,328,104);this.line(96,85,384,85,'#9e875755',1);this.line(96,174,384,174,'#9e875755',1);
-        const title=g.mode==='ready'?'ELEMENTAL KNIGHT':g.mode==='dead'?'TU LLAMA SE APAGÓ':g.mode==='won'?'LA PESTE HA CAÍDO':'EL DESCENSO TE ESPERA';
-        this.text(title,240,115,16,'#d1c3a5');this.text(g.mode==='ready'?'Una luz diminuta en una catedral sin dioses.':g.mode==='dead'?'La cripta recuerda tu nombre. Volvé a intentarlo.':g.mode==='won'?'Tu sombra ya no es tu enemiga.':'Conservás tu nombre, tu clase y todo tu equipo.',240,142,8,'#a4b2af');
+        const title=g.mode==='ready'?'ELEMENTAL KNIGHT':g.mode==='dead'?'TU LLAMA SE APAGÓ':g.mode==='won'?'LA MATRIARCA HA CAÍDO':'EL DESCENSO TE ESPERA';
+        this.text(title,240,115,16,'#d1c3a5');this.text(g.mode==='ready'?'Una luz diminuta en una catedral sin dioses.':g.mode==='dead'?'La cripta recuerda tu nombre. Volvé a intentarlo.':g.mode==='won'?'Las cavernas vuelven a respirar.':'Conservás tu nombre, tu clase y todo tu equipo.',240,142,8,'#a4b2af');
       }else if(g.paused){this.path([['M',181,237],['L',299,237],['L',299,258],['L',181,258],['Z']],'#060c16db','#8a805e',.6);this.text('PAUSA · SEGUIR',240,251,8,'#cabd9c');}
     }
   }
@@ -958,7 +1086,7 @@
     $('#ek-life').classList.toggle('ek-poisoned',game.hero.poison>0);
     const odds = game.chances();
     $('#ek-chances').textContent = 'Botín: 5% equipo total · 10% poción · 85% oro';
-    $('#ek-kills').textContent = 'Esqueletos del capítulo ' + game.chapterKills + '/18';
+    $('#ek-kills').textContent = 'Enemigos derrotados: ' + game.chapterKills + (game.chapter===3?' · Llave: '+game.keyFragments.length+'/2':'');
     const set=game.artifactSet();$('#ek-skill').textContent=set?ELEMENTS[set].skill+(game.skillCooldown>0?' · '+Math.ceil(game.skillCooldown)+'s':' · Q'):'Skill · conjunto incompleto';
     $('#ek-skill').disabled=!set||!game.active()||game.skillCooldown>0||game.hero.stamina<25;
   }
@@ -1020,14 +1148,15 @@
     const focused = document.activeElement?.getAttribute?.('aria-label');
     $('#ek-world').hidden = panel || ['shop','awakening'].includes(game.mode); $('#ek-character').hidden = !panel; $('#ek-shop').hidden = panel || game.mode !== 'shop';
     $('#ek-awakening').hidden=panel || game.mode!=='awakening';
-    $('#ek-title').textContent=game.chapter===2?'La catedral de la peste':'La Cripta de Brasas';
-    $('#ek-next-chapter').hidden=panel||game.mode!=='chapter-complete';
-    $('#ek-exploration').hidden=panel||game.chapter!==2||!game.zones||game.mode!=='play';
+    $('#ek-title').textContent=game.chapter===3?'Las cavernas de seda':game.chapter===2?'La catedral de la peste':'La Cripta de Brasas';
+    $('#ek-next-chapter').hidden=panel||!(game.mode==='chapter-complete'||game.chapter===2&&game.mode==='won');
+    $('#ek-next-chapter').textContent=game.chapter===2?'Descender al acto III →':'Descender al capítulo II →';
+    $('#ek-exploration').hidden=panel||game.chapter<2||!game.zones||game.mode!=='play';
     if(!$('#ek-exploration').hidden)exploration();
-    $('#ek-enter-boss').textContent=game.chapter===2?'Enfrentar al guerrero de la peste →':'Enfrentar a mi sombra →';
+    $('#ek-enter-boss').textContent=game.chapter===3?'Abrir el sello de Aracnia · '+game.keyFragments.length+'/2 →':game.chapter===2?'Enfrentar al guerrero de la peste →':'Enfrentar a mi sombra →';
     $('#ek-panel').setAttribute('aria-expanded', String(panel)); $('#ek-message').textContent = game.message;
     $('#ek-start').textContent = game.mode === 'ready' ? 'Entrar a la cripta' : 'Reiniciar';
-    $('#ek-attack').textContent = (WEAPONS[game.weaponType()]||(game.chapter===2&&game.hero.specialization==='mage'?'Hielo':game.chapter===2&&game.hero.specialization==='rogue'?'Flecha':'Puños')) + ' · Espacio';
+    $('#ek-attack').textContent = (WEAPONS[game.weaponType()]||(game.chapter>=2&&game.hero.specialization==='mage'?'Hielo':game.chapter>=2&&game.hero.specialization==='rogue'?'Flecha':'Puños')) + ' · Espacio';
     $('#ek-attack').disabled = !game.active(); $('#ek-dash').disabled = !game.active();
     $('#ek-open').disabled = panel || !['play', 'reward'].includes(game.mode);
     $('#ek-pause').disabled = panel || !['play', 'boss', 'reward'].includes(game.mode);
@@ -1040,7 +1169,7 @@
   function exploration(){
     const z=game.zones[game.zoneId],dirs={up:'arriba',right:'derecha',down:'abajo',left:'izquierda'};
     $('#ek-location').textContent='Sala '+game.room+' · '+z.name;
-    $('#ek-route').textContent=game.enemies.length?(game.enemies.length===1?'Derrotá al enemigo':'Derrotá a los '+game.enemies.length+' enemigos')+' para abrir las puertas.':'Puertas abiertas: '+Object.keys(z.doors).map(d=>dirs[d]).join(' · ')+'.';
+    $('#ek-route').textContent=game.combatants().length?(game.combatants().length===1?'Derrotá al enemigo':'Derrotá a los '+game.combatants().length+' enemigos')+' para abrir las puertas.':'Puertas abiertas: '+Object.keys(z.doors).map(d=>dirs[d]).join(' · ')+'.';
     $('#ek-class-help').textContent=CLASSES[game.hero.specialization].name+' · '+({mage:'Lanzás hielo que ralentiza a los esbirros.',rogue:'Disparás flechas rápidas a distancia.',warrior:'Tu espada conserva el daño, alcance y efectos de tus artefactos.'}[game.hero.specialization])+' Apuntá con la dirección de movimiento o un clic en la mazmorra.';
     const visible=Object.values(game.zones).filter(n=>n.visited||Object.values(game.zones).some(v=>v.visited&&Object.values(v.doors).includes(n.id)));
     const minX=Math.min(...visible.map(n=>n.x)),minY=Math.min(...visible.map(n=>n.y)),maxX=Math.max(...visible.map(n=>n.x)),maxY=Math.max(...visible.map(n=>n.y));
@@ -1064,7 +1193,7 @@
   $('#ek-destiny').onsubmit=e=>{e.preventDefault();if(game.specialize($('#ek-name').value,selectedClass)){$('#ek-name-error').textContent='';keys={};refresh();}else $('#ek-name-error').textContent='Escribí un nombre de 1 a 20 caracteres.';};
   $('#ek-panel').onclick = $('#ek-close').onclick = $('#ek-shop-build').onclick = togglePanel;
   $('#ek-start').onclick = () => { panel = false; keys = {}; $('#ek-name').value=''; game.reset(); refresh(); };
-  $('#ek-next-chapter').onclick=()=>{keys={};panel=false;game.beginChapter2();refresh();};
+  $('#ek-next-chapter').onclick=()=>{keys={};panel=false;game.chapter===1?game.beginChapter2():game.beginChapter3();refresh();};
   $('#ek-pause').onclick = () => { keys = {}; game.paused = !game.paused; refresh(); };
   $('#ek-enter-boss').onclick = () => { game.enterBoss(); keys = {}; refresh(); };
   $('#ek-open').onclick = () => { game.openChest(); refresh(); };
@@ -1154,6 +1283,7 @@ globalThis.KnightCloudConfig = {
       return data;
     }
     async signup(email,password){return this.request('/auth/v1/signup',{email,password});}
+    async resendSignup(email){return this.request('/auth/v1/resend',{type:'signup',email});}
     async login(email,password){const data=await this.request('/auth/v1/token?grant_type=password',{email,password});if(!data?.access_token||!data?.user?.id)throw new Error('No se pudo iniciar sesión.');this.session={...data,expires_at:Date.now()+data.expires_in*1000};this.revision=0;return data.user;}
     async token(){if(!this.session)throw new Error('Iniciá sesión primero.');if(Date.now()>this.session.expires_at-60000){const d=await this.request('/auth/v1/token?grant_type=refresh_token',{refresh_token:this.session.refresh_token});this.session={...d,expires_at:Date.now()+d.expires_in*1000};}return this.session.access_token;}
     async load(){const token=await this.token();const rows=await this.request('/rest/v1/knight_saves?select=revision,document',undefined,token);const row=rows?.[0];this.revision=row?.revision||0;return row?.document||null;}
@@ -1168,7 +1298,7 @@ globalThis.KnightCloudConfig = {
   const S=window.ElementalSession, cloud=new window.KnightCloud.CloudAccount(window.KnightCloudConfig);
   const entry=document.createElement('button');entry.type='button';entry.textContent='Lobby · Cuenta y baúl';document.querySelector('.ek-window-actions').append(entry);
   const dialog=document.createElement('dialog');dialog.id='ek-lobby';dialog.className='ek-lobby';
-  dialog.innerHTML='<h2>El refugio del caballero</h2><p id="ek-account-state">Invitado · guardado en este dispositivo</p><p id="ek-cloud-status" role="status"></p><form id="ek-account-form"><label>Correo <input name="email" type="email" required autocomplete="email"></label><label>Contraseña <input name="password" type="password" minlength="8" required autocomplete="current-password"></label><button type="submit">Iniciar sesión</button><button type="button" id="ek-register">Crear cuenta</button></form><div id="ek-account-actions" hidden><button id="ek-cloud-save">Guardar en la nube</button><button id="ek-cloud-load">Cargar nube</button><button id="ek-logout">Cerrar sesión</button></div><p>Baúl: hasta 200 objetos. Equipá desde la mochila. Los objetos del baúl se conservan al reiniciar la aventura.</p><div class="ek-vault-columns"><section><h3>Mochila</h3><div id="ek-vault-bag"></div></section><section><h3>Baúl</h3><div id="ek-vault-items"></div></section></div><button id="ek-lobby-close">Volver al juego</button>';
+  dialog.innerHTML='<h2>El refugio del caballero</h2><p id="ek-account-state">Invitado · guardado en este dispositivo</p><p id="ek-cloud-status" role="status"></p><form id="ek-account-form"><label>Correo <input name="email" type="email" required autocomplete="email"></label><label>Contraseña <input name="password" type="password" minlength="8" required autocomplete="current-password"></label><button type="submit">Iniciar sesión</button><button type="button" id="ek-register">Crear cuenta</button><button type="button" id="ek-resend-confirmation">Reenviar confirmación</button></form><div id="ek-account-actions" hidden><button id="ek-cloud-save">Guardar en la nube</button><button id="ek-cloud-load">Cargar nube</button><button id="ek-logout">Cerrar sesión</button></div><p>Baúl: hasta 200 objetos. Equipá desde la mochila. Los objetos del baúl se conservan al reiniciar la aventura.</p><div class="ek-vault-columns"><section><h3>Mochila</h3><div id="ek-vault-bag"></div></section><section><h3>Baúl</h3><div id="ek-vault-items"></div></section></div><button id="ek-lobby-close">Volver al juego</button>';
   document.querySelector('#ember-dungeon').append(dialog);
   const $=s=>dialog.querySelector(s),status=message=>$('#ek-cloud-status').textContent=message;
   let busy=false;
@@ -1182,7 +1312,8 @@ globalThis.KnightCloudConfig = {
   const form=$('#ek-account-form');
   for(const b of form.querySelectorAll('button'))b.disabled=!cloud.configured;
   form.onsubmit=e=>{e.preventDefault();action(async()=>{const data=new FormData(form);await cloud.login(data.get('email'),data.get('password'));form.reset();S.setUser(cloud.session.user.id);S.pause();const document=await cloud.load();if(document){if(window.confirm('¿Cargar la partida de la nube? La partida local de esta cuenta queda guardada como respaldo hasta que vuelvas a guardar.'))S.load(JSON.stringify(document));}status('Sesión iniciada. Usá Guardar en la nube para sincronizar el personaje y el baúl.');});};
-  $('#ek-register').onclick=()=>{if(!form.reportValidity())return;action(async()=>{const data=new FormData(form);await cloud.signup(data.get('email'),data.get('password'));form.reset();status('Si el registro se completó, revisá tu correo para confirmar la cuenta y luego iniciá sesión.');});};
+  $('#ek-register').onclick=()=>{if(!form.reportValidity())return;action(async()=>{const data=new FormData(form);await cloud.signup(data.get('email'),data.get('password'));form.reset();status('Cuenta creada. Revisá tu correo (y spam/promociones) para confirmarla; después iniciá sesión.');});};
+  $('#ek-resend-confirmation').onclick=()=>{const email=form.elements.email;if(!email.reportValidity())return;action(async()=>{await cloud.resendSignup(email.value);status('Correo de confirmación reenviado. Revisá también spam/promociones.');});};
   $('#ek-cloud-save').onclick=()=>action(upload);
   $('#ek-cloud-load').onclick=()=>action(async()=>{if(!window.confirm('¿Reemplazar la partida abierta por la de la nube?'))return;const document=await cloud.load();if(!document)throw new Error('Esta cuenta todavía no tiene una partida en la nube.');S.load(JSON.stringify(document));status('Partida y baúl recuperados.');});
   $('#ek-logout').onclick=()=>action(async()=>{if(window.ElementalSave.encode(S.get())){try{await upload();}catch(error){if(!window.confirm(error.message+' Tu copia local está guardada. ¿Cerrar sesión sin sincronizar?'))return;}}const revoked=await cloud.logout();S.setUser(null);S.pause();status(revoked?'Sesión cerrada. Volviste a invitado.':'Sesión cerrada en este dispositivo; no se pudo revocar la sesión remota por un error de conexión.');});
