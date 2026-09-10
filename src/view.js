@@ -1,11 +1,12 @@
 (() => {
   'use strict';
   const root = document.getElementById('ember-dungeon'), $ = selector => root.querySelector(selector);
-  const { Game, ITEMS, ATTRS, CLASSES } = globalThis.ElementalEngine;
+  const { Game, ITEMS, ATTRS, CLASSES, ELEMENTS, QUALITIES, WEAPONS, ARMOR_SLOTS, ARTIFACT_SLOTS, twoHanded } = globalThis.ElementalEngine;
   let game = new Game();
   const canvas = $('#ek-canvas'), painter = new globalThis.ElementalPainter(canvas);
   let panel = false, pausedBeforePanel = false, keys = {}, last = 0, lastRevision = -1, hudTimer = 0;
-  const saveKey='elemental-knight-save-v1'+(location.pathname.includes('/.qa/')?':qa:'+location.pathname:'');
+  const guestSaveKey='elemental-knight-save-v1'+(location.pathname.includes('/.qa/')?':qa:'+location.pathname:'');
+  let saveKey=guestSaveKey;
   let storedSave=null,saveTimer=0,expandedFallback=false;
   try{storedSave=globalThis.ElementalSave.decode(localStorage.getItem(saveKey));}catch{}
   function saveGame(manual=false){
@@ -55,6 +56,8 @@
     const odds = game.chances();
     $('#ek-chances').textContent = 'Cofres: equipo ' + Math.round(odds.gear * 100) + '% · poción ' + Math.round(odds.potion * 100) + '% · resto oro';
     $('#ek-kills').textContent = 'Esqueletos del capítulo ' + game.chapterKills + '/18';
+    const set=game.artifactSet();$('#ek-skill').textContent=set?ELEMENTS[set].skill+(game.skillCooldown>0?' · '+Math.ceil(game.skillCooldown)+'s':' · Q'):'Skill · conjunto incompleto';
+    $('#ek-skill').disabled=!set||!game.active()||game.skillCooldown>0||game.hero.stamina<25;
   }
   function inventory() {
     painter.portrait($('#ek-portrait'),game);
@@ -74,15 +77,16 @@
       'Nivel ' + s.level + ' · +1 cada 5 esqueletos', 'Un ataque acertado = una curación']) derived.append(node('span', '', text));
     derived.append(node('span', 'ek-heal-formula', 'Curación = 0,6 + 0,03(V−1) + 0,015(F−1) + 0,01(A−1) + 0,1(nivel−1). V: vitalidad · F: fuerza · A: agilidad.'));
     const slotBox = $('#ek-slots'); slotBox.replaceChildren();
-    ITEMS.forEach((def, slot) => {
+    [...ARMOR_SLOTS,...ARTIFACT_SLOTS].forEach(slot => {const def=ITEMS[slot];
       const item = game.equipped[slot], card = node('div', 'ek-slot');
-      card.append(node('span', 'ek-slot-label', def.group + ' · ' + def.slot), icon(item || { kind: 'empty', slot }), node('span', 'ek-item-name' + (!item ? ' ek-empty' : ''), item ? game.itemName(item) : 'Vacío'));
-      if(item){card.dataset.rank=item.rank;card.append(node('small','ek-item-detail',ITEMS[slot].detail+' · Rango '+item.rank));}
+      const locked=slot===9&&game.evolution<2,occupied=slot===8&&twoHanded(game.equipped[4]);
+      card.append(node('span', 'ek-slot-label', def.group + ' · ' + def.slot), icon(item || { kind: 'empty', slot }), node('span', 'ek-item-name' + (!item ? ' ek-empty' : ''), item ? game.itemName(item) : locked?'Segunda evolución':occupied?'Ocupado por arma a dos manos':'Vacío'));
+      if(item){card.style.borderColor=QUALITIES[item.quality]?.color||ELEMENTS[item.element].color;card.append(node('small','ek-item-detail',ITEMS[slot].detail));}
       if (item) card.append(button('Quitar', () => game.unequip(slot), !game.canManage(), 'Quitar ' + def.name));
       slotBox.append(card);
     });
-    $('#ek-count').textContent = game.equipped.filter(Boolean).length + '/8';
-    $('#ek-bonuses').textContent = 'Hierro ' + game.equipped.slice(0, 4).filter(Boolean).length + '/4: +2 protección. Escarcha ' + game.equipped.slice(4).filter(Boolean).length + '/4: +10 contra fuego.';
+    $('#ek-count').textContent = 'Armadura '+ARMOR_SLOTS.filter(i=>game.equipped[i]).length+'/5 · Artefactos '+(ARTIFACT_SLOTS.filter(i=>game.equipped[i]).length+(twoHanded(game.equipped[4])?1:0))+'/5';
+    const set=game.artifactSet();$('#ek-bonuses').textContent=(set?'Skill: '+ELEMENTS[set].skill+' · Q · 25 energía · 18 s.':'Equipá los cinco artefactos del mismo elemento para desbloquear su skill. Un arma a dos manos cubre ambas posiciones.')+' Evolución '+game.evolution+'/2.';
     const backpack = $('#ek-inventory'); backpack.replaceChildren(); $('#ek-bag-count').textContent = '(' + game.bag.length + ')';
     if (!game.bag.length) backpack.append(node('p', 'ek-muted', 'Vacía. Acá aparecen piezas y pociones de los cofres.'));
     for (const item of game.bag) {
@@ -90,10 +94,11 @@
       const card = button('', () => isPotion ? game.drink(item.id) : game.equip(item.id), !game.canManage(), (isPotion ? 'Usar ' : 'Equipar ') + game.itemName(item));
       card.className = 'ek-bag-item';
       card.title = game.itemName(item) + ' · ' + (isPotion ? '+' + item.power + ' puntos' + (item.attribute === 'vitality' ? ' y cura 35%' : '') : ITEMS[item.slot].detail);
-      const name = node('span', '', isPotion ? ATTRS[item.attribute].name + ' +' + item.power : ITEMS[item.slot].slot + (item.rank > 1 ? ' +' + item.rank : ''));
+      const name = node('span', '', isPotion ? ATTRS[item.attribute].name + ' +' + item.power : game.itemName(item));
       if (isPotion) name.style.color = ATTRS[item.attribute].color;
       card.append(icon(item), name);
       backpack.append(card);
+      if(item.weapon&&item.weapon!=='shield'&&!twoHanded(item))backpack.append(button(item.slot===4?'Equipar en segunda mano':'Equipar en mano principal',()=>game.equip(item.id,item.slot===4?8:4)));
     }
   }
   function shop() {
@@ -118,7 +123,7 @@
     $('#ek-enter-boss').textContent=game.chapter===2?'Enfrentar al guerrero de la peste →':'Enfrentar a mi sombra →';
     $('#ek-panel').setAttribute('aria-expanded', String(panel)); $('#ek-message').textContent = game.message;
     $('#ek-start').textContent = game.mode === 'ready' ? 'Entrar a la cripta' : 'Reiniciar';
-    $('#ek-attack').textContent = (game.chapter===2&&game.hero.specialization==='mage'?'Hielo':game.chapter===2&&game.hero.specialization==='rogue'?'Flecha':game.rank(4)?'Espada':'Puños') + ' · Espacio';
+    $('#ek-attack').textContent = (WEAPONS[game.weaponType()]||(game.chapter===2&&game.hero.specialization==='mage'?'Hielo':game.chapter===2&&game.hero.specialization==='rogue'?'Flecha':'Puños')) + ' · Espacio';
     $('#ek-attack').disabled = !game.active(); $('#ek-dash').disabled = !game.active();
     $('#ek-open').disabled = panel || !['play', 'reward'].includes(game.mode);
     $('#ek-pause').disabled = panel || !['play', 'boss', 'reward'].includes(game.mode);
@@ -160,6 +165,7 @@
   $('#ek-enter-boss').onclick = () => { game.enterBoss(); keys = {}; refresh(); };
   $('#ek-open').onclick = () => { game.openChest(); refresh(); };
   $('#ek-dash').onclick = () => { game.dash(); updateHud(); };
+  $('#ek-skill').onclick=()=>{game.skill();refresh();};
   $('#ek-attack').onclick = () => game.strike();
   $('#ek-attack').onpointerdown = e => { e.preventDefault(); if (!game.active()) return; keys.hit = true; e.currentTarget.setPointerCapture(e.pointerId); game.strike(); };
   $('#ek-attack').onpointerup = $('#ek-attack').onpointercancel = () => { keys.hit = false; };
@@ -167,6 +173,7 @@
   const map = { ArrowLeft: 'left', a: 'left', ArrowRight: 'right', d: 'right', ArrowUp: 'up', w: 'up', ArrowDown: 'down', s: 'down' };
   document.addEventListener('keydown', e => {
     if (document.querySelector('#ek-settings[open]')) return;
+    if (document.querySelector('#ek-lobby[open]')) return;
     if (/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)||game.mode==='awakening') return;
     if(e.key==='Escape'&&expandedFallback){expandedFallback=false;fullscreenState();return;}
     if(e.key==='Enter'&&['ek-next-chapter','ek-start','ek-fullscreen','ek-save','ek-load'].includes(e.target.id))return;
@@ -176,11 +183,13 @@
     const k = map[e.key] || map[e.key.toLowerCase()]; if (k) { e.preventDefault(); keys[k] = true; }
     if (e.code === 'Space' && game.active()) { e.preventDefault(); keys.hit = true; game.strike(); }
     if (e.key.toLowerCase() === 'e' && !e.repeat) { game.openChest(); refresh(); }
+    if (e.key.toLowerCase() === 'q' && !e.repeat) { game.skill(); refresh(); }
     if (e.key === 'Shift' && !e.repeat) { e.preventDefault(); game.dash(); }
   });
   document.addEventListener('keyup', e => { const k = map[e.key] || map[e.key.toLowerCase()]; if (k) keys[k] = false; if (e.code === 'Space') keys.hit = false; });
   function blur() { saveGame(); keys = {}; if (game.active() || game.mode === 'reward') { game.paused = true; refresh(); } }
   window.addEventListener('knight:settings', blur);
+  window.ElementalSession={get:()=>game,save:saveGame,refresh,pause:blur,setUser:id=>{saveGame();saveKey=id?guestSaveKey+':account:'+id:guestSaveKey;storedSave=null;try{storedSave=globalThis.ElementalSave.decode(localStorage.getItem(saveKey));}catch{}game=storedSave||new Game();panel=false;keys={};refresh();},load:text=>{const loaded=globalThis.ElementalSave.decode(text);if(!loaded)throw new Error('Partida inválida');game=loaded;panel=false;keys={};lastRevision=-1;refresh();},reset:()=>{game=new Game();panel=false;keys={};refresh();}};
   window.addEventListener('pagehide',()=>saveGame());
   window.addEventListener('blur', blur); document.addEventListener('visibilitychange', () => { if (document.hidden) blur(); });
   canvas.onpointerdown = e => { if (!game.active()) return; const r = canvas.getBoundingClientRect(); game.hero.face = Math.atan2((e.clientY - r.top) * 272 / r.height - game.hero.y, (e.clientX - r.left) * 480 / r.width - game.hero.x); game.strike(); };

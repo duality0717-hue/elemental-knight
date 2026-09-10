@@ -14,8 +14,15 @@
     { slot: 'Arma', name: 'Espada de escarcha', group: 'Artefactos', detail: 'Más alcance y ralentización', basePrice: 100 },
     { slot: 'Anillo', name: 'Anillo de hielo', group: 'Artefactos', detail: 'Más daño', basePrice: 80 },
     { slot: 'Pulsera', name: 'Pulsera del deshielo', group: 'Artefactos', detail: 'Ataques más rápidos', basePrice: 85 },
-    { slot: 'Collar', name: 'Corazón de invierno', group: 'Artefactos', detail: 'Recupera vida por baja', basePrice: 95 }
+    { slot: 'Collar', name: 'Collar', group: 'Artefactos', detail: 'Recupera vida por baja', basePrice: 95 },
+    { slot: 'Segunda mano', name: 'Segunda mano', group: 'Artefactos', detail: 'Arma secundaria o escudo', basePrice: 100 },
+    { slot: 'Ala / capa', name: 'Capa', group: 'Armadura', detail: 'Segunda evolución · Protección adicional', basePrice: 140 }
   ];
+  const ELEMENTS = { ice: {name:'Hielo',color:'#8de4ff',skill:'Invierno eterno'}, electric: {name:'Eléctrico',color:'#c8a2ff',skill:'Cadena del trueno'}, magma: {name:'Magma',color:'#ff995e',skill:'Erupción'}, poison: {name:'Veneno',color:'#a5db69',skill:'Miasma'} };
+  const QUALITIES = {bronze:{name:'Bronce',power:1,color:'#b98755'},silver:{name:'Plata',power:2,color:'#c7d5e2'},gold:{name:'Oro',power:3,color:'#e5bf60'}};
+  const WEAPONS = {sword:'Espada',staff:'Báculo',bow:'Arco',greatsword:'Mandoble',shield:'Escudo'};
+  const ARMOR_SLOTS=[0,2,3,1,9], ARTIFACT_SLOTS=[4,8,5,6,7];
+  const twoHanded = item => ['bow','greatsword'].includes(item?.weapon);
   const ROOMS = ['La entrada carbonizada', 'El osario', 'El santuario ardiente', 'Las forjas hundidas', 'El trono de ceniza'];
   const CLASSES = {
     mage: { name: 'Mago', attribute: 'energy', color: '#91d9ed', title: 'La voluntad del invierno', detail: '+5 Energía · Dominio arcano' },
@@ -32,23 +39,51 @@
       this.time = 0; this.attack = 0; this.cooldown = 0; this.dashTime = 0; this.dashCooldown = 0;
       this.hero = { x: 54, y: 136, face: 0, hp: 100, stamina: 52, gold: 0, points: 0, inv: 1.5, slow: 0, poison: 0, poisonTick: 0, name: '', specialization: null,
         attributes: { strength: 1, energy: 1, vitality: 1, agility: 1 } };
-      this.bag = []; this.equipped = Array(8).fill(null); this.stock = []; this.boss = null;
+      this.bag = []; this.equipped = Array(10).fill(null); this.stock = []; this.boss = null;
+      this.evolution=0; this.skillCooldown=0; this.skillEffect=null; this.vault=this.vault||[];
+      this.nextId=Math.max(this.nextId,...this.vault.map(i=>i.id+1));
       this.effects = []; this.notices = []; this.revision = 0; this.rewardClaimed = false;
       this.spawnRoom(); this.say('Entrás sin equipo. Cada esqueleto da oro y 1 punto libre. Enter abre el personaje.');
     }
     say(text) { this.message = text; this.revision++; }
-    rank(slot) { return this.equipped[slot]?.rank || 0; }
+    rank(slot) { const item=this.equipped[slot]; return item ? (QUALITIES[item.quality]?.power||1)*(1+(item.level||0)*.04) : 0; }
+    artifactSet() {
+      const weapon=this.equipped[4]; if(!weapon)return null;
+      const slots=twoHanded(weapon)?[4,5,6,7]:ARTIFACT_SLOTS;
+      return slots.every(i=>this.equipped[i]?.element===weapon.element)?weapon.element:null;
+    }
+    armorSet() { const items=ARMOR_SLOTS.map(i=>this.equipped[i]);return items.every(i=>i&&i.element===items[0]?.element)?items[0].element:null; }
+    weaponType() { return this.equipped[4]?.weapon || (this.equipped[8]?.weapon!=='shield'&&this.equipped[8]?.weapon) || null; }
     stats() {
       const a = this.hero.attributes, r = i => this.rank(i), level = 1 + Math.floor(this.kills / 5);
-      return { level, damage: (r(4) ? 24 + 6 * (r(4) - 1) : 12) + (a.strength - 1) * 1.5 + r(3) * 4 + r(5) * 6,
+      return { level, damage: (r(4) ? 24 + 6 * (r(4) - 1) : 12) + (a.strength - 1) * 1.5 + r(3) * 4 + r(5) * 6 + (this.equipped[8]&&this.equipped[8].weapon!=='shield'?r(8)*5:0),
         maxHp: 100 + (a.vitality - 1) * 8, maxEnergy: 50 + a.energy * 2,
-        armor: r(0) * 3 + r(2) * 2 + (this.equipped.slice(0, 4).every(Boolean) ? 2 : 0),
+        armor: r(0) * 3 + r(2) * 2 + r(9)*2 + (this.equipped[8]?.weapon==='shield'?r(8)*4:0) + (this.armorSet() ? 4 : 0),
         speed: 88 + (a.agility - 1) * .5 + r(1) * 10,
         delay: Math.max(.18, .48 / (1 + (a.agility - 1) * .01) * Math.pow(.88, r(6))),
-        range: r(4) ? 47 : 33, frost: this.equipped.slice(4).every(Boolean),
+        range: this.weaponType()==='greatsword'?65:r(4) ? 47 : 33, frost: false,
         lifeOnHit: .6 + .03 * (a.vitality - 1) + .015 * (a.strength - 1) + .01 * (a.agility - 1) + .1 * (level - 1) };
     }
     chances() { return { gear: this.room * 5 / 100, potion: (15 + (this.room - 1) * 10) / 100 }; }
+    transferVault(id, withdraw=false) {
+      if(!this.paused||!this.canManage())return false;
+      const from=withdraw?this.vault:this.bag,to=withdraw?this.bag:this.vault;
+      const index=from.findIndex(i=>i.id===id);if(index<0||to.length>=200)return false;
+      to.push(from.splice(index,1)[0]);this.say(withdraw?'Objeto retirado del baúl.':'Objeto guardado en el baúl.');return true;
+    }
+    skill() {
+      const element=this.artifactSet();
+      if(!element||!this.active()||this.skillCooldown>0||this.hero.stamina<25)return false;
+      this.hero.stamina-=25;this.skillCooldown=18;
+      const radius=element==='magma'?85:element==='electric'?500:150;
+      this.skillEffect={element,x:this.hero.x,y:this.hero.y,radius,life:1};
+      let targets=(this.mode==='boss'?[this.boss]:this.enemies).filter(e=>e.hp>0&&Math.hypot(e.x-this.hero.x,e.y-this.hero.y)<radius);
+      if(element==='electric')targets=targets.sort((a,b)=>Math.hypot(a.x-this.hero.x,a.y-this.hero.y)-Math.hypot(b.x-this.hero.x,b.y-this.hero.y)).slice(0,3);
+      const damage={ice:45,electric:70,magma:100,poison:20}[element]+this.stats().damage*.3;
+      for(const e of targets){e.hp=Math.max(0,e.hp-damage);if(element==='ice')e.slow=4;if(element==='poison')e.venom={remaining:6,tick:1};if(!e.hp){if(e===this.boss)this.defeatBoss();else this.kill(e);}}
+      const before=this.enemies.length;this.enemies=this.enemies.filter(e=>e.hp>0);if(before&&!this.enemies.length)this.clearedCombat();
+      this.say(ELEMENTS[element].skill+' · '+targets.length+' objetivo(s).');return true;
+    }
     spawnRoom() {
       if (this.chapter === 2 && this.room < 5) { this.createLabyrinth(); return; }
       this.hero.x = 54; this.hero.y = 136; this.hero.inv = 1.5; this.hero.face = 0;
@@ -69,20 +104,35 @@
       this.hero.stamina += this.stats().maxEnergy - before.maxEnergy;
       this.say(ATTRS[key].name + ' aumentó a ' + this.hero.attributes[key] + '/100.'); return true;
     }
-    gear(slot, rank = 1) { return { id: this.nextId++, kind: 'gear', slot, rank }; }
-    potion(attribute, power = this.room) { return { id: this.nextId++, kind: 'potion', attribute, power }; }
-    itemName(item) { return item.kind === 'potion' ? 'Poción de ' + ATTRS[item.attribute].name.toLowerCase() : ITEMS[item.slot].name + (item.rank > 1 ? ' +' + item.rank : ''); }
-    acquireGear(rank = 1) {
-      const owned = new Set([...this.bag.filter(i => i.kind === 'gear'), ...this.equipped.filter(Boolean)].map(i => i.slot));
-      const available = ITEMS.map((_, i) => i).filter(i => !owned.has(i));
-      const pool = available.length ? available : ITEMS.map((_, i) => i);
-      const item = this.gear(pool[Math.floor(this.random() * pool.length)], rank); this.bag.push(item); return item;
+    gear(slot, rank = 1, options={}) {
+      const element=options.element||Object.keys(ELEMENTS)[Math.floor(this.random()*4)];
+      const quality=(slot<5||slot===8||slot===9)?(options.quality||Object.keys(QUALITIES)[clamp(rank-1,0,2)]):null;
+      const pool=slot===8?['sword','staff','shield']:['sword','staff','bow','greatsword'];
+      return { id:this.nextId++,kind:'gear',slot,rank,element,quality,level:clamp(options.level??0,0,25),
+        ...([4,8].includes(slot)?{weapon:options.weapon||pool[Math.floor(this.random()*pool.length)]}:{}),
+        ...(slot===9?{style:options.style||(this.random()<.5?'cape':'wings')}:{} ) };
     }
-    equip(id) {
+    potion(attribute, power = this.room) { return { id: this.nextId++, kind: 'potion', attribute, power }; }
+    itemName(item) { return item.kind === 'potion' ? 'Poción de ' + ATTRS[item.attribute].name.toLowerCase() : (WEAPONS[item.weapon]||(item.slot===9?(item.style==='wings'?'Alas':'Capa'):ITEMS[item.slot].slot))+' · '+ELEMENTS[item.element].name+(item.quality?' · '+QUALITIES[item.quality].name:'')+' · Nv. '+item.level; }
+    acquireGear(rank = 1, source='normal') {
+      const owned = new Set([...this.bag.filter(i => i.kind === 'gear'), ...this.equipped.filter(Boolean)].map(i => i.slot));
+      const eligible=ITEMS.map((_,i)=>i).filter(i=>i!==9||this.evolution>=2);
+      const available = eligible.filter(i => !owned.has(i));
+      const pool = available.length ? available : eligible;
+      const level=source==='boss'?Math.min(25,5*this.chapter):source==='elite'?Math.min(25,this.chapter+Math.floor(this.random()*3)):0;
+      const item = this.gear(pool[Math.floor(this.random() * pool.length)], rank,{level,quality:Object.keys(QUALITIES)[Math.floor(this.random()*3)]}); this.bag.push(item); return item;
+    }
+    equip(id, targetSlot) {
       if (!this.canManage()) return false;
       const index = this.bag.findIndex(i => i.id === id && i.kind === 'gear'); if (index < 0) return false;
-      const [item] = this.bag.splice(index, 1), old = this.equipped[item.slot];
-      this.equipped[item.slot] = item; if (old) this.bag.push(old);
+      const item=this.bag[index], slot=targetSlot??item.slot;
+      if(slot===9&&this.evolution<2){this.say('Ala/capa se desbloquea en la segunda evolución.');return false;}
+      if(item.weapon){if(![4,8].includes(slot)||(slot===4&&item.weapon==='shield')||(slot===8&&twoHanded(item)))return false;}
+      else if(slot!==item.slot)return false;
+      if(slot===8&&twoHanded(this.equipped[4])){this.say('El arco y el mandoble ocupan ambas manos. Quitá primero el arma principal.');return false;}
+      this.bag.splice(index,1);
+      if(slot===4&&twoHanded(item)&&this.equipped[8]){this.bag.push(this.equipped[8]);this.equipped[8]=null;}
+      const old=this.equipped[slot];item.slot=slot;this.equipped[slot]=item;if(old)this.bag.push(old);
       this.say(this.itemName(item) + ' equipado manualmente.'); return true;
     }
     unequip(slot) {
@@ -109,7 +159,7 @@
       chest.open = true;
       if (chest.luxury) {
         if (this.rewardClaimed) return false;
-        this.rewardClaimed = true; const item = this.acquireGear(3); this.hero.gold += 200;
+        this.rewardClaimed = true; const item = this.acquireGear(3,'boss'); this.hero.gold += 200;
         for (const key of Object.keys(ATTRS)) this.bag.push(this.potion(key, 8));
         this.mode = this.chapter === 1 ? 'chapter-complete' : 'won'; this.say('¡Victoria! Cofre lujoso: ' + this.itemName(item) + ', 200 de oro y cuatro pociones de +8.' + (this.chapter === 1 ? ' Tu viaje continúa en el capítulo II.' : ' Venciste a Mórtigo junto a tu sombra.')); return true;
       }
@@ -127,6 +177,7 @@
     kill(enemy) {
       if (enemy.rewarded) return;
       enemy.rewarded = true; this.kills++; this.chapterKills++; this.hero.points++;
+      if(enemy.kind==='elite')this.acquireGear(2,'elite');
       const gold = 4 + this.room * 2 + Math.floor(this.random() * 5); this.hero.gold += gold;
       if (this.rank(7)) this.hero.hp = Math.min(this.stats().maxHp, this.hero.hp + this.rank(7) * 6);
       this.notices.push({ x: enemy.x, y: enemy.y - 23, text: '+' + gold + ' oro · +1 punto', life: 1.2 }); this.revision++;
@@ -134,8 +185,9 @@
     strike() {
       if (!this.active() || this.cooldown > 0) return;
       const s = this.stats(); this.cooldown = s.delay; this.attack = .18; let damageDealt = 0;
-      if (this.chapter === 2 && ['mage', 'rogue'].includes(this.hero.specialization)) {
-        const type = this.hero.specialization === 'mage' ? 'ice' : 'arrow', speed = type === 'ice' ? 155 : 220;
+      const weapon=this.weaponType();
+      if (['staff','bow'].includes(weapon)||(!weapon&&this.chapter === 2 && ['mage', 'rogue'].includes(this.hero.specialization))) {
+        const type = weapon==='bow'||(!weapon&&this.hero.specialization==='rogue') ? 'arrow' : this.equipped[4]?.element||this.equipped[8]?.element||'ice', speed = type === 'arrow' ? 220 : 155;
         this.friendlyShots.push({ x: this.hero.x, y: this.hero.y, vx: Math.cos(this.hero.face) * speed, vy: Math.sin(this.hero.face) * speed, life: 2.8, damage: s.damage, type, owner: 'hero' });
         return;
       }
@@ -144,7 +196,7 @@
         const dot = (dx * Math.cos(this.hero.face) + dy * Math.sin(this.hero.face)) / (distance || 1);
         if (e.hp > 0 && distance < s.range + (e.kind === 'elite' ? 7 : 0) && (dot > -.15 || distance < 17)) {
           damageDealt += Math.min(e.hp, s.damage + (s.frost ? 10 : 0));
-          e.hp -= s.damage + (s.frost ? 10 : 0); e.slow = this.rank(4) ? 1.6 : 0;
+          e.hp -= s.damage; e.slow = this.equipped[4]?.element==='ice' ? 1.6 : 0;
           e.x = clamp(e.x + Math.cos(this.hero.face) * 11, 22, 458); e.y = clamp(e.y + Math.sin(this.hero.face) * 11, 32, 243);
           if (e.hp <= 0) this.kill(e);
         }
@@ -178,15 +230,15 @@
       if (this.mode === 'shop') return;
       this.room = 5; this.spawnRoom(); this.enemies = [];
       this.mode = 'shop'; this.shots = []; this.hero.hp = this.stats().maxHp; this.hero.stamina = this.stats().maxEnergy;
-      const pool = ITEMS.map((_, i) => i); this.stock = [];
+      const pool = ITEMS.map((_, i) => i).filter(i=>i!==9||this.evolution>=2); this.stock = [];
       for (let i = 0; i < 6; i++) { const slot = pool.splice(Math.floor(this.random() * pool.length), 1)[0], rank = this.random() < .3 ? 2 : 1;
-        this.stock.push({ ...this.gear(slot, rank), price: ITEMS[slot].basePrice + (rank - 1) * 35, sold: false }); }
+        const quality=Object.keys(QUALITIES)[Math.floor(this.random()*3)];this.stock.push({ ...this.gear(slot, rank,{quality}), price: ITEMS[slot].basePrice + (QUALITIES[quality].power - 1) * 35, sold: false }); }
       this.say('Tienda de la quinta sala · Vida y energía restauradas. Prepará tu build: ' + (this.chapter===2?'Mórtigo te espera.':'tu sombra te espera.'));
     }
     buy(id) {
       if (this.mode !== 'shop') return false;
       const item = this.stock.find(i => i.id === id); if (!item || item.sold || this.hero.gold < item.price) return false;
-      this.hero.gold -= item.price; item.sold = true; this.bag.push({ id: item.id, kind: 'gear', slot: item.slot, rank: item.rank });
+      this.hero.gold -= item.price; item.sold = true; const {price,sold,...bought}=item;this.bag.push(bought);
       this.say(this.itemName(item) + ' comprado. Está en la mochila, todavía no equipado.'); return true;
     }
     enterBoss() {
@@ -209,6 +261,7 @@
       if (!clean || Array.from(clean).length > 20 || /[\u0000-\u001f\u007f]/.test(clean)) { this.say('Elegí un nombre de 1 a 20 caracteres.'); return false; }
       const before = this.stats(), key = CLASSES[specialization].attribute;
       this.hero.name = clean; this.hero.specialization = specialization;
+      this.evolution=Math.max(1,this.evolution);
       this.hero.attributes[key] = Math.min(100, this.hero.attributes[key] + 5);
       this.hero.stamina += this.stats().maxEnergy - before.maxEnergy;
       this.mode = 'reward'; this.paused = false;
@@ -308,6 +361,7 @@
       this.hero.hp=Math.min(this.stats().maxHp,this.hero.hp+35);this.say('Sala despejada · +35 de vida. Revisá los cofres y buscá la salida.');
     }
     defeatBoss() {
+      if(this.chapter===2)this.evolution=2;
       this.boss.hp=0;this.mode=this.chapter===1?'awakening':'reward';this.shots=[];this.hazards=[];this.friendlyShots=[];this.hero.poison=0;
       this.chests=[{x:330,y:136,open:false,luxury:true}];
       this.say(this.chapter===1?'Tu sombra cayó. Elegí tu nombre y tu especialización.':'Mórtigo cayó. Tu sombra inclina la cabeza: sobrevivieron juntos. Abrí el cofre lujoso con E.');
@@ -318,6 +372,7 @@
         const target=targets.find(e=>e.hp>0&&Math.hypot(e.x-p.x,e.y-p.y)<(e===this.boss?28:e.kind==='elite'?17:12));
         if(!target)continue;const dealt=Math.min(target.hp,p.damage);target.hp=Math.max(0,target.hp-p.damage);target.hit=.15;p.life=0;
         if(p.type==='ice'&&target!==this.boss)target.slow=1.6;
+        if(p.type==='poison')target.venom={remaining:3,tick:1};
         if(p.owner==='hero')this.hero.hp=Math.min(this.stats().maxHp,this.hero.hp+Math.min(this.stats().lifeOnHit,dealt*.08));
         if(!target.hp){if(target===this.boss){this.defeatBoss();break;}this.kill(target);const previous=this.enemies.length;this.enemies=this.enemies.filter(e=>e.hp>0);if(previous&&!this.enemies.length)this.clearedCombat();}
       }
@@ -361,6 +416,15 @@
     }
     tick(dt, keys = {}) {
       if (this.paused || !['play', 'boss', 'reward'].includes(this.mode)) return;
+      this.skillCooldown=Math.max(0,this.skillCooldown-dt);
+      if(this.skillEffect){this.skillEffect.life-=dt;if(this.skillEffect.life<=0)this.skillEffect=null;}
+      for(const e of [...this.enemies,...(this.mode==='boss'?[this.boss]:[])]){
+        if(!e.venom||e.hp<=0)continue;
+        e.venom.remaining=Math.max(0,e.venom.remaining-dt);e.venom.tick-=dt;
+        if(e.venom.tick<=0){e.venom.tick+=1;e.hp=Math.max(0,e.hp-6);if(!e.hp){if(e===this.boss)this.defeatBoss();else this.kill(e);}}
+        if(!e.venom.remaining)e.venom=null;
+      }
+      const aliveBefore=this.enemies.length;this.enemies=this.enemies.filter(e=>e.hp>0);if(aliveBefore&&!this.enemies.length)this.clearedCombat();
       this.time += dt; this.hero.inv = Math.max(0, this.hero.inv - dt); this.attack = Math.max(0, this.attack - dt);
       this.cooldown = Math.max(0, this.cooldown - dt); this.dashCooldown = Math.max(0, this.dashCooldown - dt);
       this.hero.slow = Math.max(0, this.hero.slow - dt);
@@ -397,6 +461,6 @@
       }
     }
   }
-  scope.ElementalEngine = { Game, ITEMS, ATTRS, ROOMS, CLASSES };
+  scope.ElementalEngine = { Game, ITEMS, ATTRS, ROOMS, CLASSES, ELEMENTS, QUALITIES, WEAPONS, ARMOR_SLOTS, ARTIFACT_SLOTS, twoHanded };
   if (typeof module !== 'undefined' && module.exports) module.exports = scope.ElementalEngine;
 })(globalThis);

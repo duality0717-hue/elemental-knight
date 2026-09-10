@@ -1,0 +1,23 @@
+(() => {
+  const S=window.ElementalSession, cloud=new window.KnightCloud.CloudAccount(window.KnightCloudConfig);
+  const entry=document.createElement('button');entry.type='button';entry.textContent='Lobby · Cuenta y baúl';document.querySelector('.ek-window-actions').append(entry);
+  const dialog=document.createElement('dialog');dialog.id='ek-lobby';dialog.className='ek-lobby';
+  dialog.innerHTML='<h2>El refugio del caballero</h2><p id="ek-account-state">Invitado · guardado en este dispositivo</p><p id="ek-cloud-status" role="status"></p><form id="ek-account-form"><label>Correo <input name="email" type="email" required autocomplete="email"></label><label>Contraseña <input name="password" type="password" minlength="8" required autocomplete="current-password"></label><button type="submit">Iniciar sesión</button><button type="button" id="ek-register">Crear cuenta</button></form><div id="ek-account-actions" hidden><button id="ek-cloud-save">Guardar en la nube</button><button id="ek-cloud-load">Cargar nube</button><button id="ek-logout">Cerrar sesión</button></div><p>Baúl: hasta 200 objetos. Equipá desde la mochila. Los objetos del baúl se conservan al reiniciar la aventura.</p><div class="ek-vault-columns"><section><h3>Mochila</h3><div id="ek-vault-bag"></div></section><section><h3>Baúl</h3><div id="ek-vault-items"></div></section></div><button id="ek-lobby-close">Volver al juego</button>';
+  document.querySelector('#ember-dungeon').append(dialog);
+  const $=s=>dialog.querySelector(s),status=message=>$('#ek-cloud-status').textContent=message;
+  let busy=false;
+  function render(){const g=S.get();$('#ek-account-state').textContent=cloud.session?'Cuenta: '+cloud.session.user.email:'Invitado · guardado en este dispositivo';$('#ek-account-form').hidden=!!cloud.session;$('#ek-account-actions').hidden=!cloud.session;
+    for(const [selector,items,withdraw] of [['#ek-vault-bag',g.bag,false],['#ek-vault-items',g.vault,true]]){const box=$(selector);box.replaceChildren();for(const item of items){const b=document.createElement('button');b.textContent=g.itemName(item)+(withdraw?' · Retirar':' · Guardar');b.onclick=()=>{if(g.transferVault(item.id,withdraw)){S.save();S.refresh();render();}};box.append(b);}if(!items.length)box.textContent='Vacío';}
+  }
+  async function action(fn){if(busy)return;busy=true;try{await fn();}catch(error){status(error.message);}finally{busy=false;render();}}
+  async function upload(){S.save();const text=window.ElementalSave.encode(S.get());if(!text)throw new Error('Entrá a la aventura o cargá una partida viva antes de sincronizar.');await cloud.save(JSON.parse(text));status('Personaje, equipo y baúl guardados en la nube.');}
+  entry.onclick=()=>{S.pause();render();dialog.showModal();if(!cloud.configured)status('Cuentas online pendientes de conexión. El baúl funciona con tu partida local.');};
+  $('#ek-lobby-close').onclick=()=>dialog.close();
+  const form=$('#ek-account-form');
+  for(const b of form.querySelectorAll('button'))b.disabled=!cloud.configured;
+  form.onsubmit=e=>{e.preventDefault();action(async()=>{const data=new FormData(form);await cloud.login(data.get('email'),data.get('password'));form.reset();S.setUser(cloud.session.user.id);S.pause();const document=await cloud.load();if(document){if(window.confirm('¿Cargar la partida de la nube? La partida local de esta cuenta queda guardada como respaldo hasta que vuelvas a guardar.'))S.load(JSON.stringify(document));}status('Sesión iniciada. Usá Guardar en la nube para sincronizar el personaje y el baúl.');});};
+  $('#ek-register').onclick=()=>{if(!form.reportValidity())return;action(async()=>{const data=new FormData(form);await cloud.signup(data.get('email'),data.get('password'));form.reset();status('Si el registro se completó, revisá tu correo para confirmar la cuenta y luego iniciá sesión.');});};
+  $('#ek-cloud-save').onclick=()=>action(upload);
+  $('#ek-cloud-load').onclick=()=>action(async()=>{if(!window.confirm('¿Reemplazar la partida abierta por la de la nube?'))return;const document=await cloud.load();if(!document)throw new Error('Esta cuenta todavía no tiene una partida en la nube.');S.load(JSON.stringify(document));status('Partida y baúl recuperados.');});
+  $('#ek-logout').onclick=()=>action(async()=>{if(window.ElementalSave.encode(S.get())){try{await upload();}catch(error){if(!window.confirm(error.message+' Tu copia local está guardada. ¿Cerrar sesión sin sincronizar?'))return;}}const revoked=await cloud.logout();S.setUser(null);S.pause();status(revoked?'Sesión cerrada. Volviste a invitado.':'Sesión cerrada en este dispositivo; no se pudo revocar la sesión remota por un error de conexión.');});
+})();

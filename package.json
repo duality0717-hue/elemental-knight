@@ -1,7 +1,7 @@
 {
   "name": "elemental-knight",
   "productName": "Elemental Knight",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Elemental Knight para Windows",
   "author": "Andrés",
   "private": true,
@@ -9,7 +9,7 @@
   "scripts": {
     "build": "node build.cjs",
     "start": "npm run build && electron .",
-    "test": "node tests/game.test.cjs && node tests/chapter2.test.cjs && node tests/save.test.cjs && node --test tests/updates.test.cjs",
+    "test": "node tests/game.test.cjs && node tests/chapter2.test.cjs && node tests/save.test.cjs && node --test tests/updates.test.cjs tests/equipment.test.cjs tests/cloud.test.cjs",
     "dist:win": "npm run build && electron-builder --win nsis --x64 --publish never"
   },
   "dependencies": { "electron-updater": "^6.6.2" },

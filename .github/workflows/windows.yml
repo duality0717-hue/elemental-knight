@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     tags: ['v*']
-    branches: ['codex/windows-updates-0.7.0']
+    branches: ['codex/windows-updates-0.7.0', 'codex/elemental-sets-0.8.0']
 concurrency:
   group: windows-release-${{ github.ref }}
   cancel-in-progress: false
@@ -20,6 +20,8 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run dist:win
+      - name: Verify game UI and lobby
+        run: ./node_modules/.bin/electron tests/desktop-ui.cjs
       - name: Install and launch on Windows
         shell: pwsh
         run: |
