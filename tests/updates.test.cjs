@@ -36,7 +36,7 @@ test('automatic preference survives startup; switching manual disables installat
   const h=await setup('automatic');h.contents.emit('did-finish-load');
   assert.equal(h.counts().checks,1);assert.equal(h.updater.autoDownload,true);
   h.call('mode','manual');assert.equal(h.updater.autoInstallOnAppQuit,false);
-  assert.equal(JSON.parse(h.disk['/test/updates.json']).mode,'manual');
+  assert.equal(JSON.parse(h.disk[require('node:path').join('/test','updates.json')]).mode,'manual');
 });
 test('enabling automatic after manual download registers install-on-close',async()=>{
   const h=await setup();await h.call('check');await h.call('download');h.call('mode','automatic');
