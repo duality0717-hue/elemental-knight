@@ -3,23 +3,23 @@ const { Game, ATTRS } = require('../src/engine.js');
 let checks = 0;
 function test(name, fn) { fn(); checks++; console.log('PASS ' + name); }
 function game(roll=.99) { const g = new Game(() => roll); g.reset(); return g; }
-function open(g, index=0) { g.hero.x=g.chests[index].x;g.hero.y=g.chests[index].y;return g.openChest(); }
+function open(g, index=0) { g.chests[index].guard=null; g.hero.x=g.chests[index].x;g.hero.y=g.chests[index].y;return g.openChest(); }
 test('start empty; attributes 1/100; no gold, no free points',()=>{
  const g=game();assert.equal(g.hero.hp,100);assert.equal(g.hero.gold,0);assert.equal(g.hero.points,0);assert.equal(g.bag.length,0);assert(g.equipped.every(i=>i===null));assert(Object.values(g.hero.attributes).every(x=>x===1));assert.equal(g.stats().damage,12);
 });
-test('one free point and gold per skeleton, never double rewards',()=>{
- const g=game(),e=g.enemies[0];g.kill(e);assert.equal(g.hero.points,1);assert.equal(g.hero.gold,10);g.kill(e);assert.equal(g.hero.points,1);
+test('one free point per skeleton and one loot roll, never double rewards',()=>{
+ const g=game(),e=g.enemies[0];g.kill(e);assert.equal(g.hero.points,1);assert.equal(g.hero.gold,16);g.kill(e);assert.equal(g.hero.points,1);
 });
 test('distribution costs points, affects combat, respects cap',()=>{
  const g=game();assert(!g.invest('strength'));g.hero.points=2;assert(g.invest('strength'));assert.equal(g.stats().damage,13.5);assert.equal(g.hero.points,1);assert(!g.invest('unknown'));g.hero.attributes.strength=100;assert(!g.invest('strength'));assert.equal(g.hero.points,1);assert(g.invest('vitality'));assert.equal(g.stats().maxHp,108);assert.equal(g.hero.hp,108);
 });
-test('gear odds unchanged; potion odds rise by 10%; chests never empty or repeat',()=>{
+test('single 5/10/85 loot roll in every room; no repeat rewards',()=>{
  for(let room=1;room<=5;room++){
-  const g=game();g.room=room;g.spawnRoom();const p=g.chances();assert.equal(p.gear,room*5/100);assert.equal(p.potion,(15+(room-1)*10)/100);
-  for(const [roll,kind] of [[0,'gear'],[p.gear,'potion'],[p.gear+p.potion,'gold'],[.999,'gold']]){
+  const g=game();g.room=room;g.spawnRoom();assert.deepEqual(g.chances(),{gear:.05,potion:.10,gold:.85});
+  for(const [roll,kind] of [[0,'gear'],[.04999,'gear'],[.05,'potion'],[.14999,'potion'],[.15,'gold'],[.999,'gold']]){
    g.bag=[];g.chests[0].open=false;g.random=()=>roll;const before=g.hero.gold;assert(open(g));
-   if(kind==='gold')assert(g.hero.gold>before);else {assert.equal(g.bag[0].kind,kind);if(kind==='potion')assert.equal(g.bag[0].power,room);}
-   assert(g.equipped.every(i=>!i));const count=g.bag.length,gold=g.hero.gold;assert(!open(g));assert.equal(g.bag.length,count);assert.equal(g.hero.gold,gold);
+   if(kind==='gold')assert(g.hero.gold>before);else if(kind==='empty'){assert.equal(g.bag.length,0);assert.equal(g.hero.gold,before);}else assert.equal(g.bag[0].kind,kind);
+   const count=g.bag.length,gold=g.hero.gold;assert(!open(g));assert.equal(g.bag.length,count);assert.equal(g.hero.gold,gold);
   }
  }
 });
@@ -44,7 +44,7 @@ test('shop random unique stock, no rerolls, checked funds, manual equip',()=>{
  const g=game(.2);g.enterShop();assert.equal(g.stock.length,6);assert.equal(new Set(g.stock.map(i=>i.slot)).size,6);const ids=g.stock.map(i=>i.id);g.enterShop();assert.deepEqual(g.stock.map(i=>i.id),ids);const item=g.stock[0];assert(!g.buy(item.id));g.hero.gold=item.price;assert(g.buy(item.id));assert.equal(g.hero.gold,0);assert(g.bag.some(i=>i.id===item.id));assert(g.equipped.every(i=>!i));assert(!g.buy(item.id));for(let i=0;i<3;i++){assert(g.openChest(i));assert(!g.openChest(i));}
 });
 test('shadow telegraphs ground attack; death yields luxury chest and one reward',()=>{
- const g=game();g.enterShop();g.enterBoss();assert.equal(g.boss.hp,650);g.boss.cycle=1;g.boss.timer=.01;g.tick(.02);assert.equal(g.hazards.length,1);assert(g.hazards[0].timer>0);g.hero.x=40;g.hero.y=40;g.hero.inv=0;g.tick(1.01);assert.equal(g.hazards[0].fired,true);assert.equal(g.hero.hp,100);g.hero.x=g.boss.x-35;g.hero.y=g.boss.y;g.hero.face=0;g.boss.hp=1;g.cooldown=0;g.strike();assert.equal(g.mode,'awakening');assert(!g.specialize('', 'mage'));assert(g.specialize('Crist', 'mage'));assert.equal(g.hero.attributes.energy,6);assert(!g.specialize('Again','warrior'));assert.equal(g.mode,'reward');assert(g.chests[0].luxury);const before=g.hero.gold;assert(open(g));assert.equal(g.mode,'chapter-complete');assert.equal(g.hero.gold,before+200);assert.equal(g.bag.filter(i=>i.kind==='potion').length,4);assert(g.bag.some(i=>i.rank===3));assert(!open(g));
+ const g=game();g.enterShop();g.enterBoss();assert.equal(g.boss.hp,650);g.boss.cycle=1;g.boss.timer=.01;g.tick(.02);assert.equal(g.hazards.length,1);assert(g.hazards[0].timer>0);g.hero.x=40;g.hero.y=40;g.hero.inv=0;g.tick(1.01);assert.equal(g.hazards[0].fired,true);assert.equal(g.hero.hp,100);g.hero.x=g.boss.x-35;g.hero.y=g.boss.y;g.hero.face=0;g.boss.hp=1;g.cooldown=0;g.strike();assert.equal(g.mode,'awakening');assert(!g.specialize('', 'mage'));assert(g.specialize('Crist', 'mage'));assert.equal(g.hero.attributes.energy,6);assert(!g.specialize('Again','warrior'));assert.equal(g.mode,'reward');assert(g.chests[0].luxury);const before=g.hero.gold;assert(open(g));assert.equal(g.mode,'chapter-complete');assert.equal(g.hero.gold,before+200);assert.equal(g.bag.length,0);assert(!open(g));
 });
 test('pause freezes movement; restart clears progression and shop',()=>{
  const g=game();g.paused=true;const x=g.hero.x;g.tick(1,{right:true,hit:true});assert.equal(g.hero.x,x);g.hero.points=12;g.hero.gold=100;g.reset();assert.equal(g.hero.points,0);assert.equal(g.hero.gold,0);assert.equal(g.boss,null);assert.equal(g.stock.length,0);
