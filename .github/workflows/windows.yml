@@ -3,6 +3,10 @@ on:
   workflow_dispatch:
   push:
     tags: ['v*']
+    branches: ['codex/windows-updates-0.7.0']
+concurrency:
+  group: windows-release-${{ github.ref }}
+  cancel-in-progress: false
 permissions:
   contents: write
 jobs:
@@ -16,6 +20,21 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run dist:win
+      - name: Install and launch on Windows
+        shell: pwsh
+        run: |
+          $installer = Get-ChildItem dist/*Setup*.exe | Select-Object -First 1
+          $installDir = Join-Path $env:LOCALAPPDATA 'Programs/Elemental Knight'
+          $setup = Start-Process $installer.FullName -ArgumentList @('/S', "/D=$installDir") -Wait -PassThru
+          if ($setup.ExitCode -ne 0) { throw "Installer failed: $($setup.ExitCode)" }
+          $gamePath = Join-Path $installDir 'Elemental Knight.exe'
+          if (!(Test-Path $gamePath)) { throw 'Installed executable not found' }
+          $game = Start-Process $gamePath -PassThru
+          Start-Sleep -Seconds 12
+          $game.Refresh()
+          if ($game.HasExited) { throw "Game exited early: $($game.ExitCode)" }
+          Write-Output "Installed game running on Windows, process $($game.Id)"
+          Stop-Process -Id $game.Id -Force
       - uses: actions/upload-artifact@v4
         with:
           name: Elemental-Knight-Windows
@@ -23,9 +42,15 @@ jobs:
             dist/*.exe
             dist/*.blockmap
             dist/latest.yml
-      - name: Publish tagged release
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Publish Windows release
+        if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/codex/windows-updates-0.7.0'
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create $env:GITHUB_REF_NAME dist/*.exe dist/*.blockmap dist/latest.yml --title "Elemental Knight $env:GITHUB_REF_NAME" --generate-notes
+        run: |
+          $version = (Get-Content package.json | ConvertFrom-Json).version
+          $tag = "v$version"
+          if ($env:GITHUB_REF -like 'refs/tags/*' -and $env:GITHUB_REF_NAME -ne $tag) { throw 'Tag/version mismatch' }
+          $assets = @(Get-ChildItem dist/*.exe,dist/*.blockmap,dist/latest.yml | ForEach-Object FullName)
+          gh release create $tag @assets --target $env:GITHUB_SHA --title "Elemental Knight $tag" --generate-notes
+          if ($LASTEXITCODE -ne 0) { throw 'Release publication failed' }
