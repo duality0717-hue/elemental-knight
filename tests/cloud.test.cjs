@@ -13,3 +13,11 @@ test('fetch receives its required global receiver',async()=>{
  const c=new CloudAccount({url:'https://test.supabase.co',key:'public'},function(){assert.equal(this,globalThis);return Promise.resolve({ok:true,json:async()=>({})});});
  await c.signup('test@example.invalid','not-a-real-password');
 });
+
+test('signup confirmation can be resent',async()=>{
+  const calls=[];
+  const c=new CloudAccount({url:'https://test.supabase.co',key:'public'},async(url,options)=>{calls.push({url,options});return {ok:true,status:200,json:async()=>({})};});
+  await c.resendSignup('knight@example.invalid');
+  assert.match(calls[0].url,/\/auth\/v1\/resend$/);
+  assert.deepEqual(JSON.parse(calls[0].options.body),{type:'signup',email:'knight@example.invalid'});
+});

@@ -11,6 +11,7 @@
       return data;
     }
     async signup(email,password){return this.request('/auth/v1/signup',{email,password});}
+    async resendSignup(email){return this.request('/auth/v1/resend',{type:'signup',email});}
     async login(email,password){const data=await this.request('/auth/v1/token?grant_type=password',{email,password});if(!data?.access_token||!data?.user?.id)throw new Error('No se pudo iniciar sesión.');this.session={...data,expires_at:Date.now()+data.expires_in*1000};this.revision=0;return data.user;}
     async token(){if(!this.session)throw new Error('Iniciá sesión primero.');if(Date.now()>this.session.expires_at-60000){const d=await this.request('/auth/v1/token?grant_type=refresh_token',{refresh_token:this.session.refresh_token});this.session={...d,expires_at:Date.now()+d.expires_in*1000};}return this.session.access_token;}
     async load(){const token=await this.token();const rows=await this.request('/rest/v1/knight_saves?select=revision,document',undefined,token);const row=rows?.[0];this.revision=row?.revision||0;return row?.document||null;}
