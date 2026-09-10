@@ -47,7 +47,7 @@ jobs:
             dist/*.blockmap
             dist/latest.yml
       - name: Publish Windows release
-        if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/codex/windows-updates-0.7.0'
+        if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/codex/windows-updates-0.7.0' || github.ref == 'refs/heads/codex/elemental-sets-0.8.0'
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
@@ -56,5 +56,5 @@ jobs:
           $tag = "v$version"
           if ($env:GITHUB_REF -like 'refs/tags/*' -and $env:GITHUB_REF_NAME -ne $tag) { throw 'Tag/version mismatch' }
           $assets = @(Get-ChildItem dist/*.exe,dist/*.blockmap,dist/latest.yml | ForEach-Object FullName)
-          gh release create $tag @assets --target $env:GITHUB_SHA --title "Elemental Knight $tag" --generate-notes
+          gh release create $tag @assets --target $env:GITHUB_SHA --title "Elemental Knight $tag" --notes-file CHANGELOG-0.8.1.md
           if ($LASTEXITCODE -ne 0) { throw 'Release publication failed' }

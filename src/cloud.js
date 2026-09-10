@@ -1,7 +1,7 @@
 (function(scope){
   'use strict';
   class CloudAccount {
-    constructor(config,fetcher=globalThis.fetch){this.config=config;this.fetcher=fetcher;this.session=null;this.revision=0;this.saving=false;}
+    constructor(config,fetcher=globalThis.fetch){this.config=config;this.fetcher=fetcher.bind(globalThis);this.session=null;this.revision=0;this.saving=false;}
     get configured(){return /^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(this.config.url)&&!!this.config.key;}
     async request(path,body,token){
       if(!this.configured)throw new Error('Las cuentas online todavía no están habilitadas. Podés jugar como invitado.');

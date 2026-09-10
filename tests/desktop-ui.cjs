@@ -8,6 +8,8 @@ app.whenReady().then(async()=>{
     await window.loadFile(path.join(__dirname,'../index.html'));
     const result=await window.webContents.executeJavaScript(`(async()=>{
       const assert=(condition,message)=>{if(!condition)throw new Error(message);};
+      const client=new KnightCloud.CloudAccount(KnightCloudConfig);
+      const response=await client.fetcher('data:application/json,%7B%22ok%22%3Atrue%7D');assert((await response.json()).ok,'native browser fetch binding');
       const S=globalThis.ElementalSession;assert(S,'game boot');
       document.querySelector('#ek-start').click();
       const g=S.get();g.paused=true;
@@ -23,6 +25,11 @@ app.whenReady().then(async()=>{
       assert(g.vault.some(i=>i.id===item.id),'vault deposit');
       document.querySelector('#ek-vault-items button').click();assert(!g.vault.length,'vault withdrawal');
       assert(!document.querySelector('#ek-account-form button').disabled,'configured online login enabled');
+      document.querySelector('#ek-lobby-close').click();assert(!document.querySelector('#ek-lobby').open,'lobby closes');
+      assert(getComputedStyle(document.querySelector('#ek-lobby')).display==='none','closed lobby invisible');
+      document.querySelector('#ek-panel').click();
+      const confirmOriginal=globalThis.confirm;globalThis.confirm=()=>true;
+      const sale=[...document.querySelectorAll('#ek-inventory button')].find(b=>b.textContent.startsWith('Vender'));assert(sale,'bag sale button');const gold=g.hero.gold;sale.click();assert(g.hero.gold>gold,'sale credits gold');globalThis.confirm=confirmOriginal;
       return 'PASS: game boot, ten slots, elemental skill, lobby, vault transfers, account gate';
     })()`);
     console.log(result);clearTimeout(timer);app.exit(0);

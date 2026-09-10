@@ -29,7 +29,7 @@ test('all elemental skills damage targets, cost energy and respect pause/cooldow
   }
 });
 test('elite drops rewarded only once; boss rewards higher level; cape unlocks after second evolution',()=>{
-  const g=game();const e={kind:'elite',x:20,y:20};g.kill(e);g.kill(e);assert.equal(g.bag.length,1);assert(g.bag[0].level>0);
+  const g=game();g.random=()=>0;const e={kind:'elite',x:20,y:20};g.kill(e);g.kill(e);assert.equal(g.bag.length,1);assert(g.bag[0].level>0);
   assert(g.acquireGear(3,'boss').level>0);const cape=g.gear(9);g.bag.push(cape);assert(!g.equip(cape.id));
   g.chapter=2;g.enterShop();g.enterBoss();g.defeatBoss();assert.equal(g.evolution,2);assert(g.equip(cape.id));
 });
@@ -48,4 +48,15 @@ test('invalid levels, illegal loadouts and duplicated vault IDs rejected on load
   const g=game();equip(g,4);let s=JSON.parse(encode(g));s.data.equipped[4].level=26;assert.equal(decode(JSON.stringify(s)),null);
   s=JSON.parse(encode(g));s.data.vault=[s.data.equipped[4]];assert.equal(decode(JSON.stringify(s)),null);
   equip(g,8);s=JSON.parse(encode(g));s.data.equipped[4].weapon='bow';assert.equal(decode(JSON.stringify(s)),null);
+});
+
+test('all loot sources share exactly one 5/10/85 roll',()=>{
+ for(const source of ['normal','elite','boss']){const g=game();const counts={gear:0,potion:0,gold:0};
+ for(let n=0;n<10000;n++){g.random=()=>n/10000;const item=g.rollLoot(source);counts[item.kind]++;g.bag=[];}
+ assert.deepEqual(counts,{gear:500,potion:1000,gold:8500});}
+});
+test('selling bag and equipped items credits gold once and survives save',()=>{
+ const g=game(),item=g.acquireGear();const price=g.salePrice(item);assert(g.sell(item.id));assert.equal(g.hero.gold,price);assert(!g.sell(item.id));
+ const sword=equip(g,4);const value=g.salePrice(sword);assert(g.sell(sword.id,'equipped'));assert.equal(g.equipped[4],null);assert.equal(g.hero.gold,price+value);assert(!g.sell(sword.id,'equipped'));
+ const restored=decode(encode(g));assert.equal(restored.hero.gold,g.hero.gold);assert.equal(restored.bag.length,0);
 });

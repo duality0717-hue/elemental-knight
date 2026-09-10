@@ -43,7 +43,7 @@
       this.evolution=0; this.skillCooldown=0; this.skillEffect=null; this.vault=this.vault||[];
       this.nextId=Math.max(this.nextId,...this.vault.map(i=>i.id+1));
       this.effects = []; this.notices = []; this.revision = 0; this.rewardClaimed = false;
-      this.spawnRoom(); this.say('Entrás sin equipo. Cada esqueleto da oro y 1 punto libre. Enter abre el personaje.');
+      this.spawnRoom(); this.say('Entrás sin equipo. Cada esqueleto da 1 punto libre. Botín: 5% equipo, 10% poción y 85% oro. Enter abre el personaje.');
     }
     say(text) { this.message = text; this.revision++; }
     rank(slot) { const item=this.equipped[slot]; return item ? (QUALITIES[item.quality]?.power||1)*(1+(item.level||0)*.04) : 0; }
@@ -64,7 +64,22 @@
         range: this.weaponType()==='greatsword'?65:r(4) ? 47 : 33, frost: false,
         lifeOnHit: .6 + .03 * (a.vitality - 1) + .015 * (a.strength - 1) + .01 * (a.agility - 1) + .1 * (level - 1) };
     }
-    chances() { return { gear: this.room * 5 / 100, potion: (15 + (this.room - 1) * 10) / 100 }; }
+    chances() { return { gear:.05,potion:.10,gold:.85 }; }
+    rollLoot(source='normal') {
+      const roll=this.random();
+      if(roll<.05)return this.acquireGear(source==='boss'?3:source==='elite'?2:1,source);
+      if(roll<.15){const keys=Object.keys(ATTRS),item=this.potion(keys[Math.floor(this.random()*keys.length)],source==='boss'?8:this.room);this.bag.push(item);return item;}
+      const amount=source==='boss'?200:10+this.room*6;this.hero.gold+=amount;return {kind:'gold',amount};
+    }
+    salePrice(item) { return item.kind==='potion'?Math.max(1,item.power*5):Math.max(1,Math.floor(ITEMS[item.slot].basePrice*(QUALITIES[item.quality]?.power||1)*(1+item.level*.04)/4)); }
+    sell(id,source='bag') {
+      if(!this.canManage()||!['bag','equipped'].includes(source))return false;
+      const items=this[source],index=items.findIndex(i=>i?.id===id);if(index<0)return false;
+      const item=items[index],price=this.salePrice(item);
+      if(source==='equipped')items[index]=null;else items.splice(index,1);
+      this.hero.gold+=price;const stats=this.stats();this.hero.hp=Math.min(this.hero.hp,stats.maxHp);this.hero.stamina=Math.min(this.hero.stamina,stats.maxEnergy);
+      this.say('Vendiste '+this.itemName(item)+' por '+price+' de oro.');return true;
+    }
     transferVault(id, withdraw=false) {
       if(!this.paused||!this.canManage())return false;
       const from=withdraw?this.vault:this.bag,to=withdraw?this.bag:this.vault;
@@ -157,28 +172,18 @@
       if (chest?.open) return false;
       if (!chest) { this.say('Acercate a un cofre y presioná E.'); return false; }
       chest.open = true;
-      if (chest.luxury) {
-        if (this.rewardClaimed) return false;
-        this.rewardClaimed = true; const item = this.acquireGear(3,'boss'); this.hero.gold += 200;
-        for (const key of Object.keys(ATTRS)) this.bag.push(this.potion(key, 8));
-        this.mode = this.chapter === 1 ? 'chapter-complete' : 'won'; this.say('¡Victoria! Cofre lujoso: ' + this.itemName(item) + ', 200 de oro y cuatro pociones de +8.' + (this.chapter === 1 ? ' Tu viaje continúa en el capítulo II.' : ' Venciste a Mórtigo junto a tu sombra.')); return true;
-      }
-      const roll = this.random(), chance = this.chances();
-      if (roll < chance.gear) {
-        const item = this.acquireGear(); this.say('Encontraste ' + this.itemName(item) + '. Equipalo desde la mochila con Enter.');
-      } else if (roll < chance.gear + chance.potion) {
-        const keys = Object.keys(ATTRS), item = this.potion(keys[Math.floor(this.random() * keys.length)]);
-        this.bag.push(item); this.say(this.itemName(item) + ' (+' + item.power + ') en la mochila. Hacé clic para usarla.');
-      } else {
-        const gold = 10 + this.room * 6 + Math.floor(this.random() * 11); this.hero.gold += gold; this.say('Cofre: +' + gold + ' de oro.');
-      }
+      if(chest.luxury&&this.rewardClaimed)return false;
+      const item=this.rollLoot(chest.luxury?'boss':'normal');
+      const message=item?(item.kind==='gold'?'Encontraste '+item.amount+' de oro.':'Encontraste '+this.itemName(item)+'.'):'El cofre no contenía botín.';
+      if(chest.luxury){this.rewardClaimed=true;this.mode=this.chapter===1?'chapter-complete':'won';}
+      this.say(message);
       return true;
     }
     kill(enemy) {
       if (enemy.rewarded) return;
       enemy.rewarded = true; this.kills++; this.chapterKills++; this.hero.points++;
-      if(enemy.kind==='elite')this.acquireGear(2,'elite');
-      const gold = 4 + this.room * 2 + Math.floor(this.random() * 5); this.hero.gold += gold;
+      const loot=this.rollLoot(enemy.kind==='elite'?'elite':'normal');
+      const gold=loot?.kind==='gold'?loot.amount:0;
       if (this.rank(7)) this.hero.hp = Math.min(this.stats().maxHp, this.hero.hp + this.rank(7) * 6);
       this.notices.push({ x: enemy.x, y: enemy.y - 23, text: '+' + gold + ' oro · +1 punto', life: 1.2 }); this.revision++;
     }

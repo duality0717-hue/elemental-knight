@@ -8,3 +8,8 @@ test('save uses bearer session, optimistic revision; conflict does not advance r
   fail=true;await assert.rejects(c.save({version:2}),/otro dispositivo/);assert.equal(c.revision,5);assert.equal(c.saving,false);
   await c.logout();assert.equal(c.session,null);await assert.rejects(c.save({}),/Iniciá sesión/);
 });
+
+test('fetch receives its required global receiver',async()=>{
+ const c=new CloudAccount({url:'https://test.supabase.co',key:'public'},function(){assert.equal(this,globalThis);return Promise.resolve({ok:true,json:async()=>({})});});
+ await c.signup('test@example.invalid','not-a-real-password');
+});

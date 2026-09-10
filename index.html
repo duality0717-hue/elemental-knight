@@ -144,6 +144,15 @@
 #ember-dungeon.ek-expanded .ek-footer{padding-top:4px;flex-shrink:0}
 @media(max-height:600px) and (min-width:600px){#ember-dungeon.ek-expanded .ek-eyebrow,#ember-dungeon.ek-expanded .ek-footer,#ember-dungeon.ek-expanded #ek-save-status,#ember-dungeon.ek-expanded .ek-controls>span{display:none}#ember-dungeon.ek-expanded .ek-controls{position:absolute;right:16px;bottom:8px}#ember-dungeon.ek-expanded .ek-actions{padding-right:190px}#ember-dungeon.ek-expanded #ek-message{max-width:70%}}
 
+#ember-dungeon dialog:not([open]){display:none!important}
+#ember-dungeon .ek-lobby{box-sizing:border-box;width:min(760px,94vw);max-height:85dvh;overflow-y:auto;background:#111b28;color:#eee;border:1px solid #b89b60;border-radius:12px;padding:18px}
+#ember-dungeon .ek-lobby::backdrop{background:#000a}
+#ember-dungeon #ek-lobby-close{position:sticky;bottom:0;display:block;margin-top:12px;background:#263d50}
+#ember-dungeon .ek-vault-columns{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+#ember-dungeon .ek-vault-columns button{display:block;margin:6px 0}
+#ember-dungeon .ek-bag-group{display:flex;flex-direction:column;gap:5px}
+@media(max-width:540px){#ember-dungeon .ek-vault-columns{grid-template-columns:1fr}}
+
 </style>
 <script>
 (function (scope) {
@@ -191,7 +200,7 @@
       this.evolution=0; this.skillCooldown=0; this.skillEffect=null; this.vault=this.vault||[];
       this.nextId=Math.max(this.nextId,...this.vault.map(i=>i.id+1));
       this.effects = []; this.notices = []; this.revision = 0; this.rewardClaimed = false;
-      this.spawnRoom(); this.say('Entrás sin equipo. Cada esqueleto da oro y 1 punto libre. Enter abre el personaje.');
+      this.spawnRoom(); this.say('Entrás sin equipo. Cada esqueleto da 1 punto libre. Botín: 5% equipo, 10% poción y 85% oro. Enter abre el personaje.');
     }
     say(text) { this.message = text; this.revision++; }
     rank(slot) { const item=this.equipped[slot]; return item ? (QUALITIES[item.quality]?.power||1)*(1+(item.level||0)*.04) : 0; }
@@ -212,7 +221,22 @@
         range: this.weaponType()==='greatsword'?65:r(4) ? 47 : 33, frost: false,
         lifeOnHit: .6 + .03 * (a.vitality - 1) + .015 * (a.strength - 1) + .01 * (a.agility - 1) + .1 * (level - 1) };
     }
-    chances() { return { gear: this.room * 5 / 100, potion: (15 + (this.room - 1) * 10) / 100 }; }
+    chances() { return { gear:.05,potion:.10,gold:.85 }; }
+    rollLoot(source='normal') {
+      const roll=this.random();
+      if(roll<.05)return this.acquireGear(source==='boss'?3:source==='elite'?2:1,source);
+      if(roll<.15){const keys=Object.keys(ATTRS),item=this.potion(keys[Math.floor(this.random()*keys.length)],source==='boss'?8:this.room);this.bag.push(item);return item;}
+      const amount=source==='boss'?200:10+this.room*6;this.hero.gold+=amount;return {kind:'gold',amount};
+    }
+    salePrice(item) { return item.kind==='potion'?Math.max(1,item.power*5):Math.max(1,Math.floor(ITEMS[item.slot].basePrice*(QUALITIES[item.quality]?.power||1)*(1+item.level*.04)/4)); }
+    sell(id,source='bag') {
+      if(!this.canManage()||!['bag','equipped'].includes(source))return false;
+      const items=this[source],index=items.findIndex(i=>i?.id===id);if(index<0)return false;
+      const item=items[index],price=this.salePrice(item);
+      if(source==='equipped')items[index]=null;else items.splice(index,1);
+      this.hero.gold+=price;const stats=this.stats();this.hero.hp=Math.min(this.hero.hp,stats.maxHp);this.hero.stamina=Math.min(this.hero.stamina,stats.maxEnergy);
+      this.say('Vendiste '+this.itemName(item)+' por '+price+' de oro.');return true;
+    }
     transferVault(id, withdraw=false) {
       if(!this.paused||!this.canManage())return false;
       const from=withdraw?this.vault:this.bag,to=withdraw?this.bag:this.vault;
@@ -305,28 +329,18 @@
       if (chest?.open) return false;
       if (!chest) { this.say('Acercate a un cofre y presioná E.'); return false; }
       chest.open = true;
-      if (chest.luxury) {
-        if (this.rewardClaimed) return false;
-        this.rewardClaimed = true; const item = this.acquireGear(3,'boss'); this.hero.gold += 200;
-        for (const key of Object.keys(ATTRS)) this.bag.push(this.potion(key, 8));
-        this.mode = this.chapter === 1 ? 'chapter-complete' : 'won'; this.say('¡Victoria! Cofre lujoso: ' + this.itemName(item) + ', 200 de oro y cuatro pociones de +8.' + (this.chapter === 1 ? ' Tu viaje continúa en el capítulo II.' : ' Venciste a Mórtigo junto a tu sombra.')); return true;
-      }
-      const roll = this.random(), chance = this.chances();
-      if (roll < chance.gear) {
-        const item = this.acquireGear(); this.say('Encontraste ' + this.itemName(item) + '. Equipalo desde la mochila con Enter.');
-      } else if (roll < chance.gear + chance.potion) {
-        const keys = Object.keys(ATTRS), item = this.potion(keys[Math.floor(this.random() * keys.length)]);
-        this.bag.push(item); this.say(this.itemName(item) + ' (+' + item.power + ') en la mochila. Hacé clic para usarla.');
-      } else {
-        const gold = 10 + this.room * 6 + Math.floor(this.random() * 11); this.hero.gold += gold; this.say('Cofre: +' + gold + ' de oro.');
-      }
+      if(chest.luxury&&this.rewardClaimed)return false;
+      const item=this.rollLoot(chest.luxury?'boss':'normal');
+      const message=item?(item.kind==='gold'?'Encontraste '+item.amount+' de oro.':'Encontraste '+this.itemName(item)+'.'):'El cofre no contenía botín.';
+      if(chest.luxury){this.rewardClaimed=true;this.mode=this.chapter===1?'chapter-complete':'won';}
+      this.say(message);
       return true;
     }
     kill(enemy) {
       if (enemy.rewarded) return;
       enemy.rewarded = true; this.kills++; this.chapterKills++; this.hero.points++;
-      if(enemy.kind==='elite')this.acquireGear(2,'elite');
-      const gold = 4 + this.room * 2 + Math.floor(this.random() * 5); this.hero.gold += gold;
+      const loot=this.rollLoot(enemy.kind==='elite'?'elite':'normal');
+      const gold=loot?.kind==='gold'?loot.amount:0;
       if (this.rank(7)) this.hero.hp = Math.min(this.stats().maxHp, this.hero.hp + this.rank(7) * 6);
       this.notices.push({ x: enemy.x, y: enemy.y - 23, text: '+' + gold + ' oro · +1 punto', life: 1.2 }); this.revision++;
     }
@@ -945,7 +959,7 @@
     $('#ek-room').textContent = 'Cap. ' + game.chapter + ' · Nivel ' + s.level + ' · Sala ' + game.room + '/5';
     $('#ek-life').classList.toggle('ek-poisoned',game.hero.poison>0);
     const odds = game.chances();
-    $('#ek-chances').textContent = 'Cofres: equipo ' + Math.round(odds.gear * 100) + '% · poción ' + Math.round(odds.potion * 100) + '% · resto oro';
+    $('#ek-chances').textContent = 'Botín: 5% equipo total · 10% poción · 85% oro';
     $('#ek-kills').textContent = 'Esqueletos del capítulo ' + game.chapterKills + '/18';
     const set=game.artifactSet();$('#ek-skill').textContent=set?ELEMENTS[set].skill+(game.skillCooldown>0?' · '+Math.ceil(game.skillCooldown)+'s':' · Q'):'Skill · conjunto incompleto';
     $('#ek-skill').disabled=!set||!game.active()||game.skillCooldown>0||game.hero.stamina<25;
@@ -974,6 +988,7 @@
       card.append(node('span', 'ek-slot-label', def.group + ' · ' + def.slot), icon(item || { kind: 'empty', slot }), node('span', 'ek-item-name' + (!item ? ' ek-empty' : ''), item ? game.itemName(item) : locked?'Segunda evolución':occupied?'Ocupado por arma a dos manos':'Vacío'));
       if(item){card.style.borderColor=QUALITIES[item.quality]?.color||ELEMENTS[item.element].color;card.append(node('small','ek-item-detail',ITEMS[slot].detail));}
       if (item) card.append(button('Quitar', () => game.unequip(slot), !game.canManage(), 'Quitar ' + def.name));
+      if(item)card.append(button('Vender · '+game.salePrice(item)+' oro',()=>{if(window.confirm('¿Vender '+game.itemName(item)+'?')){game.sell(item.id,'equipped');saveGame();}},!game.canManage()));
       slotBox.append(card);
     });
     $('#ek-count').textContent = 'Armadura '+ARMOR_SLOTS.filter(i=>game.equipped[i]).length+'/5 · Artefactos '+(ARTIFACT_SLOTS.filter(i=>game.equipped[i]).length+(twoHanded(game.equipped[4])?1:0))+'/5';
@@ -988,7 +1003,7 @@
       const name = node('span', '', isPotion ? ATTRS[item.attribute].name + ' +' + item.power : game.itemName(item));
       if (isPotion) name.style.color = ATTRS[item.attribute].color;
       card.append(icon(item), name);
-      backpack.append(card);
+      const group=node('div','ek-bag-group');group.append(card,button('Vender · '+game.salePrice(item)+' oro',()=>{if(window.confirm('¿Vender '+game.itemName(item)+'?')){game.sell(item.id);saveGame();}},!game.canManage()));backpack.append(group);
       if(item.weapon&&item.weapon!=='shield'&&!twoHanded(item))backpack.append(button(item.slot===4?'Equipar en segunda mano':'Equipar en mano principal',()=>game.equip(item.id,item.slot===4?8:4)));
     }
   }
@@ -1131,7 +1146,7 @@ globalThis.KnightCloudConfig = {
 (function(scope){
   'use strict';
   class CloudAccount {
-    constructor(config,fetcher=globalThis.fetch){this.config=config;this.fetcher=fetcher;this.session=null;this.revision=0;this.saving=false;}
+    constructor(config,fetcher=globalThis.fetch){this.config=config;this.fetcher=fetcher.bind(globalThis);this.session=null;this.revision=0;this.saving=false;}
     get configured(){return /^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(this.config.url)&&!!this.config.key;}
     async request(path,body,token){
       if(!this.configured)throw new Error('Las cuentas online todavía no están habilitadas. Podés jugar como invitado.');
@@ -1160,7 +1175,7 @@ globalThis.KnightCloudConfig = {
   const $=s=>dialog.querySelector(s),status=message=>$('#ek-cloud-status').textContent=message;
   let busy=false;
   function render(){const g=S.get();$('#ek-account-state').textContent=cloud.session?'Cuenta: '+cloud.session.user.email:'Invitado · guardado en este dispositivo';$('#ek-account-form').hidden=!!cloud.session;$('#ek-account-actions').hidden=!cloud.session;
-    for(const [selector,items,withdraw] of [['#ek-vault-bag',g.bag,false],['#ek-vault-items',g.vault,true]]){const box=$(selector);box.replaceChildren();for(const item of items){const b=document.createElement('button');b.textContent=g.itemName(item)+(withdraw?' · Retirar':' · Guardar');b.onclick=()=>{if(g.transferVault(item.id,withdraw)){S.save();S.refresh();render();}};box.append(b);}if(!items.length)box.textContent='Vacío';}
+    for(const [selector,items,withdraw] of [['#ek-vault-bag',g.bag,false],['#ek-vault-items',g.vault,true]]){const box=$(selector);box.replaceChildren();for(const item of items){const b=document.createElement('button');b.textContent=g.itemName(item)+(withdraw?' · Retirar':' · Guardar');b.onclick=()=>{if(g.transferVault(item.id,withdraw)){S.save();S.refresh();render();}};box.append(b);if(!withdraw){const sell=document.createElement('button');sell.textContent='Vender · '+g.salePrice(item)+' oro';sell.onclick=()=>{if(window.confirm('¿Vender '+g.itemName(item)+'?')&&g.sell(item.id)){S.save();S.refresh();render();}};box.append(sell);}}if(!items.length)box.textContent='Vacío';}
   }
   async function action(fn){if(busy)return;busy=true;try{await fn();}catch(error){status(error.message);}finally{busy=false;render();}}
   async function upload(){S.save();const text=window.ElementalSave.encode(S.get());if(!text)throw new Error('Entrá a la aventura o cargá una partida viva antes de sincronizar.');await cloud.save(JSON.parse(text));status('Personaje, equipo y baúl guardados en la nube.');}

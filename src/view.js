@@ -54,7 +54,7 @@
     $('#ek-room').textContent = 'Cap. ' + game.chapter + ' · Nivel ' + s.level + ' · Sala ' + game.room + '/5';
     $('#ek-life').classList.toggle('ek-poisoned',game.hero.poison>0);
     const odds = game.chances();
-    $('#ek-chances').textContent = 'Cofres: equipo ' + Math.round(odds.gear * 100) + '% · poción ' + Math.round(odds.potion * 100) + '% · resto oro';
+    $('#ek-chances').textContent = 'Botín: 5% equipo total · 10% poción · 85% oro';
     $('#ek-kills').textContent = 'Esqueletos del capítulo ' + game.chapterKills + '/18';
     const set=game.artifactSet();$('#ek-skill').textContent=set?ELEMENTS[set].skill+(game.skillCooldown>0?' · '+Math.ceil(game.skillCooldown)+'s':' · Q'):'Skill · conjunto incompleto';
     $('#ek-skill').disabled=!set||!game.active()||game.skillCooldown>0||game.hero.stamina<25;
@@ -83,6 +83,7 @@
       card.append(node('span', 'ek-slot-label', def.group + ' · ' + def.slot), icon(item || { kind: 'empty', slot }), node('span', 'ek-item-name' + (!item ? ' ek-empty' : ''), item ? game.itemName(item) : locked?'Segunda evolución':occupied?'Ocupado por arma a dos manos':'Vacío'));
       if(item){card.style.borderColor=QUALITIES[item.quality]?.color||ELEMENTS[item.element].color;card.append(node('small','ek-item-detail',ITEMS[slot].detail));}
       if (item) card.append(button('Quitar', () => game.unequip(slot), !game.canManage(), 'Quitar ' + def.name));
+      if(item)card.append(button('Vender · '+game.salePrice(item)+' oro',()=>{if(window.confirm('¿Vender '+game.itemName(item)+'?')){game.sell(item.id,'equipped');saveGame();}},!game.canManage()));
       slotBox.append(card);
     });
     $('#ek-count').textContent = 'Armadura '+ARMOR_SLOTS.filter(i=>game.equipped[i]).length+'/5 · Artefactos '+(ARTIFACT_SLOTS.filter(i=>game.equipped[i]).length+(twoHanded(game.equipped[4])?1:0))+'/5';
@@ -97,7 +98,7 @@
       const name = node('span', '', isPotion ? ATTRS[item.attribute].name + ' +' + item.power : game.itemName(item));
       if (isPotion) name.style.color = ATTRS[item.attribute].color;
       card.append(icon(item), name);
-      backpack.append(card);
+      const group=node('div','ek-bag-group');group.append(card,button('Vender · '+game.salePrice(item)+' oro',()=>{if(window.confirm('¿Vender '+game.itemName(item)+'?')){game.sell(item.id);saveGame();}},!game.canManage()));backpack.append(group);
       if(item.weapon&&item.weapon!=='shield'&&!twoHanded(item))backpack.append(button(item.slot===4?'Equipar en segunda mano':'Equipar en mano principal',()=>game.equip(item.id,item.slot===4?8:4)));
     }
   }
