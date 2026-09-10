@@ -1,0 +1,27 @@
+{
+  "name": "elemental-knight",
+  "productName": "Elemental Knight",
+  "version": "0.7.0",
+  "description": "Elemental Knight para Windows",
+  "author": "Andrés",
+  "private": true,
+  "main": "desktop/main.cjs",
+  "scripts": {
+    "build": "node build.cjs",
+    "start": "npm run build && electron .",
+    "test": "node tests/game.test.cjs && node tests/chapter2.test.cjs && node tests/save.test.cjs && node --test tests/updates.test.cjs",
+    "dist:win": "npm run build && electron-builder --win nsis --x64 --publish never"
+  },
+  "dependencies": { "electron-updater": "^6.6.2" },
+  "devDependencies": { "electron": "44.3.0", "electron-builder": "^26.0.12" },
+  "build": {
+    "toolsets": { "wine": "1.0.1" },
+    "appId": "com.elementalknight.game",
+    "productName": "Elemental Knight",
+    "directories": { "output": "dist" },
+    "files": ["index.html", "desktop/**", "package.json"],
+    "publish": [{ "provider": "github", "owner": "duality0717-hue", "repo": "elemental-knight" }],
+    "win": { "target": "nsis", "signAndEditExecutable": false },
+    "nsis": { "oneClick": false, "perMachine": false, "allowToChangeInstallationDirectory": true, "deleteAppDataOnUninstall": false, "artifactName": "Elemental-Knight-Setup-${version}.${ext}" }
+  }
+}

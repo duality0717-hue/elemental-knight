@@ -166,6 +166,7 @@
   for (const b of root.querySelectorAll('[data-dir]')) { b.onpointerdown = e => { e.preventDefault(); keys[b.dataset.dir] = true; b.setPointerCapture(e.pointerId); }; b.onpointerup = b.onpointercancel = () => { keys[b.dataset.dir] = false; }; }
   const map = { ArrowLeft: 'left', a: 'left', ArrowRight: 'right', d: 'right', ArrowUp: 'up', w: 'up', ArrowDown: 'down', s: 'down' };
   document.addEventListener('keydown', e => {
+    if (document.querySelector('#ek-settings[open]')) return;
     if (/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)||game.mode==='awakening') return;
     if(e.key==='Escape'&&expandedFallback){expandedFallback=false;fullscreenState();return;}
     if(e.key==='Enter'&&['ek-next-chapter','ek-start','ek-fullscreen','ek-save','ek-load'].includes(e.target.id))return;
@@ -179,6 +180,7 @@
   });
   document.addEventListener('keyup', e => { const k = map[e.key] || map[e.key.toLowerCase()]; if (k) keys[k] = false; if (e.code === 'Space') keys.hit = false; });
   function blur() { saveGame(); keys = {}; if (game.active() || game.mode === 'reward') { game.paused = true; refresh(); } }
+  window.addEventListener('knight:settings', blur);
   window.addEventListener('pagehide',()=>saveGame());
   window.addEventListener('blur', blur); document.addEventListener('visibilitychange', () => { if (document.hidden) blur(); });
   canvas.onpointerdown = e => { if (!game.active()) return; const r = canvas.getBoundingClientRect(); game.hero.face = Math.atan2((e.clientY - r.top) * 272 / r.height - game.hero.y, (e.clientX - r.left) * 480 / r.width - game.hero.x); game.strike(); };
