@@ -882,10 +882,24 @@
     spider(e,g,queen=false){
       const c=this.c,scale=queen?3:e.kind==='elite'?1.65:.8,color=e.kind==='area'?'#a793cf':e.kind==='caster'?'#8dbe84':'#bb957b';
       this.memory.set(e,{x:e.x,y:e.y,hp:e.hp});c.save();c.translate(e.x,e.y);c.scale(scale,scale);this.ellipse(0,7,22,7,'#00000070',null);
-      for(const side of [-1,1])for(let i=0;i<4;i++){const sway=e.dormant?0:Math.sin(g.time*9+i*1.7)*3;this.path([['M',side*5,-2+i*3],['L',side*(16+i%2*4),-15+i*9+sway],['L',side*(25+i%2*3),-10+i*8-sway]],null,queen?'#a0b8a0':color,queen?2:1.5);}
-      this.ellipse(0,1,11,14,queen?'#343b48':e.kind==='elite'?'#534b62':'#4b474b','#11131c',1.5);this.ellipse(0,4,5,8,queen?'#9a456c':color,null);
-      this.ellipse(0,-12,9,7,'#424750','#121721',1);for(const side of [-1,1])for(let i=0;i<3;i++)this.ellipse(side*(2+i*2.4),-14+i,1.2,1.5,queen?'#ff768b':'#e6eea0',null);
-      for(const side of [-1,1])this.path([['M',side*4,-16],['L',side*6,-24],['L',side*1,-20]],null,'#eee0bd',2);
+      for(const side of [-1,1])for(let i=0;i<4;i++){
+        const sway=e.dormant?0:Math.sin(g.time*9+i*1.7)*3,kx=side*(16+i%2*4),ky=-15+i*9+sway,tx=side*(25+i%2*3),ty=-10+i*8-sway;
+        this.path([['M',side*5,-2+i*3],['L',kx,ky-1.5],['L',tx+side*2,ty+3],['L',kx-side*1.5,ky+1.5],['Z']],queen?'#5c6866':color,'#11171e',.6);
+        this.line(side*6,-2+i*3,kx,ky,queen?'#b0b4a0':color,.7);
+        if(queen)this.path([['M',kx,ky],['L',kx+side*4,ky-4],['L',kx+side*2,ky+1],['Z']],'#a3a38d','#171920',.6);
+      }
+      this.ellipse(0,1,11,14,queen?'#252330':e.kind==='elite'?'#534b62':'#4b474b','#11131c',1.5);
+      if(queen){
+        this.path([['M',0,-9],['L',7,-3],['L',3,0],['L',7,4],['L',2,8],['L',0,13],['L',-2,8],['L',-7,4],['L',-3,0],['L',-7,-3],['Z']],'#843545','#b66c69',.5);
+        for(const side of [-1,1])for(let i=0;i<3;i++)this.path([['M',side*8,-2+i*5],['L',side*13,1+i*5],['L',side*8,3+i*5],['Z']],'#65685d','#13141c',.5);
+      }else this.ellipse(0,4,5,8,color,null);
+      this.ellipse(0,-12,9,7,queen?'#35323b':'#424750','#121721',1);
+      for(const side of [-1,1])for(let i=0;i<3;i++){
+        if(queen)this.ellipse(side*(2+i*2.4),-15+i,2,2,'#cf314c33',null);
+        this.ellipse(side*(2+i*2.4),-15+i,queen?1:1.2,queen?1:1.5,queen?'#ff354f':'#e6eea0',null);
+      }
+      if(queen){this.ellipse(0,-7,4,3,'#090a10','#98616a',.5);for(const x of [-2,-1,1,2])this.path([['M',x,-9],['L',x+.3,-6],['L',x+.8,-9]],'#c3b799',null);}
+      for(const side of [-1,1])this.path([['M',side*5,-10],['L',side*7,-5],['L',side*2,1],['L',side*3,-5],['Z']],queen?'#b5b699':'#eee0bd','#171923',.6);
       c.restore();
       if(queen){c.fillStyle='#15151f';c.fillRect(125,13,230,6);c.fillStyle='#d776a2';c.fillRect(126,14,228*e.hp/e.max,4);this.text('ARACNIA · MADRE DE LAS PROFUNDIDADES',240,30,8,'#ecd0e4');}
       else{c.fillStyle='#392d3e';c.fillRect(e.x-12,e.y-30*scale,24,3);c.fillStyle=color;c.fillRect(e.x-12,e.y-30*scale,24*e.hp/e.max,3);this.text(e.keyFragment?'PORTADORA · FRAGMENTO':e.dormant?'DORMIDA':e.kind==='elite'?'ÉLITE':{melee:'MORDEDORA',area:'TEJEDORA',caster:'ESCUPIDORA'}[e.kind],e.x,e.y-34*scale,5,e.keyFragment?'#f7d98a':color);}
