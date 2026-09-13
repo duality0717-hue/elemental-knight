@@ -1,0 +1,45 @@
+name: Godot core
+on:
+  push:
+    branches: ['godot/4.7.2-migration']
+  pull_request:
+    paths: ['godot/**', 'tools/godot-reference.cjs', '.github/workflows/godot.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  core:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Keep Electron reference passing
+        run: |
+          npm test
+          npm run build
+          git diff --exit-code -- src desktop tests index.html package.json package-lock.json
+      - name: Download exact Godot runtime
+        run: |
+          curl --fail --location --retry 3 'https://downloads.godotengine.org/?flavor=stable&platform=linux.64&slug=linux.x86_64.zip&version=4.7.2' -o /tmp/godot.zip
+          unzip /tmp/godot.zip -d /tmp/godot-runtime
+          echo '/tmp/godot-runtime' >> "$GITHUB_PATH"
+          /tmp/godot-runtime/Godot_v4.7.2-stable_linux.x86_64 --version | grep '^4\.7\.2\.stable'
+      - name: Generate expectations from Electron
+        run: |
+          node tools/godot-reference.cjs
+          git diff --exit-code -- godot/tests/reference.json
+      - name: Import and test native core
+        run: |
+          Godot_v4.7.2-stable_linux.x86_64 --headless --path godot --editor --import --quit
+          Godot_v4.7.2-stable_linux.x86_64 --headless --path godot --script tests/core_test.gd
+      - name: Render actual room
+        env:
+          EK_PREVIEW_PATH: ${{ github.workspace }}/godot-core.png
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: xvfb-run -a Godot_v4.7.2-stable_linux.x86_64 --path godot --script tests/render_preview.gd
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Godot-core-preview
+          path: godot-core.png
