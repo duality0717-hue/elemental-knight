@@ -13,5 +13,7 @@ for(let n=0;n<128;n++){
 const boundaries=[0,.049999999,.05,.149999999,.15,.999999999].map(roll=>{const g=new Game(()=>.5);g.random=()=>roll;const item=g.rollLoot();return {roll,kind:item.kind,amount:item.amount??0};});
 const g=new Game(()=>.5);g.mode='play';g.hero.inv=0;g.dash();
 const result={cases,boundaries,dash:{cost:52-g.hero.stamina,duration:g.dashTime,cooldown:g.dashCooldown,invulnerability:g.hero.inv},enemy:g.makeEnemy('melee',0,0)};
-fs.writeFileSync('godot/tests/reference.json',JSON.stringify(result,null,2)+'\n');
+// Stable serialization across V8/libm versions (Math.pow may differ by one ULP).
+// 12 significant digits retain far more precision than the native comparison tolerance.
+fs.writeFileSync('godot/tests/reference.json',JSON.stringify(result,(_key,value)=>typeof value==='number'?Number(value.toPrecision(12)):value,2)+'\n');
 console.log(`Generated ${cases.length} stat fixtures from src/engine.js`);

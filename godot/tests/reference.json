@@ -118,12 +118,12 @@
         "maxEnergy": 60,
         "armor": 12.48,
         "speed": 91,
-        "delay": 0.3964581509726025,
+        "delay": 0.396458150973,
         "range": 47,
         "frost": false,
         "lifeOnHit": 0.855
       },
-      "damage35": 22.519999999999996
+      "damage35": 22.52
     },
     {
       "attributes": {
@@ -210,12 +210,12 @@
         "maxEnergy": 68,
         "armor": 18.36,
         "speed": 104.8,
-        "delay": 0.373305596347889,
+        "delay": 0.373305596348,
         "range": 47,
         "frost": false,
-        "lifeOnHit": 1.1099999999999999
+        "lifeOnHit": 1.11
       },
-      "damage35": 16.639999999999986
+      "damage35": 16.64
     },
     {
       "attributes": {
@@ -307,14 +307,14 @@
         "damage": 68.46,
         "maxHp": 220,
         "maxEnergy": 76,
-        "armor": 12.320000000000002,
+        "armor": 12.32,
         "speed": 119.4,
-        "delay": 0.35251680304651445,
+        "delay": 0.352516803047,
         "range": 65,
         "frost": false,
-        "lifeOnHit": 1.3649999999999998
+        "lifeOnHit": 1.365
       },
-      "damage35": 22.680000000000007
+      "damage35": 22.68
     },
     {
       "attributes": {
@@ -405,14 +405,14 @@
         "damage": 52.04,
         "maxHp": 260,
         "maxEnergy": 84,
-        "armor": 13.919999999999998,
+        "armor": 13.92,
         "speed": 134.8,
-        "delay": 0.33374859946080165,
+        "delay": 0.333748599461,
         "range": 33,
         "frost": false,
-        "lifeOnHit": 1.6199999999999999
+        "lifeOnHit": 1.62
       },
-      "damage35": 21.080000000000013
+      "damage35": 21.08
     },
     {
       "attributes": {
@@ -506,12 +506,12 @@
         "maxEnergy": 92,
         "armor": 32.4,
         "speed": 115,
-        "delay": 0.3167211689601589,
+        "delay": 0.31672116896,
         "range": 47,
         "frost": false,
-        "lifeOnHit": 1.9750000000000003
+        "lifeOnHit": 1.975
       },
-      "damage35": 2.6000000000000227
+      "damage35": 2.6
     },
     {
       "attributes": {
@@ -600,17 +600,17 @@
       ],
       "expected": {
         "level": 2,
-        "damage": 90.87999999999998,
+        "damage": 90.88,
         "maxHp": 340,
         "maxEnergy": 100,
         "armor": 17.64,
         "speed": 130.8,
-        "delay": 0.35294117647058826,
+        "delay": 0.352941176471,
         "range": 47,
         "frost": false,
         "lifeOnHit": 2.23
       },
-      "damage35": 17.360000000000014
+      "damage35": 17.36
     },
     {
       "attributes": {
@@ -692,17 +692,17 @@
       ],
       "expected": {
         "level": 2,
-        "damage": 96.85999999999999,
+        "damage": 96.86,
         "maxHp": 380,
         "maxEnergy": 108,
         "armor": 7.68,
         "speed": 147.4,
-        "delay": 0.2870058264451347,
+        "delay": 0.287005826445,
         "range": 65,
         "frost": false,
         "lifeOnHit": 2.485
       },
-      "damage35": 27.319999999999993
+      "damage35": 27.32
     },
     {
       "attributes": {
@@ -788,12 +788,12 @@
         "maxEnergy": 116,
         "armor": 25.08,
         "speed": 112,
-        "delay": 0.27396598757168,
+        "delay": 0.273965987572,
         "range": 47,
         "frost": false,
-        "lifeOnHit": 2.7399999999999998
+        "lifeOnHit": 2.74
       },
-      "damage35": 9.920000000000016
+      "damage35": 9.92
     },
     {
       "attributes": {
@@ -880,12 +880,12 @@
         "maxEnergy": 124,
         "armor": 4.08,
         "speed": 142.2,
-        "delay": 0.26194912413725224,
+        "delay": 0.261949124137,
         "range": 47,
         "frost": false,
-        "lifeOnHit": 2.9949999999999997
+        "lifeOnHit": 2.995
       },
-      "damage35": 30.920000000000016
+      "damage35": 30.92
     },
     {
       "attributes": {
@@ -977,14 +977,14 @@
         "damage": 103.6,
         "maxHp": 500,
         "maxEnergy": 132,
-        "armor": 16.799999999999997,
+        "armor": 16.8,
         "speed": 160,
-        "delay": 0.25084011761076186,
+        "delay": 0.250840117611,
         "range": 47,
         "frost": false,
         "lifeOnHit": 3.35
       },
-      "damage35": 18.19999999999999
+      "damage35": 18.2
     },
     {
       "attributes": {
@@ -1075,12 +1075,12 @@
         "damage": 87.42,
         "maxHp": 540,
         "maxEnergy": 140,
-        "armor": 38.879999999999995,
+        "armor": 38.88,
         "speed": 135.4,
-        "delay": 0.2405404932702984,
+        "delay": 0.24054049327,
         "range": 33,
         "frost": false,
-        "lifeOnHit": 3.6050000000000004
+        "lifeOnHit": 3.605
       },
       "damage35": 2
     },
@@ -1174,14 +1174,14 @@
         "damage": 117.88,
         "maxHp": 580,
         "maxEnergy": 148,
-        "armor": 20.279999999999998,
+        "armor": 20.28,
         "speed": 153.6,
-        "delay": 0.23096551721233988,
+        "delay": 0.230965517212,
         "range": 47,
         "frost": false,
-        "lifeOnHit": 3.8600000000000003
+        "lifeOnHit": 3.86
       },
-      "damage35": 14.720000000000027
+      "damage35": 14.72
     },
     {
       "attributes": {
@@ -1273,14 +1273,14 @@
         "damage": 132.74,
         "maxHp": 620,
         "maxEnergy": 156,
-        "armor": 18.240000000000002,
-        "speed": 172.60000000000002,
-        "delay": 0.2696629213483146,
+        "armor": 18.24,
+        "speed": 172.6,
+        "delay": 0.269662921348,
         "range": 47,
         "frost": false,
         "lifeOnHit": 4.115
       },
-      "damage35": 16.75999999999999
+      "damage35": 16.76
     },
     {
       "attributes": {
@@ -1367,12 +1367,12 @@
         "maxEnergy": 164,
         "armor": 28.08,
         "speed": 145.6,
-        "delay": 0.21370583631228676,
+        "delay": 0.213705836312,
         "range": 47,
         "frost": false,
         "lifeOnHit": 4.37
       },
-      "damage35": 6.919999999999959
+      "damage35": 6.92
     },
     {
       "attributes": {
@@ -1453,17 +1453,17 @@
       ],
       "expected": {
         "level": 4,
-        "damage": 120.70000000000002,
+        "damage": 120.7,
         "maxHp": 700,
         "maxEnergy": 172,
         "armor": 17.6,
         "speed": 133,
-        "delay": 0.2059016902976864,
+        "delay": 0.205901690298,
         "range": 65,
         "frost": false,
         "lifeOnHit": 4.725
       },
-      "damage35": 17.399999999999977
+      "damage35": 17.4
     },
     {
       "attributes": {
@@ -1545,17 +1545,17 @@
       ],
       "expected": {
         "level": 4,
-        "damage": 150.67999999999998,
+        "damage": 150.68,
         "maxHp": 740,
         "maxEnergy": 180,
         "armor": 9.84,
         "speed": 185.2,
-        "delay": 0.19858056789549777,
+        "delay": 0.198580567895,
         "range": 47,
         "frost": false,
-        "lifeOnHit": 4.9799999999999995
+        "lifeOnHit": 4.98
       },
-      "damage35": 25.159999999999968
+      "damage35": 25.16
     },
     {
       "attributes": {
@@ -1647,9 +1647,9 @@
         "damage": 114.66,
         "maxHp": 780,
         "maxEnergy": 188,
-        "armor": 45.36000000000001,
+        "armor": 45.36,
         "speed": 105.8,
-        "delay": 0.379639991346812,
+        "delay": 0.379639991347,
         "range": 47,
         "frost": false,
         "lifeOnHit": 4.235
@@ -1747,12 +1747,12 @@
         "maxEnergy": 196,
         "armor": 22.92,
         "speed": 126.4,
-        "delay": 0.35672017959058117,
+        "delay": 0.356720179591,
         "range": 33,
         "frost": false,
-        "lifeOnHit": 4.489999999999999
+        "lifeOnHit": 4.49
       },
-      "damage35": 12.080000000000041
+      "damage35": 12.08
     },
     {
       "attributes": {
@@ -1841,17 +1841,17 @@
       ],
       "expected": {
         "level": 4,
-        "damage": 158.06000000000003,
+        "damage": 158.06,
         "maxHp": 860,
         "maxEnergy": 204,
         "armor": 21.12,
         "speed": 147.8,
-        "delay": 0.33622181560407216,
+        "delay": 0.336221815604,
         "range": 65,
         "frost": false,
-        "lifeOnHit": 4.744999999999999
+        "lifeOnHit": 4.745
       },
-      "damage35": 13.879999999999995
+      "damage35": 13.88
     },
     {
       "attributes": {
@@ -1940,7 +1940,7 @@
       ],
       "expected": {
         "level": 5,
-        "damage": 151.20000000000002,
+        "damage": 151.2,
         "maxHp": 100,
         "maxEnergy": 212,
         "armor": 48.6,
@@ -2032,12 +2032,12 @@
       ],
       "expected": {
         "level": 5,
-        "damage": 180.57999999999998,
+        "damage": 180.58,
         "maxHp": 140,
         "maxEnergy": 220,
-        "armor": 14.719999999999999,
+        "armor": 14.72,
         "speed": 137.8,
-        "delay": 0.30110558361183276,
+        "delay": 0.301105583612,
         "range": 47,
         "frost": false,
         "lifeOnHit": 2.355
@@ -2128,12 +2128,12 @@
         "maxEnergy": 228,
         "armor": 22.56,
         "speed": 104,
-        "delay": 0.2859530478153893,
+        "delay": 0.285953047815,
         "range": 47,
         "frost": false,
         "lifeOnHit": 2.61
       },
-      "damage35": 12.439999999999998
+      "damage35": 12.44
     },
     {
       "attributes": {
@@ -2220,12 +2220,12 @@
         "maxEnergy": 236,
         "armor": 32.64,
         "speed": 126.2,
-        "delay": 0.27212527535774833,
+        "delay": 0.272125275358,
         "range": 65,
         "frost": false,
-        "lifeOnHit": 2.8649999999999998
+        "lifeOnHit": 2.865
       },
-      "damage35": 2.3600000000000136
+      "damage35": 2.36
     },
     {
       "attributes": {
@@ -2314,17 +2314,17 @@
       ],
       "expected": {
         "level": 5,
-        "damage": 190.67999999999998,
+        "damage": 190.68,
         "maxHp": 260,
         "maxEnergy": 244,
-        "armor": 21.560000000000002,
+        "armor": 21.56,
         "speed": 149.2,
-        "delay": 0.25945663586650786,
+        "delay": 0.259456635867,
         "range": 47,
         "frost": false,
         "lifeOnHit": 3.12
       },
-      "damage35": 13.439999999999998
+      "damage35": 13.44
     },
     {
       "attributes": {
@@ -2516,7 +2516,7 @@
         "maxEnergy": 60,
         "armor": 27,
         "speed": 126,
-        "delay": 0.27076923076923076,
+        "delay": 0.270769230769,
         "range": 47,
         "frost": false,
         "lifeOnHit": 3.73
@@ -2615,12 +2615,12 @@
         "maxEnergy": 68,
         "armor": 15.44,
         "speed": 139.8,
-        "delay": 0.2962962962962963,
+        "delay": 0.296296296296,
         "range": 65,
         "frost": false,
         "lifeOnHit": 3.985
       },
-      "damage35": 19.560000000000002
+      "damage35": 19.56
     },
     {
       "attributes": {
@@ -2702,17 +2702,17 @@
       ],
       "expected": {
         "level": 6,
-        "damage": 183.95999999999998,
+        "damage": 183.96,
         "maxHp": 420,
         "maxEnergy": 76,
         "armor": 6.48,
         "speed": 154.4,
-        "delay": 0.2488703975652594,
+        "delay": 0.248870397565,
         "range": 47,
         "frost": false,
         "lifeOnHit": 4.24
       },
-      "damage35": 28.519999999999982
+      "damage35": 28.52
     },
     {
       "attributes": {
@@ -2798,12 +2798,12 @@
         "maxEnergy": 84,
         "armor": 21.28,
         "speed": 125,
-        "delay": 0.23906311930740634,
+        "delay": 0.239063119307,
         "range": 47,
         "frost": false,
         "lifeOnHit": 4.495
       },
-      "damage35": 13.720000000000027
+      "damage35": 13.72
     },
     {
       "attributes": {
@@ -2888,14 +2888,14 @@
         "damage": 195.92,
         "maxHp": 500,
         "maxEnergy": 92,
-        "armor": 3.4799999999999995,
+        "armor": 3.48,
         "speed": 151.2,
-        "delay": 0.22991570185077448,
+        "delay": 0.229915701851,
         "range": 47,
         "frost": false,
         "lifeOnHit": 4.85
       },
-      "damage35": 31.519999999999982
+      "damage35": 31.52
     },
     {
       "attributes": {
@@ -2984,17 +2984,17 @@
       ],
       "expected": {
         "level": 7,
-        "damage": 192.29999999999998,
+        "damage": 192.3,
         "maxHp": 540,
         "maxEnergy": 100,
-        "armor": 14.399999999999999,
+        "armor": 14.4,
         "speed": 167,
-        "delay": 0.2213642578753799,
+        "delay": 0.221364257875,
         "range": 65,
         "frost": false,
         "lifeOnHit": 5.105
       },
-      "damage35": 20.600000000000023
+      "damage35": 20.6
     },
     {
       "attributes": {
@@ -3085,12 +3085,12 @@
         "damage": 178.32,
         "maxHp": 580,
         "maxEnergy": 108,
-        "armor": 33.480000000000004,
+        "armor": 33.48,
         "speed": 146.4,
-        "delay": 0.21335288612358944,
+        "delay": 0.213352886124,
         "range": 33,
         "frost": false,
-        "lifeOnHit": 5.359999999999999
+        "lifeOnHit": 5.36
       },
       "damage35": 2
     },
@@ -3186,12 +3186,12 @@
         "maxEnergy": 116,
         "armor": 18.08,
         "speed": 162.6,
-        "delay": 0.20583246138994513,
+        "delay": 0.20583246139,
         "range": 47,
         "frost": false,
         "lifeOnHit": 5.615
       },
-      "damage35": 16.91999999999996
+      "damage35": 16.92
     },
     {
       "attributes": {
@@ -3285,12 +3285,12 @@
         "maxEnergy": 124,
         "armor": 15.84,
         "speed": 129.6,
-        "delay": 0.4615384615384615,
+        "delay": 0.461538461538,
         "range": 47,
         "frost": false,
         "lifeOnHit": 3.37
       },
-      "damage35": 19.159999999999968
+      "damage35": 19.16
     },
     {
       "attributes": {
@@ -3375,14 +3375,14 @@
         "damage": 58.14,
         "maxHp": 700,
         "maxEnergy": 132,
-        "armor": 24.479999999999997,
+        "armor": 24.48,
         "speed": 106.6,
-        "delay": 0.3667287737921531,
+        "delay": 0.366728773792,
         "range": 65,
         "frost": false,
-        "lifeOnHit": 3.7250000000000005
+        "lifeOnHit": 3.725
       },
-      "damage35": 10.519999999999982
+      "damage35": 10.52
     },
     {
       "attributes": {
@@ -3466,14 +3466,14 @@
         "damage": 60.8,
         "maxHp": 740,
         "maxEnergy": 140,
-        "armor": 15.399999999999999,
+        "armor": 15.4,
         "speed": 96,
-        "delay": 0.3459863691182922,
+        "delay": 0.345986369118,
         "range": 47,
         "frost": false,
-        "lifeOnHit": 3.9800000000000004
+        "lifeOnHit": 3.98
       },
-      "damage35": 19.600000000000023
+      "damage35": 19.6
     },
     {
       "attributes": {
@@ -3560,12 +3560,12 @@
         "maxEnergy": 148,
         "armor": 8.64,
         "speed": 142.2,
-        "delay": 0.32729280231860275,
+        "delay": 0.327292802319,
         "range": 47,
         "frost": false,
         "lifeOnHit": 4.235
       },
-      "damage35": 26.360000000000014
+      "damage35": 26.36
     },
     {
       "attributes": {
@@ -3654,12 +3654,12 @@
       ],
       "expected": {
         "level": 8,
-        "damage": 56.75999999999999,
+        "damage": 56.76,
         "maxHp": 820,
         "maxEnergy": 156,
-        "armor": 39.959999999999994,
+        "armor": 39.96,
         "speed": 116.8,
-        "delay": 0.3103599137540817,
+        "delay": 0.310359913754,
         "range": 47,
         "frost": false,
         "lifeOnHit": 4.49
@@ -3755,14 +3755,14 @@
         "damage": 75.5,
         "maxHp": 860,
         "maxEnergy": 164,
-        "armor": 20.720000000000002,
+        "armor": 20.72,
         "speed": 135.4,
-        "delay": 0.29495115467104754,
+        "delay": 0.294951154671,
         "range": 33,
         "frost": false,
         "lifeOnHit": 4.745
       },
-      "damage35": 14.279999999999973
+      "damage35": 14.28
     },
     {
       "attributes": {
@@ -3856,10 +3856,10 @@
         "maxEnergy": 172,
         "armor": 18.72,
         "speed": 154.8,
-        "delay": 0.28087052772471977,
+        "delay": 0.280870527725,
         "range": 47,
         "frost": false,
-        "lifeOnHit": 2.0999999999999996
+        "lifeOnHit": 2.1
       },
       "damage35": 16.28
     },
@@ -3955,7 +3955,7 @@
         "maxEnergy": 180,
         "armor": 43.2,
         "speed": 127,
-        "delay": 0.3287671232876712,
+        "delay": 0.328767123288,
         "range": 47,
         "frost": false,
         "lifeOnHit": 2.355
@@ -4045,14 +4045,14 @@
         "damage": 117.68,
         "maxHp": 180,
         "maxEnergy": 188,
-        "armor": 13.120000000000001,
+        "armor": 13.12,
         "speed": 146.8,
-        "delay": 0.25606441649682604,
+        "delay": 0.256064416497,
         "range": 47,
         "frost": false,
-        "lifeOnHit": 2.6100000000000003
+        "lifeOnHit": 2.61
       },
-      "damage35": 21.879999999999995
+      "damage35": 21.88
     },
     {
       "attributes": {
@@ -4136,14 +4136,14 @@
         "damage": 115.26,
         "maxHp": 220,
         "maxEnergy": 196,
-        "armor": 20.160000000000004,
+        "armor": 20.16,
         "speed": 117,
-        "delay": 0.24508404504667605,
+        "delay": 0.245084045047,
         "range": 65,
         "frost": false,
         "lifeOnHit": 2.865
       },
-      "damage35": 14.840000000000003
+      "damage35": 14.84
     },
     {
       "attributes": {
@@ -4228,14 +4228,14 @@
         "damage": 107.28,
         "maxHp": 260,
         "maxEnergy": 204,
-        "armor": 29.240000000000002,
+        "armor": 29.24,
         "speed": 137.2,
-        "delay": 0.2349132889986754,
+        "delay": 0.234913288999,
         "range": 47,
         "frost": false,
         "lifeOnHit": 3.12
       },
-      "damage35": 5.759999999999991
+      "damage35": 5.76
     },
     {
       "attributes": {
@@ -4329,12 +4329,12 @@
         "maxEnergy": 212,
         "armor": 19.36,
         "speed": 158.2,
-        "delay": 0.225466393993319,
+        "delay": 0.225466393993,
         "range": 47,
         "frost": false,
         "lifeOnHit": 3.475
       },
-      "damage35": 15.639999999999986
+      "damage35": 15.64
     },
     {
       "attributes": {
@@ -4427,12 +4427,12 @@
         "maxEnergy": 220,
         "armor": 21.6,
         "speed": 180,
-        "delay": 0.21666929959704143,
+        "delay": 0.216669299597,
         "range": 33,
         "frost": false,
         "lifeOnHit": 3.73
       },
-      "damage35": 13.399999999999977
+      "damage35": 13.4
     },
     {
       "attributes": {
@@ -4521,12 +4521,12 @@
       ],
       "expected": {
         "level": 10,
-        "damage": 112.61999999999999,
+        "damage": 112.62,
         "maxHp": 380,
         "maxEnergy": 228,
-        "armor": 49.67999999999999,
+        "armor": 49.68,
         "speed": 147.4,
-        "delay": 0.20845771173126884,
+        "delay": 0.208457711731,
         "range": 65,
         "frost": false,
         "lifeOnHit": 3.985
@@ -4625,12 +4625,12 @@
         "maxEnergy": 236,
         "armor": 24.68,
         "speed": 169.6,
-        "delay": 0.2553191489361702,
+        "delay": 0.255319148936,
         "range": 47,
         "frost": false,
         "lifeOnHit": 4.24
       },
-      "damage35": 10.319999999999993
+      "damage35": 10.32
     },
     {
       "attributes": {
@@ -4712,17 +4712,17 @@
       ],
       "expected": {
         "level": 10,
-        "damage": 159.54000000000002,
+        "damage": 159.54,
         "maxHp": 460,
         "maxEnergy": 244,
         "armor": 11.52,
         "speed": 192.6,
-        "delay": 0.19357364948128492,
+        "delay": 0.193573649481,
         "range": 47,
         "frost": false,
         "lifeOnHit": 4.495
       },
-      "damage35": 23.480000000000018
+      "damage35": 23.48
     },
     {
       "attributes": {
@@ -4808,7 +4808,7 @@
         "maxEnergy": 52,
         "armor": 37.24,
         "speed": 88,
-        "delay": 0.3736175556477713,
+        "delay": 0.373617555648,
         "range": 47,
         "frost": false,
         "lifeOnHit": 3.85
@@ -4900,7 +4900,7 @@
         "maxEnergy": 60,
         "armor": 6,
         "speed": 131,
-        "delay": 0.3506716981132075,
+        "delay": 0.350671698113,
         "range": 65,
         "frost": false,
         "lifeOnHit": 4.105
@@ -4999,10 +4999,10 @@
         "maxEnergy": 68,
         "armor": 12,
         "speed": 124,
-        "delay": 0.37714285714285706,
+        "delay": 0.377142857143,
         "range": 47,
         "frost": false,
-        "lifeOnHit": 4.359999999999999
+        "lifeOnHit": 4.36
       },
       "damage35": 23
     },
@@ -5097,12 +5097,12 @@
         "maxEnergy": 76,
         "armor": 28.08,
         "speed": 107.4,
-        "delay": 0.35614037290759215,
+        "delay": 0.356140372908,
         "range": 33,
         "frost": false,
         "lifeOnHit": 4.615
       },
-      "damage35": 6.919999999999959
+      "damage35": 6.92
     },
     {
       "attributes": {
@@ -5191,17 +5191,17 @@
       ],
       "expected": {
         "level": 11,
-        "damage": 144.48000000000002,
+        "damage": 144.48,
         "maxHp": 660,
         "maxEnergy": 84,
         "armor": 15.88,
         "speed": 121.6,
-        "delay": 0.3371792483142224,
+        "delay": 0.337179248314,
         "range": 47,
         "frost": false,
         "lifeOnHit": 4.87
       },
-      "damage35": 19.120000000000005
+      "damage35": 19.12
     },
     {
       "attributes": {
@@ -5293,14 +5293,14 @@
         "damage": 156.94,
         "maxHp": 700,
         "maxEnergy": 92,
-        "armor": 13.440000000000001,
+        "armor": 13.44,
         "speed": 136.6,
-        "delay": 0.3692307692307692,
+        "delay": 0.369230769231,
         "range": 65,
         "frost": false,
         "lifeOnHit": 5.225
       },
-      "damage35": 21.559999999999945
+      "damage35": 21.56
     },
     {
       "attributes": {
@@ -5385,14 +5385,14 @@
         "damage": 147.84,
         "maxHp": 740,
         "maxEnergy": 100,
-        "armor": 20.879999999999995,
+        "armor": 20.88,
         "speed": 117.6,
-        "delay": 0.30430019362602506,
+        "delay": 0.304300193626,
         "range": 47,
         "frost": false,
         "lifeOnHit": 5.48
       },
-      "damage35": 14.120000000000005
+      "damage35": 14.12
     },
     {
       "attributes": {
@@ -5478,12 +5478,12 @@
         "maxEnergy": 108,
         "armor": 13.2,
         "speed": 109,
-        "delay": 0.28995599975225816,
+        "delay": 0.289955999752,
         "range": 47,
         "frost": false,
-        "lifeOnHit": 5.734999999999999
+        "lifeOnHit": 5.735
       },
-      "damage35": 21.799999999999955
+      "damage35": 21.8
     },
     {
       "attributes": {
@@ -5565,17 +5565,17 @@
       ],
       "expected": {
         "level": 12,
-        "damage": 174.87999999999997,
+        "damage": 174.88,
         "maxHp": 820,
         "maxEnergy": 116,
-        "armor": 7.4399999999999995,
+        "armor": 7.44,
         "speed": 149.2,
-        "delay": 0.27678212253871065,
+        "delay": 0.276782122539,
         "range": 47,
         "frost": false,
         "lifeOnHit": 5.99
       },
-      "damage35": 27.559999999999945
+      "damage35": 27.56
     },
     {
       "attributes": {
@@ -5669,10 +5669,10 @@
         "maxEnergy": 124,
         "armor": 34.56,
         "speed": 127.8,
-        "delay": 0.26464173607278657,
+        "delay": 0.264641736073,
         "range": 65,
         "frost": false,
-        "lifeOnHit": 6.245000000000001
+        "lifeOnHit": 6.245
       },
       "damage35": 2
     },
@@ -5767,12 +5767,12 @@
         "maxEnergy": 132,
         "armor": 18.52,
         "speed": 144.4,
-        "delay": 0.25341853850380397,
+        "delay": 0.253418538504,
         "range": 33,
         "frost": false,
         "lifeOnHit": 3.6
       },
-      "damage35": 16.480000000000004
+      "damage35": 16.48
     },
     {
       "attributes": {
@@ -5861,17 +5861,17 @@
       ],
       "expected": {
         "level": 13,
-        "damage": 184.66000000000003,
+        "damage": 184.66,
         "maxHp": 140,
         "maxEnergy": 140,
         "armor": 16.32,
         "speed": 161.8,
-        "delay": 0.24301304287431832,
+        "delay": 0.243013042874,
         "range": 47,
         "frost": false,
         "lifeOnHit": 3.855
       },
-      "damage35": 18.680000000000007
+      "damage35": 18.68
     },
     {
       "attributes": {
@@ -5965,7 +5965,7 @@
         "maxEnergy": 148,
         "armor": 37.8,
         "speed": 138,
-        "delay": 0.27906976744186046,
+        "delay": 0.279069767442,
         "range": 47,
         "frost": false,
         "lifeOnHit": 4.11
@@ -6057,12 +6057,12 @@
         "maxEnergy": 156,
         "armor": 11.52,
         "speed": 155.8,
-        "delay": 0.22432428024084008,
+        "delay": 0.224324280241,
         "range": 65,
         "frost": false,
         "lifeOnHit": 4.365
       },
-      "damage35": 23.47999999999999
+      "damage35": 23.48
     },
     {
       "attributes": {
@@ -6143,17 +6143,17 @@
       ],
       "expected": {
         "level": 13,
-        "damage": 203.35999999999999,
+        "damage": 203.36,
         "maxHp": 260,
         "maxEnergy": 164,
-        "armor": 17.759999999999998,
+        "armor": 17.76,
         "speed": 130,
-        "delay": 0.21590254869849163,
+        "delay": 0.215902548698,
         "range": 47,
         "frost": false,
         "lifeOnHit": 4.62
       },
-      "damage35": 17.24000000000001
+      "damage35": 17.24
     },
     {
       "attributes": {
@@ -6235,17 +6235,17 @@
       ],
       "expected": {
         "level": 14,
-        "damage": 196.98000000000002,
+        "damage": 196.98,
         "maxHp": 300,
         "maxEnergy": 172,
-        "armor": 25.840000000000003,
+        "armor": 25.84,
         "speed": 148.2,
-        "delay": 0.20801818276800196,
+        "delay": 0.208018182768,
         "range": 47,
         "frost": false,
-        "lifeOnHit": 4.9750000000000005
+        "lifeOnHit": 4.975
       },
-      "damage35": 9.159999999999968
+      "damage35": 9.16
     },
     {
       "attributes": {
@@ -6339,12 +6339,12 @@
         "maxEnergy": 180,
         "armor": 17.16,
         "speed": 167.2,
-        "delay": 0.20062180551765696,
+        "delay": 0.200621805518,
         "range": 47,
         "frost": false,
-        "lifeOnHit": 5.2299999999999995
+        "lifeOnHit": 5.23
       },
-      "damage35": 17.839999999999975
+      "damage35": 17.84
     },
     {
       "attributes": {
@@ -6432,17 +6432,17 @@
       ],
       "expected": {
         "level": 14,
-        "damage": 43.900000000000006,
+        "damage": 43.9,
         "maxHp": 380,
         "maxEnergy": 188,
-        "armor": 19.200000000000003,
+        "armor": 19.2,
         "speed": 137,
-        "delay": 0.3835423642800041,
+        "delay": 0.38354236428,
         "range": 33,
         "frost": false,
         "lifeOnHit": 2.985
       },
-      "damage35": 15.800000000000011
+      "damage35": 15.8
     },
     {
       "attributes": {
@@ -6536,7 +6536,7 @@
         "maxEnergy": 196,
         "armor": 44.28,
         "speed": 108.4,
-        "delay": 0.36038695655108854,
+        "delay": 0.360386956551,
         "range": 47,
         "frost": false,
         "lifeOnHit": 3.24
@@ -6630,17 +6630,17 @@
       ],
       "expected": {
         "level": 14,
-        "damage": 90.66000000000001,
+        "damage": 90.66,
         "maxHp": 460,
         "maxEnergy": 204,
-        "armor": 22.480000000000004,
+        "armor": 22.48,
         "speed": 128.6,
-        "delay": 0.4210526315789473,
+        "delay": 0.421052631579,
         "range": 47,
         "frost": false,
         "lifeOnHit": 3.495
       },
-      "damage35": 12.519999999999982
+      "damage35": 12.52
     },
     {
       "attributes": {
@@ -6722,17 +6722,17 @@
       ],
       "expected": {
         "level": 15,
-        "damage": 96.63999999999999,
+        "damage": 96.64,
         "maxHp": 500,
         "maxEnergy": 212,
         "armor": 10.32,
         "speed": 149.6,
-        "delay": 0.32104816163152305,
+        "delay": 0.321048161632,
         "range": 47,
         "frost": false,
-        "lifeOnHit": 3.8500000000000005
+        "lifeOnHit": 3.85
       },
-      "damage35": 24.680000000000007
+      "damage35": 24.68
     },
     {
       "attributes": {
@@ -6813,12 +6813,12 @@
       ],
       "expected": {
         "level": 15,
-        "damage": 79.74000000000001,
+        "damage": 79.74,
         "maxHp": 540,
         "maxEnergy": 220,
         "armor": 33.44,
         "speed": 101,
-        "delay": 0.3042006903084463,
+        "delay": 0.304200690308,
         "range": 65,
         "frost": false,
         "lifeOnHit": 4.105
@@ -6910,12 +6910,12 @@
         "maxEnergy": 228,
         "armor": 5.4,
         "speed": 140,
-        "delay": 0.2888923994627219,
+        "delay": 0.288892399463,
         "range": 47,
         "frost": false,
-        "lifeOnHit": 4.359999999999999
+        "lifeOnHit": 4.36
       },
-      "damage35": 29.600000000000023
+      "damage35": 29.6
     },
     {
       "attributes": {
@@ -7009,12 +7009,12 @@
         "maxEnergy": 236,
         "armor": 22.08,
         "speed": 162.2,
-        "delay": 0.27492248938471686,
+        "delay": 0.274922489385,
         "range": 47,
         "frost": false,
         "lifeOnHit": 4.615
       },
-      "damage35": 12.919999999999959
+      "damage35": 12.92
     },
     {
       "attributes": {
@@ -7107,7 +7107,7 @@
         "maxEnergy": 244,
         "armor": 50.76,
         "speed": 128.8,
-        "delay": 0.2621236271641069,
+        "delay": 0.262123627164,
         "range": 33,
         "frost": false,
         "lifeOnHit": 4.87
@@ -7206,12 +7206,12 @@
         "maxEnergy": 52,
         "armor": 25.12,
         "speed": 151.4,
-        "delay": 0.2503552533291285,
+        "delay": 0.250355253329,
         "range": 65,
         "frost": false,
         "lifeOnHit": 5.225
       },
-      "damage35": 9.879999999999995
+      "damage35": 9.88
     },
     {
       "attributes": {
@@ -7305,12 +7305,12 @@
         "maxEnergy": 60,
         "armor": 23.52,
         "speed": 174.8,
-        "delay": 0.30769230769230765,
+        "delay": 0.307692307692,
         "range": 47,
         "frost": false,
         "lifeOnHit": 5.48
       },
-      "damage35": 11.480000000000018
+      "damage35": 11.48
     },
     {
       "attributes": {
@@ -7397,10 +7397,10 @@
         "maxEnergy": 68,
         "armor": 36,
         "speed": 139,
-        "delay": 0.22945185185185182,
+        "delay": 0.229451851852,
         "range": 47,
         "frost": false,
-        "lifeOnHit": 5.734999999999999
+        "lifeOnHit": 5.735
       },
       "damage35": 2
     },
@@ -7488,10 +7488,10 @@
         "maxEnergy": 76,
         "armor": 11,
         "speed": 122,
-        "delay": 0.2514285714285714,
+        "delay": 0.251428571429,
         "range": 47,
         "frost": false,
-        "lifeOnHit": 5.989999999999999
+        "lifeOnHit": 5.99
       },
       "damage35": 24
     },
@@ -7575,17 +7575,17 @@
       ],
       "expected": {
         "level": 16,
-        "damage": 111.97999999999999,
+        "damage": 111.98,
         "maxHp": 860,
         "maxEnergy": 84,
         "armor": 6.24,
         "speed": 156.2,
-        "delay": 0.24152048277641305,
+        "delay": 0.241520482776,
         "range": 65,
         "frost": false,
         "lifeOnHit": 6.245
       },
-      "damage35": 28.75999999999999
+      "damage35": 28.76
     },
     {
       "attributes": {
@@ -7674,17 +7674,17 @@
       ],
       "expected": {
         "level": 17,
-        "damage": 90.96000000000001,
+        "damage": 90.96,
         "maxHp": 100,
         "maxEnergy": 92,
-        "armor": 29.160000000000004,
+        "armor": 29.16,
         "speed": 138.8,
-        "delay": 0.23227903772757544,
+        "delay": 0.232279037728,
         "range": 47,
         "frost": false,
         "lifeOnHit": 3.6
       },
-      "damage35": 5.840000000000003
+      "damage35": 5.84
     },
     {
       "attributes": {
@@ -7777,12 +7777,12 @@
         "maxEnergy": 100,
         "armor": 16.32,
         "speed": 153.4,
-        "delay": 0.2236396922553156,
+        "delay": 0.223639692255,
         "range": 33,
         "frost": false,
         "lifeOnHit": 3.855
       },
-      "damage35": 18.680000000000007
+      "damage35": 18.68
     },
     {
       "attributes": {
@@ -7874,14 +7874,14 @@
         "damage": 122.96,
         "maxHp": 180,
         "maxEnergy": 108,
-        "armor": 13.919999999999998,
+        "armor": 13.92,
         "speed": 168.8,
-        "delay": 0.21554597048510107,
+        "delay": 0.215545970485,
         "range": 47,
         "frost": false,
-        "lifeOnHit": 4.109999999999999
+        "lifeOnHit": 4.11
       },
-      "damage35": 21.080000000000013
+      "damage35": 21.08
     },
     {
       "attributes": {
@@ -7975,12 +7975,12 @@
         "maxEnergy": 116,
         "armor": 32.4,
         "speed": 149,
-        "delay": 0.24242424242424243,
+        "delay": 0.242424242424,
         "range": 65,
         "frost": false,
         "lifeOnHit": 4.365
       },
-      "damage35": 2.5999999999999943
+      "damage35": 2.6
     },
     {
       "attributes": {
@@ -8067,12 +8067,12 @@
         "maxEnergy": 124,
         "armor": 9.92,
         "speed": 114.8,
-        "delay": 0.39388225130508814,
+        "delay": 0.393882251305,
         "range": 47,
         "frost": false,
         "lifeOnHit": 3.62
       },
-      "damage35": 25.079999999999984
+      "damage35": 25.08
     },
     {
       "attributes": {
@@ -8158,12 +8158,12 @@
         "maxEnergy": 132,
         "armor": 15.36,
         "speed": 93,
-        "delay": 0.3704984305019012,
+        "delay": 0.370498430502,
         "range": 47,
         "frost": false,
         "lifeOnHit": 3.975
       },
-      "damage35": 19.639999999999986
+      "damage35": 19.64
     },
     {
       "attributes": {
@@ -8245,17 +8245,17 @@
       ],
       "expected": {
         "level": 18,
-        "damage": 136.67999999999998,
+        "damage": 136.68,
         "maxHp": 340,
         "maxEnergy": 140,
-        "armor": 22.439999999999998,
+        "armor": 22.44,
         "speed": 109.2,
-        "delay": 0.3495428117293848,
+        "delay": 0.349542811729,
         "range": 47,
         "frost": false,
         "lifeOnHit": 4.23
       },
-      "damage35": 12.560000000000002
+      "damage35": 12.56
     },
     {
       "attributes": {
@@ -8348,13 +8348,13 @@
         "maxHp": 380,
         "maxEnergy": 148,
         "armor": 14.96,
-        "speed": 126.19999999999999,
-        "delay": 0.3306570911240725,
+        "speed": 126.2,
+        "delay": 0.330657091124,
         "range": 65,
         "frost": false,
         "lifeOnHit": 4.485
       },
-      "damage35": 20.04000000000002
+      "damage35": 20.04
     },
     {
       "attributes": {
@@ -8445,14 +8445,14 @@
         "damage": 134.6,
         "maxHp": 420,
         "maxEnergy": 156,
-        "armor": 16.799999999999997,
+        "armor": 16.8,
         "speed": 144,
-        "delay": 0.3135501470134523,
+        "delay": 0.313550147013,
         "range": 33,
         "frost": false,
         "lifeOnHit": 4.74
       },
-      "damage35": 18.19999999999999
+      "damage35": 18.2
     },
     {
       "attributes": {
@@ -8541,15 +8541,15 @@
       ],
       "expected": {
         "level": 18,
-        "damage": 144.42000000000002,
+        "damage": 144.42,
         "maxHp": 460,
         "maxEnergy": 164,
-        "armor": 38.879999999999995,
+        "armor": 38.88,
         "speed": 119.4,
-        "delay": 0.29798299912589205,
+        "delay": 0.297982999126,
         "range": 47,
         "frost": false,
-        "lifeOnHit": 4.994999999999999
+        "lifeOnHit": 4.995
       },
       "damage35": 2
     },
@@ -8640,17 +8640,17 @@
       ],
       "expected": {
         "level": 19,
-        "damage": 177.75999999999996,
+        "damage": 177.76,
         "maxHp": 500,
         "maxEnergy": 172,
-        "armor": 20.279999999999998,
+        "armor": 20.28,
         "speed": 137.6,
-        "delay": 0.34285714285714286,
+        "delay": 0.342857142857,
         "range": 47,
         "frost": false,
-        "lifeOnHit": 5.3500000000000005
+        "lifeOnHit": 5.35
       },
-      "damage35": 14.720000000000027
+      "damage35": 14.72
     },
     {
       "attributes": {
@@ -8735,14 +8735,14 @@
         "damage": 183.74,
         "maxHp": 540,
         "maxEnergy": 180,
-        "armor": 9.120000000000001,
-        "speed": 156.60000000000002,
-        "delay": 0.2707085940131532,
+        "armor": 9.12,
+        "speed": 156.6,
+        "delay": 0.270708594013,
         "range": 65,
         "frost": false,
-        "lifeOnHit": 5.6049999999999995
+        "lifeOnHit": 5.605
       },
-      "damage35": 25.879999999999995
+      "damage35": 25.88
     },
     {
       "attributes": {
@@ -8828,12 +8828,12 @@
         "maxEnergy": 188,
         "armor": 29.64,
         "speed": 114,
-        "delay": 0.2586965386938208,
+        "delay": 0.258696538694,
         "range": 47,
         "frost": false,
         "lifeOnHit": 5.86
       },
-      "damage35": 5.360000000000014
+      "damage35": 5.36
     },
     {
       "attributes": {
@@ -8918,14 +8918,14 @@
         "damage": 195.7,
         "maxHp": 620,
         "maxEnergy": 196,
-        "armor": 4.800000000000001,
+        "armor": 4.8,
         "speed": 149,
-        "delay": 0.24760329845924312,
+        "delay": 0.247603298459,
         "range": 47,
         "frost": false,
-        "lifeOnHit": 6.114999999999999
+        "lifeOnHit": 6.115
       },
-      "damage35": 30.200000000000045
+      "damage35": 30.2
     },
     {
       "attributes": {
@@ -9014,17 +9014,17 @@
       ],
       "expected": {
         "level": 19,
-        "damage": 188.55999999999997,
+        "damage": 188.56,
         "maxHp": 660,
         "maxEnergy": 204,
         "armor": 19.68,
         "speed": 169.2,
-        "delay": 0.2373279957775461,
+        "delay": 0.237327995778,
         "range": 47,
         "frost": false,
         "lifeOnHit": 6.37
       },
-      "damage35": 15.32000000000005
+      "damage35": 15.32
     },
     {
       "attributes": {
@@ -9115,12 +9115,12 @@
         "damage": 169.74,
         "maxHp": 700,
         "maxEnergy": 212,
-        "armor": 45.36000000000001,
+        "armor": 45.36,
         "speed": 139.8,
-        "delay": 0.22778399480808714,
+        "delay": 0.227783994808,
         "range": 33,
         "frost": false,
-        "lifeOnHit": 6.7250000000000005
+        "lifeOnHit": 6.725
       },
       "damage35": 2
     },
@@ -9216,12 +9216,12 @@
         "maxEnergy": 220,
         "armor": 22.92,
         "speed": 160.4,
-        "delay": 0.21889647383967478,
+        "delay": 0.21889647384,
         "range": 47,
         "frost": false,
         "lifeOnHit": 6.98
       },
-      "damage35": 12.080000000000041
+      "damage35": 12.08
     },
     {
       "attributes": {
@@ -9310,17 +9310,17 @@
       ],
       "expected": {
         "level": 20,
-        "damage": 219.62000000000003,
+        "damage": 219.62,
         "maxHp": 780,
         "maxEnergy": 228,
         "armor": 21.12,
         "speed": 181.8,
-        "delay": 0.26373626373626374,
+        "delay": 0.263736263736,
         "range": 47,
         "frost": false,
         "lifeOnHit": 7.235
       },
-      "damage35": 13.879999999999995
+      "damage35": 13.88
     },
     {
       "attributes": {
@@ -9402,17 +9402,17 @@
       ],
       "expected": {
         "level": 20,
-        "damage": 202.20000000000002,
+        "damage": 202.2,
         "maxHp": 820,
         "maxEnergy": 236,
         "armor": 32.4,
         "speed": 150,
-        "delay": 0.20283934430361325,
+        "delay": 0.202839344304,
         "range": 47,
         "frost": false,
         "lifeOnHit": 7.49
       },
-      "damage35": 2.6000000000000227
+      "damage35": 2.6
     },
     {
       "attributes": {
@@ -9498,12 +9498,12 @@
         "maxEnergy": 244,
         "armor": 20.24,
         "speed": 135,
-        "delay": 0.19556342028397386,
+        "delay": 0.195563420284,
         "range": 65,
         "frost": false,
-        "lifeOnHit": 7.745000000000001
+        "lifeOnHit": 7.745
       },
-      "damage35": 14.759999999999991
+      "damage35": 14.76
     },
     {
       "attributes": {
@@ -9590,7 +9590,7 @@
         "maxEnergy": 52,
         "armor": 11.28,
         "speed": 144.4,
-        "delay": 0.377458023116314,
+        "delay": 0.377458023116,
         "range": 47,
         "frost": false,
         "lifeOnHit": 2.6
@@ -9684,12 +9684,12 @@
       ],
       "expected": {
         "level": 21,
-        "damage": 45.53999999999999,
+        "damage": 45.54,
         "maxHp": 140,
         "maxEnergy": 60,
         "armor": 51.84,
         "speed": 110.2,
-        "delay": 0.35427630188084214,
+        "delay": 0.354276301881,
         "range": 47,
         "frost": false,
         "lifeOnHit": 2.855
@@ -9785,14 +9785,14 @@
         "damage": 70,
         "maxHp": 180,
         "maxEnergy": 68,
-        "armor": 25.560000000000002,
+        "armor": 25.56,
         "speed": 133.2,
-        "delay": 0.33358710325693863,
+        "delay": 0.333587103257,
         "range": 33,
         "frost": false,
         "lifeOnHit": 3.11
       },
-      "damage35": 9.439999999999998
+      "damage35": 9.44
     },
     {
       "attributes": {
@@ -9886,10 +9886,10 @@
         "maxEnergy": 76,
         "armor": 24,
         "speed": 157,
-        "delay": 0.31501016949152544,
+        "delay": 0.315010169492,
         "range": 65,
         "frost": false,
-        "lifeOnHit": 3.3649999999999998
+        "lifeOnHit": 3.365
       },
       "damage35": 11
     },
@@ -9985,7 +9985,7 @@
         "maxEnergy": 84,
         "armor": 27,
         "speed": 110,
-        "delay": 0.3870967741935484,
+        "delay": 0.387096774194,
         "range": 47,
         "frost": false,
         "lifeOnHit": 3.62
@@ -10077,12 +10077,12 @@
         "maxEnergy": 92,
         "armor": 8.32,
         "speed": 123.8,
-        "delay": 0.3232658769468913,
+        "delay": 0.323265876947,
         "range": 47,
         "frost": false,
-        "lifeOnHit": 3.9750000000000005
+        "lifeOnHit": 3.975
       },
-      "damage35": 26.680000000000007
+      "damage35": 26.68
     },
     {
       "attributes": {
@@ -10168,12 +10168,12 @@
         "maxEnergy": 100,
         "armor": 12.96,
         "speed": 106,
-        "delay": 0.30742813816884984,
+        "delay": 0.307428138169,
         "range": 47,
         "frost": false,
         "lifeOnHit": 4.23
       },
-      "damage35": 22.04000000000002
+      "damage35": 22.04
     },
     {
       "attributes": {
@@ -10258,14 +10258,14 @@
         "damage": 76.38,
         "maxHp": 380,
         "maxEnergy": 108,
-        "armor": 19.040000000000003,
+        "armor": 19.04,
         "speed": 120.2,
-        "delay": 0.29293649830625845,
+        "delay": 0.292936498306,
         "range": 65,
         "frost": false,
-        "lifeOnHit": 4.484999999999999
+        "lifeOnHit": 4.485
       },
-      "damage35": 15.95999999999998
+      "damage35": 15.96
     },
     {
       "attributes": {
@@ -10357,14 +10357,14 @@
         "damage": 92.28,
         "maxHp": 420,
         "maxEnergy": 116,
-        "armor": 12.759999999999998,
+        "armor": 12.76,
         "speed": 135.2,
-        "delay": 0.2796272049536446,
+        "delay": 0.279627204954,
         "range": 47,
         "frost": false,
         "lifeOnHit": 4.74
       },
-      "damage35": 22.24000000000001
+      "damage35": 22.24
     },
     {
       "attributes": {
@@ -10455,14 +10455,14 @@
         "damage": 75.3,
         "maxHp": 460,
         "maxEnergy": 124,
-        "armor": 14.399999999999999,
+        "armor": 14.4,
         "speed": 151,
-        "delay": 0.2673620257455887,
+        "delay": 0.267362025746,
         "range": 33,
         "frost": false,
-        "lifeOnHit": 4.994999999999999
+        "lifeOnHit": 4.995
       },
-      "damage35": 20.600000000000023
+      "damage35": 20.6
     },
     {
       "attributes": {
@@ -10554,9 +10554,9 @@
         "damage": 85.32,
         "maxHp": 500,
         "maxEnergy": 132,
-        "armor": 33.480000000000004,
+        "armor": 33.48,
         "speed": 130.4,
-        "delay": 0.25602346334830733,
+        "delay": 0.256023463348,
         "range": 47,
         "frost": false,
         "lifeOnHit": 5.35
@@ -10655,12 +10655,12 @@
         "maxEnergy": 140,
         "armor": 18.08,
         "speed": 146.6,
-        "delay": 0.2891566265060241,
+        "delay": 0.289156626506,
         "range": 65,
         "frost": false,
         "lifeOnHit": 5.605
       },
-      "damage35": 16.91999999999996
+      "damage35": 16.92
     },
     {
       "attributes": {
@@ -10742,17 +10742,17 @@
       ],
       "expected": {
         "level": 23,
-        "damage": 120.83999999999999,
+        "damage": 120.84,
         "maxHp": 580,
         "maxEnergy": 148,
         "armor": 7.92,
         "speed": 163.6,
-        "delay": 0.2357381753523758,
+        "delay": 0.235738175352,
         "range": 47,
         "frost": false,
         "lifeOnHit": 5.86
       },
-      "damage35": 27.08000000000004
+      "damage35": 27.08
     },
     {
       "attributes": {
@@ -10833,17 +10833,17 @@
       ],
       "expected": {
         "level": 23,
-        "damage": 109.13999999999999,
+        "damage": 109.14,
         "maxHp": 620,
         "maxEnergy": 156,
         "armor": 25.84,
         "speed": 127,
-        "delay": 0.22663014110751037,
+        "delay": 0.226630141108,
         "range": 47,
         "frost": false,
         "lifeOnHit": 6.115
       },
-      "damage35": 9.159999999999968
+      "damage35": 9.16
     },
     {
       "attributes": {
@@ -10925,17 +10925,17 @@
       ],
       "expected": {
         "level": 23,
-        "damage": 132.79999999999998,
+        "damage": 132.8,
         "maxHp": 660,
         "maxEnergy": 164,
-        "armor": 4.199999999999999,
+        "armor": 4.2,
         "speed": 158,
-        "delay": 0.21812184140066246,
+        "delay": 0.218121841401,
         "range": 47,
         "frost": false,
         "lifeOnHit": 6.37
       },
-      "damage35": 30.799999999999955
+      "damage35": 30.8
     },
     {
       "attributes": {
@@ -11029,12 +11029,12 @@
         "maxEnergy": 172,
         "armor": 17.28,
         "speed": 176.2,
-        "delay": 0.21015643096247125,
+        "delay": 0.210156430962,
         "range": 65,
         "frost": false,
         "lifeOnHit": 6.725
       },
-      "damage35": 17.720000000000027
+      "damage35": 17.72
     },
     {
       "attributes": {
@@ -11122,12 +11122,12 @@
       ],
       "expected": {
         "level": 24,
-        "damage": 110.63999999999999,
+        "damage": 110.64,
         "maxHp": 740,
         "maxEnergy": 180,
-        "armor": 39.959999999999994,
+        "armor": 39.96,
         "speed": 150.8,
-        "delay": 0.20268402530878804,
+        "delay": 0.202684025309,
         "range": 33,
         "frost": false,
         "lifeOnHit": 6.98
@@ -11224,14 +11224,14 @@
         "damage": 141.62,
         "maxHp": 780,
         "maxEnergy": 188,
-        "armor": 20.720000000000002,
+        "armor": 20.72,
         "speed": 119.4,
-        "delay": 0.3874848502541213,
+        "delay": 0.387484850254,
         "range": 47,
         "frost": false,
         "lifeOnHit": 6.235
       },
-      "damage35": 14.279999999999973
+      "damage35": 14.28
     },
     {
       "attributes": {
@@ -11320,17 +11320,17 @@
       ],
       "expected": {
         "level": 24,
-        "damage": 156.72000000000003,
+        "damage": 156.72,
         "maxHp": 820,
         "maxEnergy": 196,
         "armor": 18.72,
         "speed": 138.8,
-        "delay": 0.4444444444444444,
+        "delay": 0.444444444444,
         "range": 47,
         "frost": false,
         "lifeOnHit": 6.49
       },
-      "damage35": 16.279999999999973
+      "damage35": 16.28
     },
     {
       "attributes": {
@@ -11417,12 +11417,12 @@
         "maxEnergy": 204,
         "armor": 28.8,
         "speed": 111,
-        "delay": 0.34316948382947726,
+        "delay": 0.343169483829,
         "range": 65,
         "frost": false,
-        "lifeOnHit": 6.744999999999999
+        "lifeOnHit": 6.745
       },
-      "damage35": 6.2000000000000455
+      "damage35": 6.2
     },
     {
       "attributes": {
@@ -11508,12 +11508,12 @@
         "maxEnergy": 212,
         "armor": 18.04,
         "speed": 98,
-        "delay": 0.32434826089597973,
+        "delay": 0.324348260896,
         "range": 47,
         "frost": false,
-        "lifeOnHit": 4.1000000000000005
+        "lifeOnHit": 4.1
       },
-      "damage35": 16.960000000000008
+      "damage35": 16.96
     },
     {
       "attributes": {
@@ -11595,12 +11595,12 @@
       ],
       "expected": {
         "level": 25,
-        "damage": 174.66000000000003,
+        "damage": 174.66,
         "maxHp": 140,
         "maxEnergy": 220,
-        "armor": 10.080000000000002,
+        "armor": 10.08,
         "speed": 151.4,
-        "delay": 0.3073276120426573,
+        "delay": 0.307327612043,
         "range": 47,
         "frost": false,
         "lifeOnHit": 4.355
@@ -11699,7 +11699,7 @@
         "maxEnergy": 228,
         "armor": 46.44,
         "speed": 121.2,
-        "delay": 0.29186196511956636,
+        "delay": 0.29186196512,
         "range": 47,
         "frost": false,
         "lifeOnHit": 4.61
@@ -11797,12 +11797,12 @@
         "maxEnergy": 236,
         "armor": 23.36,
         "speed": 142.2,
-        "delay": 0.2777484563685814,
+        "delay": 0.277748456369,
         "range": 33,
         "frost": false,
         "lifeOnHit": 4.865
       },
-      "damage35": 11.639999999999986
+      "damage35": 11.64
     },
     {
       "attributes": {
@@ -11896,12 +11896,12 @@
         "maxEnergy": 244,
         "armor": 21.6,
         "speed": 164,
-        "delay": 0.2648180328408284,
+        "delay": 0.264818032841,
         "range": 47,
         "frost": false,
-        "lifeOnHit": 5.120000000000001
+        "lifeOnHit": 5.12
       },
-      "damage35": 13.400000000000006
+      "damage35": 13.4
     },
     {
       "attributes": {
@@ -11993,7 +11993,7 @@
         "damage": 174.66,
         "maxHp": 300,
         "maxEnergy": 52,
-        "armor": 49.67999999999999,
+        "armor": 49.68,
         "speed": 131.4,
         "delay": 0.32,
         "range": 47,
@@ -12087,12 +12087,12 @@
         "maxEnergy": 60,
         "armor": 15.04,
         "speed": 153.6,
-        "delay": 0.24196027122840638,
+        "delay": 0.241960271228,
         "range": 47,
         "frost": false,
         "lifeOnHit": 5.73
       },
-      "damage35": 19.95999999999998
+      "damage35": 19.96
     },
     {
       "attributes": {
@@ -12173,17 +12173,17 @@
       ],
       "expected": {
         "level": 26,
-        "damage": 200.94000000000003,
+        "damage": 200.94,
         "maxHp": 380,
         "maxEnergy": 68,
         "armor": 23.04,
         "speed": 119,
-        "delay": 0.23181041974919303,
+        "delay": 0.231810419749,
         "range": 65,
         "frost": false,
-        "lifeOnHit": 5.984999999999999
+        "lifeOnHit": 5.985
       },
-      "damage35": 11.95999999999998
+      "damage35": 11.96
     }
   ],
   "boundaries": [
@@ -12235,7 +12235,7 @@
     "warning": false,
     "phase": "chase",
     "timer": 1,
-    "face": 3.141592653589793,
+    "face": 3.14159265359,
     "swing": 0
   }
 }
